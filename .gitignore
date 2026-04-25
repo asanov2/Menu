@@ -1,0 +1,99 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+.venv/
+venv/
+ENV/
+env/
+.env
+.env.*
+!.env.example
+
+# Alembic
+alembic/versions/*.py
+!alembic/versions/.gitkeep
+
+# Node / React
+node_modules/
+dist/
+.env.local
+.env.production
+.env.development
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Docker
+.docker/
+*.dockerignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Uploads and media
+uploads/
+media/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.mp4
+*.mp3
+
+# Logs
+*.log
+logs/
+log/
+
+# Test coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Secrets
+*.pem
+*.key
+*.crt
+*.p12
+
+# Misc
+*.bak
+*.tmp
+.cache/
