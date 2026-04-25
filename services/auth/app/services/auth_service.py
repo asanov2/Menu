@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import (
@@ -38,17 +39,9 @@ class AuthService:
         return result.scalar_one_or_none()
 
     async def register(self, data: RegisterRequest) -> Restaurant:
-        if await self.get_by_email(data.email):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Email already registered",
-            )
-        if await self.get_by_slug(data.slug):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Slug already taken",
-            )
-
+        # fix #3: removed pre-insert uniqueness checks (TOCTOU race condition).
+        # DB unique constraints are the single source of truth.
+        # IntegrityError is caught and mapped to 409 with a meaningful message.
         restaurant = Restaurant(
             email=data.email,
             hashed_password=hash_password(data.password),
@@ -56,7 +49,25 @@ class AuthService:
             slug=data.slug,
         )
         self._db.add(restaurant)
-        await self._db.commit()
+        try:
+            await self._db.commit()
+        except IntegrityError as exc:
+            await self._db.rollback()
+            orig = str(exc.orig).lower()
+            if "email" in orig:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Email already registered",
+                )
+            if "slug" in orig:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Slug already taken",
+                )
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Duplicate value",
+            )
         await self._db.refresh(restaurant)
         return restaurant
 
@@ -116,14 +127,22 @@ class AuthService:
             extra={"plan": restaurant.plan.value, "slug": restaurant.slug},
         )
 
-    def verify_token_payload(self, token: str) -> dict:
+    async def verify_token_payload(self, token: str) -> dict:
+        # fix #12 + #16: now async — checks is_active in DB so deactivated
+        # restaurants cannot use their remaining token lifetime.
         try:
             payload = decode_token(token)
             if payload.get("type") != "access":
                 return {"valid": False}
+
+            restaurant_id = UUID(payload["sub"])
+            restaurant = await self.get_by_id(restaurant_id)
+            if not restaurant or not restaurant.is_active:
+                return {"valid": False}
+
             return {
                 "valid": True,
-                "restaurant_id": UUID(payload["sub"]),
+                "restaurant_id": restaurant_id,
                 "plan": payload.get("plan"),
                 "slug": payload.get("slug"),
             }

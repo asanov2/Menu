@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 _connection: aio_pika.RobustConnection | None = None
 _channel: aio_pika.RobustChannel | None = None
 
+# fix #24: keep strong references so tasks aren't GC'd before completion
+_background_tasks: set[asyncio.Task] = set()
+
 
 async def _get_channel() -> aio_pika.RobustChannel | None:
     global _connection, _channel
@@ -54,7 +57,10 @@ async def _publish(event_type: str, restaurant_id: str, **kwargs: object) -> Non
 
 
 def publish_menu_event(event_type: str, restaurant_id: str, **kwargs: object) -> None:
-    asyncio.create_task(_publish(event_type, restaurant_id, **kwargs))
+    # fix #24: store task reference to prevent premature GC in Python 3.12+
+    task = asyncio.create_task(_publish(event_type, restaurant_id, **kwargs))
+    _background_tasks.add(task)
+    task.add_done_callback(_background_tasks.discard)
 
 
 async def close_rabbitmq() -> None:

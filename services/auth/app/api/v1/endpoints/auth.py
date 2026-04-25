@@ -5,7 +5,8 @@ from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.dependencies import get_current_restaurant, get_db
+from app.core.database import get_db
+from app.core.dependencies import get_current_restaurant
 from app.models.restaurant import Restaurant
 from app.schemas.auth import (
     LoginRequest,
@@ -78,6 +79,9 @@ async def me(
     return RestaurantResponse.model_validate(current_restaurant)
 
 
+# fix #16 + #12: db IS used now — verify_token_payload checks is_active in DB.
+# The previous audit found db was injected but never used (sync decode only).
+# Now it's async and does one DB lookup to catch deactivated restaurants.
 @router.get("/verify-token", response_model=VerifyTokenResponse)
 async def verify_token(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
@@ -87,5 +91,5 @@ async def verify_token(
         return VerifyTokenResponse(valid=False)
 
     service = AuthService(db)
-    result = service.verify_token_payload(credentials.credentials)
+    result = await service.verify_token_payload(credentials.credentials)
     return VerifyTokenResponse(**result)

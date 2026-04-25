@@ -2,10 +2,10 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import and_, select, update
+from sqlalchemy import and_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.menu import Item
+from app.models.menu import Category, Item
 from app.schemas.menu import ItemCreate, ItemReorderItem, ItemUpdate
 
 
@@ -41,7 +41,27 @@ class ItemService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
         return item
 
+    async def _validate_category_ownership(
+        self, restaurant_id: UUID, category_id: UUID
+    ) -> None:
+        # fix #6: ensure category_id belongs to THIS restaurant before inserting
+        result = await self._db.execute(
+            select(Category).where(
+                and_(
+                    Category.id == category_id,
+                    Category.restaurant_id == restaurant_id,
+                    Category.deleted_at == None,  # noqa: E711
+                )
+            )
+        )
+        if not result.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Category does not belong to your restaurant",
+            )
+
     async def create_item(self, restaurant_id: UUID, data: ItemCreate) -> Item:
+        await self._validate_category_ownership(restaurant_id, data.category_id)
         item = Item(
             restaurant_id=restaurant_id,
             category_id=data.category_id,
@@ -59,11 +79,10 @@ class ItemService:
         await self._db.refresh(item)
         return item
 
-    async def update_item(
-        self, restaurant_id: UUID, item_id: UUID, data: ItemUpdate
-    ) -> Item:
+    async def update_item(self, restaurant_id: UUID, item_id: UUID, data: ItemUpdate) -> Item:
         item = await self.get_item(restaurant_id, item_id)
-        for field, value in data.model_dump(exclude_none=True).items():
+        # fix #17: exclude_unset so PATCH {"image_url": null} clears the field
+        for field, value in data.model_dump(exclude_unset=True).items():
             setattr(item, field, value)
         await self._db.commit()
         await self._db.refresh(item)
@@ -82,16 +101,25 @@ class ItemService:
         return item
 
     async def reorder_items(self, restaurant_id: UUID, items: list[ItemReorderItem]) -> None:
-        for item in items:
-            await self._db.execute(
-                update(Item)
-                .where(
-                    and_(
-                        Item.id == item.id,
-                        Item.restaurant_id == restaurant_id,
-                        Item.deleted_at == None,  # noqa: E711
-                    )
-                )
-                .values(sort_order=item.sort_order)
-            )
+        if not items:
+            return
+        # fix #13: single bulk UPDATE using PostgreSQL unnest — replaces N queries
+        await self._db.execute(
+            text("""
+                UPDATE items
+                SET sort_order = v.sort_order
+                FROM (
+                    SELECT unnest(:ids::uuid[]) AS id,
+                           unnest(:orders::int[]) AS sort_order
+                ) AS v
+                WHERE items.id = v.id
+                  AND items.restaurant_id = :restaurant_id
+                  AND items.deleted_at IS NULL
+            """),
+            {
+                "ids": [str(item.id) for item in items],
+                "orders": [item.sort_order for item in items],
+                "restaurant_id": str(restaurant_id),
+            },
+        )
         await self._db.commit()

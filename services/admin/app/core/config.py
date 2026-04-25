@@ -22,5 +22,8 @@ class Settings(BaseSettings):
     minio_bucket: str = "menu-images"
     minio_public_url: str = "http://localhost:9000"
 
+    # fix #19: CORS origin from env instead of hardcoded
+    frontend_url: str = "http://localhost:5173"
+
 
 settings = Settings()

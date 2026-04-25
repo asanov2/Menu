@@ -57,7 +57,8 @@ class MenuService:
         if data.is_default is True:
             await self._unset_default(restaurant_id)
 
-        for field, value in data.model_dump(exclude_none=True).items():
+        # fix #17: exclude_unset so explicit null values are written to DB
+        for field, value in data.model_dump(exclude_unset=True).items():
             setattr(menu, field, value)
 
         await self._db.commit()

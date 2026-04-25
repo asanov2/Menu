@@ -1,22 +1,14 @@
-from typing import AsyncGenerator
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import AsyncSessionLocal
+# fix #18: import get_db from database.py — no circular import
+from app.core.database import get_db
 from app.core.security import decode_token
 
 bearer_scheme = HTTPBearer(auto_error=False)
-
-
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
 
 
 async def get_current_restaurant(
@@ -52,6 +44,7 @@ async def get_current_restaurant(
             detail="Invalid token payload",
         )
 
+    # Top-level import — no circular dependency now
     from app.services.auth_service import AuthService
 
     service = AuthService(db)

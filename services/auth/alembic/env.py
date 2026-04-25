@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.core.config import settings
 from app.core.database import Base
-from app.models.restaurant import Restaurant  # noqa: F401 — needed for metadata
+from app.models.restaurant import Restaurant  # noqa: F401 — registers table in metadata
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)
@@ -22,6 +22,9 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
+# Isolated version table so auth and admin alembic don't conflict in the shared DB
+VERSION_TABLE = "auth_alembic_version"
+
 
 def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
@@ -30,13 +33,18 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        version_table=VERSION_TABLE,
     )
     with context.begin_transaction():
         context.run_migrations()
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        version_table=VERSION_TABLE,
+    )
     with context.begin_transaction():
         context.run_migrations()
 
