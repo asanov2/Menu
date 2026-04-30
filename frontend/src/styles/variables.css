@@ -1,0 +1,20 @@
+:root {
+  --cream-bg: #FDFAF5;
+  --cream-surface: #FFFFFF;
+  --cream-border: #E8E0D0;
+  --cream-muted: #F0EBE3;
+  --ink-primary: #1A1208;
+  --ink-secondary: #A09080;
+  --ink-tertiary: #C0B8A8;
+  --accent-gold: #D4A853;
+  --accent-gold-bg: #F8F0D8;
+  --tag-green-bg: #EAF5E8;
+  --tag-green-text: #2A5A20;
+  --tag-green-border: #90C878;
+  --tag-red-bg: #FEE8E0;
+  --tag-red-text: #A02010;
+  --tag-red-border: #F5A080;
+  --tag-blue-bg: #E8F0FE;
+  --tag-blue-text: #1A3A8A;
+  --tag-blue-border: #90A8F0;
+}

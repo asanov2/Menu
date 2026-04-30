@@ -2,6 +2,7 @@
 import enum
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
 from sqlalchemy import (
     Boolean,
@@ -87,7 +88,10 @@ class Payment(Base):
         UUID(as_uuid=True), ForeignKey("billing.subscriptions.id", ondelete="RESTRICT"), nullable=False, index=True
     )
     restaurant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
-    amount: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    target_plan: Mapped["PlanEnum | None"] = mapped_column(
+        Enum(PlanEnum, name="plan_enum", schema="billing"), nullable=True
+    )
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="KZT")
     status: Mapped[PaymentStatus] = mapped_column(
         Enum(PaymentStatus, name="payment_status_enum", schema="billing"),

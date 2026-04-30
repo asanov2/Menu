@@ -1,4 +1,4 @@
-# === FILE: services/billing/app/core/database.py ===
+# === FILE: services/analytics/app/core/database.py ===
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 
@@ -18,15 +18,6 @@ engine = create_async_engine(
 )
 
 AsyncSessionLocal = async_sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-    autocommit=False,
-    autoflush=False,
-)
-
-# Separate session factory for auth_service schema — same engine, separate transaction
-AuthAsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,

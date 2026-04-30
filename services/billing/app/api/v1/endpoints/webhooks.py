@@ -21,12 +21,15 @@ async def kaspi_webhook(
     db: AsyncSession = Depends(get_db),
     auth_db: AsyncSession = Depends(get_auth_db),
     x_kaspi_signature: str = Header(default=""),
+    x_kaspi_timestamp: str = Header(default=""),
 ) -> Response:
     try:
         raw_body = await request.body()
         payload: dict[str, Any] = await request.json()
 
-        if not verify_kaspi_signature(raw_body, x_kaspi_signature, settings.KASPI_WEBHOOK_SECRET):
+        if not verify_kaspi_signature(
+            raw_body, x_kaspi_signature, x_kaspi_timestamp, settings.KASPI_WEBHOOK_SECRET
+        ):
             logger.warning("kaspi_webhook: invalid signature")
             return Response(content='{"status":"ok"}', media_type="application/json")
 

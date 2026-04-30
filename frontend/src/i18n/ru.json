@@ -1,0 +1,36 @@
+{
+  "header": {
+    "table": "Стол {{number}}"
+  },
+  "views": {
+    "list": "Список",
+    "card": "Карточки",
+    "gallery": "Галерея"
+  },
+  "menu": {
+    "searchPlaceholder": "Поиск по меню...",
+    "found": "Найдено: {{count}} блюд",
+    "notFound": "Ничего не найдено",
+    "notFoundDesc": "Попробуйте другой запрос",
+    "unavailable": "Нет в наличии",
+    "temporarilyUnavailable": "Временно недоступно",
+    "minutes": "мин"
+  },
+  "tags": {
+    "popular": "Хит",
+    "vegan": "Веган",
+    "spicy": "Острое",
+    "new": "Новое",
+    "chef": "Шеф"
+  },
+  "waiter": {
+    "call": "Официант",
+    "called": "Вызван!"
+  },
+  "errors": {
+    "menuNotFoundTitle": "Меню не найдено",
+    "menuNotFoundDesc": "Такого меню не существует. Проверьте QR-код.",
+    "menuInactiveTitle": "Меню временно недоступно",
+    "menuInactiveDesc": "Это заведение сейчас не принимает заказы. Попробуйте позже."
+  }
+}

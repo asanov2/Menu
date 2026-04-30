@@ -1,0 +1,36 @@
+{
+  "header": {
+    "table": "Table {{number}}"
+  },
+  "views": {
+    "list": "List",
+    "card": "Cards",
+    "gallery": "Gallery"
+  },
+  "menu": {
+    "searchPlaceholder": "Search menu...",
+    "found": "Found: {{count}} items",
+    "notFound": "Nothing found",
+    "notFoundDesc": "Try a different search",
+    "unavailable": "Unavailable",
+    "temporarilyUnavailable": "Temporarily unavailable",
+    "minutes": "min"
+  },
+  "tags": {
+    "popular": "Hit",
+    "vegan": "Vegan",
+    "spicy": "Spicy",
+    "new": "New",
+    "chef": "Chef"
+  },
+  "waiter": {
+    "call": "Waiter",
+    "called": "Called!"
+  },
+  "errors": {
+    "menuNotFoundTitle": "Menu not found",
+    "menuNotFoundDesc": "This menu does not exist. Please check the QR code.",
+    "menuInactiveTitle": "Menu temporarily unavailable",
+    "menuInactiveDesc": "This venue is not accepting orders right now. Please try again later."
+  }
+}

@@ -5,6 +5,7 @@ version: "3.9"
 # cp services/menu/.env.example services/menu/.env
 # cp services/admin/.env.example services/admin/.env
 # cp services/billing/.env.example services/billing/.env
+# cp services/analytics/.env.example services/analytics/.env
 
 networks:
   qrmenu-network:
@@ -28,6 +29,7 @@ services:
       - menu-service
       - admin-service
       - billing-service
+      - analytics-service
     networks:
       - qrmenu-network
     restart: unless-stopped
@@ -84,7 +86,6 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  # fix #14: pinned minio version instead of :latest
   minio:
     image: minio/minio:RELEASE.2024-05-01T01-11-10Z
     command: server /data --console-address ":9001"
@@ -160,6 +161,21 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./services/billing/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - qrmenu-network
+    restart: unless-stopped
+
+  analytics-service:
+    build:
+      context: ./services/analytics
+      dockerfile: Dockerfile
+    env_file:
+      - ./services/analytics/.env
     depends_on:
       postgres:
         condition: service_healthy

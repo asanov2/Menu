@@ -1,0 +1,36 @@
+{
+  "header": {
+    "table": "Үстел {{number}}"
+  },
+  "views": {
+    "list": "Тізім",
+    "card": "Карточкалар",
+    "gallery": "Галерея"
+  },
+  "menu": {
+    "searchPlaceholder": "Мәзірден іздеу...",
+    "found": "Табылды: {{count}} тағам",
+    "notFound": "Ештеңе табылмады",
+    "notFoundDesc": "Басқа сөз іздеп көріңіз",
+    "unavailable": "Қолжетімді емес",
+    "temporarilyUnavailable": "Уақытша қолжетімді емес",
+    "minutes": "мин"
+  },
+  "tags": {
+    "popular": "Хит",
+    "vegan": "Веган",
+    "spicy": "Өткір",
+    "new": "Жаңа",
+    "chef": "Шеф"
+  },
+  "waiter": {
+    "call": "Даяшы",
+    "called": "Шақырылды!"
+  },
+  "errors": {
+    "menuNotFoundTitle": "Мәзір табылмады",
+    "menuNotFoundDesc": "Мұндай мәзір жоқ. QR-кодты тексеріңіз.",
+    "menuInactiveTitle": "Мәзір уақытша қолжетімді емес",
+    "menuInactiveDesc": "Бұл мекеме қазір тапсырыс қабылдамайды. Кейінірек қайталаңыз."
+  }
+}

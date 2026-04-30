@@ -65,6 +65,7 @@ async def upgrade_subscription(
         currency="KZT",
         status=PaymentStatus.pending,
         provider=PaymentProvider.kaspi,
+        target_plan=new_plan,
     )
     db.add(payment)
     await db.flush()
@@ -176,17 +177,28 @@ async def process_successful_payment(
     payment.provider_raw_response = raw_payload
     payment.paid_at = now
 
+    if payment.target_plan is not None:
+        sub.plan = payment.target_plan
     sub.status = SubscriptionStatus.active
     sub.current_period_end = now + timedelta(days=30)
 
     await db.commit()
 
-    await sync_restaurant_status(
-        restaurant_id=restaurant_id,
-        is_active=True,
-        plan=sub.plan.value,
-        db=auth_db,
-    )
+    try:
+        await sync_restaurant_status(
+            restaurant_id=restaurant_id,
+            is_active=True,
+            plan=sub.plan.value,
+            db=auth_db,
+        )
+    except Exception as exc:
+        logger.critical(
+            "CRITICAL: payment success but auth sync FAILED for restaurant=%s. "
+            "Manual intervention required. transaction=%s error=%s",
+            restaurant_id,
+            provider_transaction_id,
+            exc,
+        )
 
     logger.info(
         "webhook: payment success restaurant=%s transaction=%s plan=%s",

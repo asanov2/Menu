@@ -1,4 +1,4 @@
-# === FILE: services/billing/app/core/auth_client.py ===
+# === FILE: services/analytics/app/core/auth_client.py ===
 import logging
 from typing import Any
 

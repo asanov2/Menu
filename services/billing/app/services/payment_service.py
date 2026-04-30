@@ -1,4 +1,5 @@
 # === FILE: services/billing/app/services/payment_service.py ===
+import base64
 import hashlib
 import hmac
 import logging
@@ -21,7 +22,6 @@ async def create_kaspi_payment(
     plan: str,
 ) -> str:
     # TODO: replace with real Kaspi API after receiving credentials
-    # Real flow: POST to Kaspi API → get payment_url
     logger.info(
         "kaspi_payment: mock payment created order=%s restaurant=%s amount=%s plan=%s",
         order_id,
@@ -52,13 +52,11 @@ async def create_cloudpayments_payment(
 def verify_kaspi_signature(
     raw_body: bytes,
     signature_header: str,
+    timestamp_header: str,
     secret_key: str,
 ) -> bool:
-    expected = hmac.new(
-        secret_key.encode(),
-        raw_body,
-        hashlib.sha256,
-    ).hexdigest()
+    message = (timestamp_header + ":" + raw_body.decode("utf-8")).encode()
+    expected = hmac.new(secret_key.encode(), message, hashlib.sha256).hexdigest()
     return hmac.compare_digest(f"sha256={expected}", signature_header)
 
 
@@ -67,14 +65,6 @@ def verify_cloudpayments_signature(
     signature_header: str,
     secret_key: str,
 ) -> bool:
-    import base64
-    import hmac as hmac_module
-    import hashlib as hashlib_module
-
-    mac = hmac_module.new(
-        secret_key.encode(),
-        raw_body,
-        hashlib_module.sha256,
-    ).digest()
+    mac = hmac.new(secret_key.encode(), raw_body, hashlib.sha256).digest()
     expected = base64.b64encode(mac).decode()
-    return hmac_module.compare_digest(expected, signature_header)
+    return hmac.compare_digest(expected, signature_header)
