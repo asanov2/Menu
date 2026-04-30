@@ -4,6 +4,7 @@ version: "3.9"
 # cp services/auth/.env.example services/auth/.env
 # cp services/menu/.env.example services/menu/.env
 # cp services/admin/.env.example services/admin/.env
+# cp services/billing/.env.example services/billing/.env
 
 networks:
   qrmenu-network:
@@ -26,6 +27,7 @@ services:
       - auth-service
       - menu-service
       - admin-service
+      - billing-service
     networks:
       - qrmenu-network
     restart: unless-stopped
@@ -147,6 +149,21 @@ services:
       redis:
         condition: service_healthy
       minio:
+        condition: service_healthy
+    networks:
+      - qrmenu-network
+    restart: unless-stopped
+
+  billing-service:
+    build:
+      context: ./services/billing
+      dockerfile: Dockerfile
+    env_file:
+      - ./services/billing/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - qrmenu-network
