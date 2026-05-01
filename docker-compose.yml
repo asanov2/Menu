@@ -30,6 +30,9 @@ services:
       - admin-service
       - billing-service
       - analytics-service
+      - menu-frontend
+      - admin-frontend
+      - owner-frontend
     networks:
       - qrmenu-network
     restart: unless-stopped
@@ -184,3 +187,42 @@ services:
     networks:
       - qrmenu-network
     restart: unless-stopped
+
+  menu-frontend:
+    build:
+      context: ./frontend
+      dockerfile: packages/menu/Dockerfile
+    networks:
+      - qrmenu-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  admin-frontend:
+    build:
+      context: ./frontend
+      dockerfile: packages/admin/Dockerfile
+    networks:
+      - qrmenu-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  owner-frontend:
+    build:
+      context: ./frontend
+      dockerfile: packages/owner/Dockerfile
+    networks:
+      - qrmenu-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
