@@ -1,33 +1,40 @@
+// === FILE: frontend/packages/admin/src/main.tsx ===
+import '@qrmenu/ui/src/styles/variables.css';
 import '@qrmenu/ui/src/styles/global.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { adminApi } from '@qrmenu/ui';
+import { useAuthStore } from './store/authStore';
+import App from './App';
+
+adminApi.interceptors.response.use(
+  (res) => res,
+  async (err) => {
+    if (err.response?.status === 401) {
+      useAuthStore.getState().logout();
+      window.location.href = '/login';
+    }
+    return Promise.reject(err);
+  }
+);
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      retry: 1,
+    },
+  },
+});
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        fontFamily: 'var(--font-ui)',
-        color: 'var(--ink-secondary)',
-        background: 'var(--cream-warm)',
-      }}
-    >
-      <div style={{ textAlign: 'center' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 28,
-            color: 'var(--ink-primary)',
-            marginBottom: 8,
-          }}
-        >
-          qrmenu.kz
-        </div>
-        <div>Admin panel — coming soon</div>
-      </div>
-    </div>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
