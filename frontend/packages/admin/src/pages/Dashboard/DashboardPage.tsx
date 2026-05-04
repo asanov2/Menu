@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { EmptyState, Skeleton, formatDate } from '@qrmenu/ui';
+import { EmptyState, Skeleton } from '@qrmenu/ui';
 import { getOverview } from '../../api/analytics';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -16,7 +16,7 @@ const DAYS_OPTIONS = [
 
 function cardStyle(): React.CSSProperties {
   return {
-    background: '#FDFAF5',
+    background: 'var(--cream-bg)',
     border: '0.5px solid var(--cream-border)',
     borderRadius: 'var(--radius-lg)',
     boxShadow: 'var(--shadow-card)',
@@ -34,14 +34,10 @@ export default function DashboardPage() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const chartData = Array.from({ length: days }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (days - 1 - i));
-    return {
-      date: d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
-      views: Math.floor(Math.random() * 80 + 10),
-    };
-  });
+  const chartData = data ? [
+    { label: 'Просмотры меню', value: data.total_menu_views },
+    { label: 'Просмотры блюд', value: data.total_item_views },
+  ] : [];
 
   const peakHour = data?.most_common_peak_hour != null
     ? `${String(data.most_common_peak_hour).padStart(2, '0')}:00`
@@ -66,7 +62,7 @@ export default function DashboardPage() {
                   padding: '6px 14px',
                   borderRadius: 'var(--radius-md)',
                   border: '0.5px solid var(--cream-border)',
-                  background: isActive ? 'var(--ink-primary)' : 'white',
+                  background: isActive ? 'var(--ink-primary)' : 'var(--cream-surface)',
                   color: isActive ? 'var(--cream-bg)' : isLocked ? 'var(--ink-tertiary)' : 'var(--ink-secondary)',
                   fontSize: 12,
                   fontFamily: 'var(--font-ui)',
@@ -113,20 +109,20 @@ export default function DashboardPage() {
 
       {/* Chart */}
       <div style={{ ...cardStyle(), marginBottom: 24 }}>
-        <div style={{ fontSize: 13, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginBottom: 16 }}>Просмотры меню</div>
+        <div style={{ fontSize: 13, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginBottom: 16 }}>Обзор просмотров</div>
         {isLoading ? (
           <Skeleton height="200px" />
         ) : (
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="var(--cream-border)" />
-              <XAxis dataKey="date" tick={{ fontSize: 10, fontFamily: 'var(--font-ui)', fill: 'var(--ink-tertiary)' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fontFamily: 'var(--font-ui)', fill: 'var(--ink-tertiary)' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-ui)', fill: 'var(--ink-tertiary)' }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: '#FDFAF5', border: '0.5px solid var(--cream-border)', borderRadius: 8, fontSize: 12, fontFamily: 'var(--font-ui)' }}
+                contentStyle={{ background: 'var(--cream-bg)', border: '0.5px solid var(--cream-border)', borderRadius: 8, fontSize: 12, fontFamily: 'var(--font-ui)' }}
                 cursor={{ fill: 'var(--cream-muted)' }}
               />
-              <Bar dataKey="views" fill="var(--accent-gold)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="value" fill="var(--accent-gold)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -151,16 +147,16 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {data.top_items.slice(0, 10).map((item) => (
+              {data.top_items.slice(0, 10).map((item, idx) => (
                 <tr
                   key={item.item_id}
                   style={{ borderBottom: '0.5px solid var(--cream-border)' }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'var(--cream-muted)'; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'; }}
                 >
-                  <td style={{ padding: '10px 8px', color: 'var(--ink-tertiary)' }}>{item.rank}</td>
-                  <td style={{ padding: '10px 8px', color: 'var(--ink-primary)' }}>{item.item_id}</td>
-                  <td style={{ padding: '10px 8px', textAlign: 'right', color: 'var(--ink-secondary)' }}>{item.views}</td>
+                  <td style={{ padding: '10px 8px', color: 'var(--ink-tertiary)' }}>{idx + 1}</td>
+                  <td style={{ padding: '10px 8px', color: 'var(--ink-primary)' }}>{item.item_name}</td>
+                  <td style={{ padding: '10px 8px', textAlign: 'right', color: 'var(--ink-secondary)' }}>{item.view_count}</td>
                 </tr>
               ))}
             </tbody>

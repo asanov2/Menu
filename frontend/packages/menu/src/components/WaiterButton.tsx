@@ -38,7 +38,7 @@ export default function WaiterButton({ slug, table }: WaiterButtonProps) {
         width: 56,
         height: 56,
         borderRadius: '50%',
-        background: called ? '#2A7A20' : 'var(--ink-primary)',
+        background: called ? 'var(--tag-green-text)' : 'var(--ink-primary)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

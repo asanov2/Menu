@@ -3,7 +3,7 @@ import { adminApi } from '@qrmenu/ui';
 import type { MenuItem } from '@qrmenu/ui';
 
 export async function getItems(categoryId: string): Promise<MenuItem[]> {
-  const { data } = await adminApi.get('/api/v1/admin/items', { params: { category_id: categoryId } });
+  const { data } = await adminApi.get(`/api/v1/admin/categories/${categoryId}/items`);
   return data;
 }
 

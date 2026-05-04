@@ -20,11 +20,12 @@ export default function QRPage() {
     enabled: !!id,
   });
 
-  const qrValue = `https://qrmenu.kz/menu/${menu?.id}?menu=${id}`;
+  const appUrl = import.meta.env.VITE_APP_URL ?? '';
+  const qrValue = menu?.slug ? `${appUrl}/m/${menu.slug}` : '';
   const canTable = restaurant?.plan === 'business' || restaurant?.plan === 'pro';
 
   const downloadPNG = () => {
-    const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
+    const canvas = canvasRef.current?.querySelector('canvas');
     if (!canvas) return;
     const url = canvas.toDataURL('image/png');
     const a = document.createElement('a');
@@ -64,20 +65,19 @@ export default function QRPage() {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <div style={{ background: '#FDFAF5', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-card)', padding: '36px 40px', maxWidth: 380, width: '100%' }}>
+        <div style={{ background: 'var(--cream-bg)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-card)', padding: '36px 40px', maxWidth: 380, width: '100%' }}>
           <div style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--ink-primary)', marginBottom: 24 }}>
             {menu?.name}
           </div>
 
           {/* Main QR */}
           <div className="qr-center" style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-            <div id="qr-canvas" style={{ background: 'white', padding: 12, borderRadius: 8 }}>
+            <div ref={canvasRef} style={{ background: 'var(--cream-surface)', padding: 12, borderRadius: 8 }}>
               <QRCodeCanvas
-                id="qr-canvas-el"
-                value={qrValue}
+                value={qrValue || ' '}
                 size={220}
-                bgColor="white"
-                fgColor="var(--ink-primary, #1A1208)"
+                bgColor="#FFFFFF"
+                fgColor="#1A1208"
                 includeMargin
               />
             </div>
@@ -85,7 +85,7 @@ export default function QRPage() {
 
           {/* Hidden SVG for download */}
           <div id="qr-svg" style={{ display: 'none' }}>
-            <QRCodeSVG value={qrValue} size={220} bgColor="white" fgColor="#1A1208" includeMargin />
+            <QRCodeSVG value={qrValue || ' '} size={220} bgColor="#FFFFFF" fgColor="#1A1208" includeMargin />
           </div>
 
           {/* Table QR section */}
@@ -99,19 +99,19 @@ export default function QRPage() {
                   placeholder="Номер стола"
                   value={tableNum}
                   onChange={(e) => setTableNum(e.target.value)}
-                  style={{ flex: 1, padding: '8px 10px', background: 'white', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', outline: 'none' }}
+                  style={{ flex: 1, padding: '8px 10px', background: 'var(--cream-surface)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', outline: 'none' }}
                 />
                 <button
                   onClick={() => setTableQR(tableNum ? `${qrValue}&table=${tableNum}` : '')}
-                  style={{ padding: '8px 14px', background: 'var(--ink-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}
+                  style={{ padding: '8px 14px', background: 'var(--ink-primary)', color: 'var(--cream-surface)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}
                 >
                   Сгенерировать
                 </button>
               </div>
               {tableQR && (
                 <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
-                  <div style={{ background: 'white', padding: 10, borderRadius: 8 }}>
-                    <QRCodeCanvas value={tableQR} size={140} bgColor="white" fgColor="#1A1208" includeMargin />
+                  <div style={{ background: 'var(--cream-surface)', padding: 10, borderRadius: 8 }}>
+                    <QRCodeCanvas value={tableQR} size={140} bgColor="#FFFFFF" fgColor="#1A1208" includeMargin />
                   </div>
                 </div>
               )}
@@ -134,7 +134,7 @@ export default function QRPage() {
             </button>
             <button
               onClick={() => window.print()}
-              style={{ flex: 1, padding: '9px', background: 'var(--ink-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}
+              style={{ flex: 1, padding: '9px', background: 'var(--ink-primary)', color: 'var(--cream-surface)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}
             >
               🖨 Печать
             </button>

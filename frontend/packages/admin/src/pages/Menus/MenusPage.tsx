@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  background: 'white',
+  background: 'var(--cream-surface)',
   border: '0.5px solid var(--cream-border)',
   borderRadius: 'var(--radius-md)',
   padding: '10px 12px',
@@ -104,7 +104,7 @@ export default function MenusPage() {
               style={{
                 position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
                 width: 'calc(100% - 48px)', maxWidth: 360,
-                background: '#FDFAF5', borderRadius: 'var(--radius-xl)', padding: 24, zIndex: 201,
+                background: 'var(--cream-bg)', borderRadius: 'var(--radius-xl)', padding: 24, zIndex: 201,
                 boxShadow: 'var(--shadow-modal)',
               }}
             >

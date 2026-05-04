@@ -77,7 +77,9 @@ export default function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowPro
         </div>
 
         {/* Toggle */}
-        <div
+        <button
+          role="switch"
+          aria-checked={optimisticAvailable}
           onClick={handleToggle}
           style={{
             width: 36,
@@ -88,6 +90,8 @@ export default function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowPro
             cursor: 'pointer',
             transition: 'background 0.2s',
             flexShrink: 0,
+            border: 'none',
+            padding: 0,
           }}
         >
           <div
@@ -98,12 +102,12 @@ export default function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowPro
               width: 16,
               height: 16,
               borderRadius: '50%',
-              background: 'white',
+              background: 'var(--cream-surface)',
               transition: 'left 0.2s',
               boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
             }}
           />
-        </div>
+        </button>
 
         {/* Edit */}
         <button

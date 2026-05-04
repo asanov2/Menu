@@ -26,20 +26,20 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
 
   setAuth: (token, restaurant) => {
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('auth_restaurant', JSON.stringify(restaurant));
+    localStorage.setItem('admin_token', token);
+    localStorage.setItem('admin_restaurant', JSON.stringify(restaurant));
     set({ token, restaurant });
   },
 
   logout: () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_restaurant');
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_restaurant');
     set({ token: null, restaurant: null });
   },
 
   initialize: () => {
-    const token = localStorage.getItem('auth_token');
-    const restaurantRaw = localStorage.getItem('auth_restaurant');
+    const token = localStorage.getItem('admin_token');
+    const restaurantRaw = localStorage.getItem('admin_restaurant');
 
     if (token && restaurantRaw) {
       const exp = parseJwtExp(token);
@@ -53,8 +53,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
     }
 
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_restaurant');
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_restaurant');
     set({ token: null, restaurant: null, isLoading: false });
   },
 }));

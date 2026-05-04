@@ -107,7 +107,7 @@ export default function CategorySection({ category, allCategories, menuId, dragH
 
   return (
     <>
-      <div style={{ background: '#FDFAF5', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', marginBottom: 16, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--cream-bg)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', marginBottom: 16, overflow: 'hidden' }}>
         {/* Category header */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', borderBottom: '0.5px solid var(--cream-border)', gap: 10 }}>
           <div {...dragHandleProps} style={{ cursor: 'grab', color: 'var(--ink-tertiary)', fontSize: 16, flexShrink: 0, userSelect: 'none' }}>⠿</div>

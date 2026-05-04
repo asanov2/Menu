@@ -26,6 +26,10 @@ export async function deleteMenu(id: string): Promise<void> {
   await adminApi.delete(`/api/v1/admin/menus/${id}`);
 }
 
+export function getMenuUrl(slug: string): string {
+  return `${import.meta.env.VITE_APP_URL ?? ''}/m/${slug}`;
+}
+
 export function generateQR(menuId: string): string {
-  return `https://qrmenu.kz/menu/${menuId}`;
+  return `${import.meta.env.VITE_APP_URL ?? ''}/m/${menuId}`;
 }

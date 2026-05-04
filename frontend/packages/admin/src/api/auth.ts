@@ -13,10 +13,10 @@ export async function getMe(): Promise<RestaurantAuth> {
 }
 
 export async function updateProfile(payload: { name?: string; email?: string }): Promise<RestaurantAuth> {
-  const { data } = await adminApi.patch('/api/v1/auth/me', payload);
+  const { data } = await adminApi.put('/api/v1/auth/profile', payload);
   return data;
 }
 
 export async function changePassword(payload: { old_password: string; new_password: string }): Promise<void> {
-  await adminApi.post('/api/v1/auth/change-password', payload);
+  await adminApi.put('/api/v1/auth/change-password', payload);
 }

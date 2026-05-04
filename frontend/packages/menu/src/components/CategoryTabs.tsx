@@ -24,7 +24,7 @@ export default function CategoryTabs({ categories, activeId, onSelect }: Categor
       style={{
         display: 'flex',
         overflowX: 'auto',
-        background: '#221A10',
+        background: 'var(--ink-primary)',
         padding: '0 16px',
       }}
     >
@@ -44,7 +44,7 @@ export default function CategoryTabs({ categories, activeId, onSelect }: Categor
                 fontSize: 11,
                 fontFamily: 'var(--font-ui)',
                 fontWeight: active ? 500 : 400,
-                color: active ? '#FDFAF5' : '#A09080',
+                color: active ? 'var(--sidebar-text)' : 'var(--sidebar-muted)',
                 background: 'none',
                 border: 'none',
                 borderBottom: active ? '2px solid var(--accent-gold)' : '2px solid transparent',

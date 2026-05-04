@@ -26,7 +26,7 @@ type PasswordData = z.infer<typeof passwordSchema>;
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  background: 'white',
+  background: 'var(--cream-surface)',
   border: '0.5px solid var(--cream-border)',
   borderRadius: 'var(--radius-md)',
   padding: '10px 12px',
@@ -37,7 +37,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 function cardStyle(): React.CSSProperties {
-  return { background: '#FDFAF5', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', padding: 24 };
+  return { background: 'var(--cream-bg)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', padding: 24 };
 }
 
 function initials(name: string): string {
@@ -64,7 +64,7 @@ export default function ProfilePage() {
     setProfileSaving(true);
     try {
       const updated = await updateProfile(data);
-      const token = localStorage.getItem('auth_token') ?? '';
+      const token = localStorage.getItem('admin_token') ?? '';
       setAuth(token, updated);
       showToast('Сохранено ✓', 'success');
     } catch (err: unknown) {
@@ -94,7 +94,7 @@ export default function ProfilePage() {
       {/* Restaurant info */}
       <div style={cardStyle()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--accent-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700, color: 'white', fontFamily: 'var(--font-ui)', flexShrink: 0 }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--accent-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700, color: 'var(--cream-surface)', fontFamily: 'var(--font-ui)', flexShrink: 0 }}>
             {restaurant ? initials(restaurant.name) : '?'}
           </div>
           <div>
@@ -109,13 +109,13 @@ export default function ProfilePage() {
 
         <form onSubmit={hsp(onSaveProfile)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
-            <div style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginBottom: 4 }}>Название ресторана</div>
-            <input {...rp('name')} style={{ ...inputStyle, borderColor: ep.name ? 'var(--error-text)' : 'var(--cream-border)' }} onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }} onBlur={(e) => { e.target.style.borderColor = ep.name ? 'var(--error-text)' : 'var(--cream-border)'; }} />
+            <label htmlFor="profile-name" style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', display: 'block', marginBottom: 4 }}>Название ресторана</label>
+            <input id="profile-name" {...rp('name')} style={{ ...inputStyle, borderColor: ep.name ? 'var(--error-text)' : 'var(--cream-border)' }} onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }} onBlur={(e) => { e.target.style.borderColor = ep.name ? 'var(--error-text)' : 'var(--cream-border)'; }} />
             {ep.name && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 3, fontFamily: 'var(--font-ui)' }}>{ep.name.message}</div>}
           </div>
           <div>
-            <div style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginBottom: 4 }}>Email</div>
-            <input {...rp('email')} type="email" style={{ ...inputStyle, borderColor: ep.email ? 'var(--error-text)' : 'var(--cream-border)' }} onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }} onBlur={(e) => { e.target.style.borderColor = ep.email ? 'var(--error-text)' : 'var(--cream-border)'; }} />
+            <label htmlFor="profile-email" style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', display: 'block', marginBottom: 4 }}>Email</label>
+            <input id="profile-email" {...rp('email')} type="email" style={{ ...inputStyle, borderColor: ep.email ? 'var(--error-text)' : 'var(--cream-border)' }} onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }} onBlur={(e) => { e.target.style.borderColor = ep.email ? 'var(--error-text)' : 'var(--cream-border)'; }} />
             {ep.email && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 3, fontFamily: 'var(--font-ui)' }}>{ep.email.message}</div>}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -131,13 +131,13 @@ export default function ProfilePage() {
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--ink-primary)', marginBottom: 20 }}>Изменить пароль</div>
         <form onSubmit={hspass(onChangePassword)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {[
-            { name: 'old_password' as const, label: 'Текущий пароль', err: epass.old_password },
-            { name: 'new_password' as const, label: 'Новый пароль', err: epass.new_password },
-            { name: 'confirm_password' as const, label: 'Подтвердите пароль', err: epass.confirm_password },
-          ].map(({ name, label, err }) => (
+            { name: 'old_password' as const, label: 'Текущий пароль', id: 'pass-old', err: epass.old_password },
+            { name: 'new_password' as const, label: 'Новый пароль', id: 'pass-new', err: epass.new_password },
+            { name: 'confirm_password' as const, label: 'Подтвердите пароль', id: 'pass-confirm', err: epass.confirm_password },
+          ].map(({ name, label, id, err }) => (
             <div key={name}>
-              <div style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginBottom: 4 }}>{label}</div>
-              <input {...rpass(name)} type="password" style={{ ...inputStyle, borderColor: err ? 'var(--error-text)' : 'var(--cream-border)' }} onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }} onBlur={(e) => { e.target.style.borderColor = err ? 'var(--error-text)' : 'var(--cream-border)'; }} />
+              <label htmlFor={id} style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', display: 'block', marginBottom: 4 }}>{label}</label>
+              <input id={id} {...rpass(name)} type="password" style={{ ...inputStyle, borderColor: err ? 'var(--error-text)' : 'var(--cream-border)' }} onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }} onBlur={(e) => { e.target.style.borderColor = err ? 'var(--error-text)' : 'var(--cream-border)'; }} />
               {err && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 3, fontFamily: 'var(--font-ui)' }}>{err.message}</div>}
             </div>
           ))}

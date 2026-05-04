@@ -1,5 +1,4 @@
 // === FILE: frontend/packages/admin/src/main.tsx ===
-import '@qrmenu/ui/src/styles/variables.css';
 import '@qrmenu/ui/src/styles/global.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';

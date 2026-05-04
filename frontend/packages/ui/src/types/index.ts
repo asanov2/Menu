@@ -10,6 +10,7 @@ export interface Restaurant {
 export interface Menu {
   id: string;
   name: string;
+  slug: string;
   language: 'ru' | 'kz' | 'en';
   is_default: boolean;
 }
@@ -32,6 +33,7 @@ export interface MenuItem {
   preparation_time: number | null;
   tags: string[];
   sort_order: number;
+  category_id: string;
 }
 
 // ── API responses ─────────────────────────────────────────────────────────────
@@ -57,8 +59,8 @@ export interface RestaurantAuth {
 
 export interface TopItem {
   item_id: string;
-  views: number;
-  rank: number;
+  item_name: string;
+  view_count: number;
 }
 
 export interface OverviewStats {

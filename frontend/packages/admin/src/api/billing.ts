@@ -21,10 +21,10 @@ export async function getSubscription(): Promise<BillingData> {
 }
 
 export async function upgradeSubscription(plan: string): Promise<{ payment_url: string; payment_id: string }> {
-  const { data } = await adminApi.post('/api/v1/billing/subscription/upgrade', { plan });
+  const { data } = await adminApi.post('/api/v1/billing/upgrade', { plan });
   return data;
 }
 
 export async function cancelSubscription(): Promise<void> {
-  await adminApi.post('/api/v1/billing/subscription/cancel');
+  await adminApi.post('/api/v1/billing/cancel');
 }

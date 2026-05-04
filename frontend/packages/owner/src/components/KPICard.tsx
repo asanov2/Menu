@@ -9,7 +9,7 @@ interface KPICardProps {
 }
 
 const SUB_COLORS = {
-  green: '#4A8A30',
+  green: 'var(--tag-green-text)',
   red: 'var(--error-text)',
   gold: 'var(--accent-gold)',
   default: 'var(--ink-secondary)',

@@ -24,6 +24,14 @@ function monthShort(m: string) {
   return MONTH_SHORT[idx] ?? m
 }
 
+function escapeCSV(value: string | number): string {
+  const str = String(value)
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`
+  }
+  return str
+}
+
 const STATUS_STYLE: Record<string, { bg: string; color: string; border: string; label: string }> = {
   paid: {
     bg: 'var(--tag-green-bg)',
@@ -49,14 +57,15 @@ const LIMIT = 20
 
 export default function RevenuePage() {
   const [page, setPage] = useState(1)
+  const now = new Date()
 
   const { data: stats } = useQuery({
     queryKey: ['platform-stats'],
     queryFn: getPlatformStats,
   })
   const { data: revenue } = useQuery({
-    queryKey: ['revenue', 12],
-    queryFn: () => getRevenue(12),
+    queryKey: ['revenue', now.getFullYear()],
+    queryFn: () => getRevenue(now.getFullYear()),
   })
   const { data: payments } = useQuery({
     queryKey: ['payments', page],
@@ -105,10 +114,12 @@ export default function RevenuePage() {
   const handleExport = () => {
     const headers = ['Дата', 'Ресторан', 'Сумма', 'Тариф', 'Статус', 'Провайдер']
     const csvRows = (payments?.items ?? []).map(p =>
-      [p.paid_at, p.restaurant_name, p.amount, p.plan, p.status, p.provider].join(','),
+      [p.paid_at, p.restaurant_name, p.amount, p.plan, p.status, p.provider]
+        .map(escapeCSV)
+        .join(','),
     )
-    const csv = [headers.join(','), ...csvRows].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const csv = [headers.map(escapeCSV).join(','), ...csvRows].join('\n')
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -191,12 +202,12 @@ export default function RevenuePage() {
           >
             <XAxis
               dataKey="name"
-              tick={{ fontFamily: 'var(--font-ui)', fontSize: 11, fill: '#A09080' }}
+              tick={{ fontFamily: 'var(--font-ui)', fontSize: 11, fill: 'var(--ink-secondary)' }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontFamily: 'var(--font-ui)', fontSize: 10, fill: '#A09080' }}
+              tick={{ fontFamily: 'var(--font-ui)', fontSize: 10, fill: 'var(--ink-secondary)' }}
               axisLine={false}
               tickLine={false}
               tickFormatter={v => `${Math.round((v as number) / 1000)}k`}

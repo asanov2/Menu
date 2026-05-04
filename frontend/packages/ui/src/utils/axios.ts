@@ -3,22 +3,32 @@ import axios from 'axios';
 
 export function createApiClient(baseURL: string) {
   const client = axios.create({ baseURL });
-
   client.interceptors.request.use((config) => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('admin_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   });
-
   return client;
 }
 
-export const menuApi = createApiClient(
-  (import.meta as ImportMeta & { env: { VITE_API_URL?: string } }).env.VITE_API_URL ?? '/api/v1'
-);
+export const menuApi = axios.create({
+  baseURL: '',
+  headers: { 'Content-Type': 'application/json' },
+});
 
-export const adminApi = createApiClient(
-  (import.meta as ImportMeta & { env: { VITE_API_URL?: string } }).env.VITE_API_URL ?? '/api/v1'
-);
+export const adminApi = (() => {
+  const client = axios.create({
+    baseURL: '',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  client.interceptors.request.use((config) => {
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+  return client;
+})();

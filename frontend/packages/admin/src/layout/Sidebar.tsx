@@ -27,7 +27,7 @@ export default function Sidebar() {
         top: 0,
         bottom: 0,
         width: 'var(--sidebar-width)',
-        background: '#1A1208',
+        background: 'var(--sidebar-bg)',
         display: 'flex',
         flexDirection: 'column',
         zIndex: 100,
@@ -39,7 +39,7 @@ export default function Sidebar() {
           style={{
             fontFamily: 'var(--font-display)',
             fontSize: 18,
-            color: '#F5F0E8',
+            color: 'var(--sidebar-text)',
             letterSpacing: '0.02em',
           }}
         >
@@ -67,7 +67,7 @@ export default function Sidebar() {
               transition: 'background 0.15s, color 0.15s',
               background: isActive ? 'rgba(212,168,83,0.12)' : 'transparent',
               borderLeft: isActive ? '3px solid var(--accent-gold)' : '3px solid transparent',
-              color: isActive ? '#F5F0E8' : 'rgba(245,240,232,0.45)',
+              color: isActive ? 'var(--sidebar-text)' : 'var(--sidebar-muted)',
             })}
             onMouseEnter={(e) => {
               const el = e.currentTarget;
@@ -94,7 +94,7 @@ export default function Sidebar() {
 
         {restaurant && (
           <div style={{ marginBottom: 10, padding: '8px 6px' }}>
-            <div style={{ fontSize: 12, fontWeight: 500, color: '#F5F0E8', fontFamily: 'var(--font-ui)', marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--sidebar-text)', fontFamily: 'var(--font-ui)', marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {restaurant.name}
             </div>
             {(() => {
@@ -116,7 +116,7 @@ export default function Sidebar() {
             gap: 8,
             background: 'transparent',
             border: 'none',
-            color: 'rgba(245,240,232,0.45)',
+            color: 'var(--sidebar-muted)',
             fontSize: 13,
             fontFamily: 'var(--font-ui)',
             cursor: 'pointer',
@@ -125,8 +125,8 @@ export default function Sidebar() {
             width: '100%',
             transition: 'color 0.15s',
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#F5F0E8'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(245,240,232,0.45)'; }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sidebar-text)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sidebar-muted)'; }}
         >
           <span>🚪</span>
           <span>Выйти</span>

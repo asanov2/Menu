@@ -41,7 +41,7 @@ export default function MenuHeader({
       {/* Top bar */}
       <div
         style={{
-          background: '#1A1208',
+          background: 'var(--sidebar-bg)',
           padding: '12px 16px 10px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -55,7 +55,7 @@ export default function MenuHeader({
               fontFamily: 'var(--font-display)',
               fontSize: 22,
               fontWeight: 600,
-              color: '#FDFAF5',
+              color: 'var(--sidebar-text)',
               lineHeight: 1.2,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -65,7 +65,7 @@ export default function MenuHeader({
             {restaurantName}
           </div>
           {tableNumber && (
-            <div style={{ fontSize: 11, color: '#A09080', marginTop: 2, fontFamily: 'var(--font-ui)' }}>
+            <div style={{ fontSize: 11, color: 'var(--sidebar-muted)', marginTop: 2, fontFamily: 'var(--font-ui)' }}>
               {t('header.table', { number: tableNumber })}
             </div>
           )}
@@ -86,7 +86,7 @@ export default function MenuHeader({
                   fontFamily: 'var(--font-ui)',
                   fontWeight: 500,
                   background: active ? 'var(--accent-gold)' : 'transparent',
-                  color: active ? '#1A1208' : '#A09080',
+                  color: active ? 'var(--sidebar-bg)' : 'var(--sidebar-muted)',
                   border: 'none',
                   cursor: 'pointer',
                   minHeight: 28,

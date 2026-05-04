@@ -116,7 +116,7 @@ export default function ConfirmModal({
                   fontWeight: 500,
                   fontFamily: 'var(--font-ui)',
                   background: danger ? 'var(--error-text)' : 'var(--ink-primary)',
-                  color: '#FDFAF5',
+                  color: 'var(--cream-surface)',
                   border: 'none',
                   cursor: 'pointer',
                   minHeight: 40,

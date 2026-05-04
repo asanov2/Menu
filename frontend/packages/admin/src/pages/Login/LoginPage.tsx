@@ -16,7 +16,7 @@ type FormData = z.infer<typeof schema>;
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  background: 'white',
+  background: 'var(--cream-surface)',
   border: '0.5px solid var(--cream-border)',
   borderRadius: 'var(--radius-md)',
   padding: '10px 12px',
@@ -71,7 +71,7 @@ export default function LoginPage() {
         style={{
           width: '100%',
           maxWidth: 380,
-          background: '#FDFAF5',
+          background: 'var(--cream-bg)',
           border: '0.5px solid var(--cream-border)',
           borderRadius: 'var(--radius-xl)',
           boxShadow: 'var(--shadow-card)',
@@ -89,7 +89,9 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
+            <label htmlFor="login-email" style={{ display: 'none' }}>Email</label>
             <input
+              id="login-email"
               {...register('email')}
               type="email"
               placeholder="Email"
@@ -101,8 +103,10 @@ export default function LoginPage() {
           </div>
 
           <div>
+            <label htmlFor="login-password" style={{ display: 'none' }}>Пароль</label>
             <div style={{ position: 'relative' }}>
               <input
+                id="login-password"
                 {...register('password')}
                 type={showPass ? 'text' : 'password'}
                 placeholder="Пароль"

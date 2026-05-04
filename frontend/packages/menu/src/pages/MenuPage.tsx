@@ -77,9 +77,9 @@ export default function MenuPage() {
   if (isLoading) {
     return (
       <div>
-        <div style={{ background: '#1A1208', height: 62 }} />
-        <div style={{ background: '#221A10', height: 44 }} />
-        <div style={{ background: '#221A10', height: 38 }} />
+        <div style={{ background: 'var(--sidebar-bg)', height: 62 }} />
+        <div style={{ background: 'var(--ink-primary)', height: 44 }} />
+        <div style={{ background: 'var(--ink-primary)', height: 38 }} />
         <SkeletonLoader viewMode={viewMode} />
       </div>
     );

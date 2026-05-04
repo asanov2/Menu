@@ -1,5 +1,6 @@
 // === FILE: frontend/packages/owner/src/pages/System/SystemPage.tsx ===
 import { useQuery } from '@tanstack/react-query'
+import { Skeleton } from '@qrmenu/ui'
 import { getSystemHealth } from '../../api/owner'
 import StatusDot from '../../components/StatusDot'
 
@@ -101,9 +102,7 @@ export default function SystemPage() {
                 <div
                   key={svc.name}
                   style={{
-                    background: isOffline
-                      ? 'rgba(254, 232, 224, 0.3)'
-                      : 'var(--cream-surface)',
+                    background: isOffline ? 'var(--error-bg)' : 'var(--cream-surface)',
                     border: `0.5px solid ${isOffline ? 'var(--error-border)' : 'var(--cream-border)'}`,
                     borderRadius: 'var(--radius-md)',
                     padding: '16px 20px',
@@ -161,18 +160,7 @@ export default function SystemPage() {
               )
             })
           : Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  background: 'var(--cream-surface)',
-                  border: '0.5px solid var(--cream-border)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '16px 20px',
-                  height: 80,
-                  boxShadow: 'var(--shadow-card)',
-                  animation: 'pulse 1.5s ease-in-out infinite',
-                }}
-              />
+              <Skeleton key={i} height="80px" borderRadius="var(--radius-md)" />
             ))}
       </div>
     </div>

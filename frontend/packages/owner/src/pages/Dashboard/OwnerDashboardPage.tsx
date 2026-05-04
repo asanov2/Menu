@@ -96,8 +96,8 @@ export default function OwnerDashboardPage() {
     refetchInterval: 60_000,
   })
   const { data: revenue } = useQuery({
-    queryKey: ['revenue', 6],
-    queryFn: () => getRevenue(6),
+    queryKey: ['revenue', now.getFullYear()],
+    queryFn: () => getRevenue(now.getFullYear()),
     refetchInterval: 60_000,
   })
   const { data: payments } = useQuery({
@@ -112,10 +112,13 @@ export default function OwnerDashboardPage() {
   }))
 
   const total = stats?.total_restaurants ?? 0
+  const starterCount = stats?.starter_count ?? 0
+  const businessCount = stats?.business_count ?? 0
+  const proCount = stats?.pro_count ?? 0
   const planDist = [
-    { label: 'Старт', count: Math.round(total * 0.58), pct: 58, color: 'var(--ink-tertiary)' },
-    { label: 'Бизнес', count: Math.round(total * 0.28), pct: 28, color: '#4A8A30' },
-    { label: 'Про', count: Math.round(total * 0.14), pct: 14, color: 'var(--accent-gold)' },
+    { label: 'Старт', count: starterCount, pct: total > 0 ? Math.round((starterCount / total) * 100) : 0, color: 'var(--ink-tertiary)' },
+    { label: 'Бизнес', count: businessCount, pct: total > 0 ? Math.round((businessCount / total) * 100) : 0, color: 'var(--tag-green-text)' },
+    { label: 'Про', count: proCount, pct: total > 0 ? Math.round((proCount / total) * 100) : 0, color: 'var(--accent-gold)' },
   ]
 
   const paymentRows = (payments?.items ?? []).slice(0, 10).map(p => ({
@@ -171,7 +174,6 @@ export default function OwnerDashboardPage() {
         <KPICard
           label="MRR"
           value={stats ? formatPrice(stats.mrr_kzt) : '—'}
-          sub="+18%"
           subColor="gold"
           icon="💰"
         />
@@ -222,12 +224,12 @@ export default function OwnerDashboardPage() {
             >
               <XAxis
                 dataKey="name"
-                tick={{ fontFamily: 'var(--font-ui)', fontSize: 11, fill: '#A09080' }}
+                tick={{ fontFamily: 'var(--font-ui)', fontSize: 11, fill: 'var(--ink-secondary)' }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fontFamily: 'var(--font-ui)', fontSize: 10, fill: '#A09080' }}
+                tick={{ fontFamily: 'var(--font-ui)', fontSize: 10, fill: 'var(--ink-secondary)' }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={v => `${Math.round((v as number) / 1000)}k`}

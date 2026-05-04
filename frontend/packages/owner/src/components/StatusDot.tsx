@@ -22,7 +22,7 @@ export default function StatusDot({ status, showLabel }: StatusDotProps) {
           width: 8,
           height: 8,
           borderRadius: '50%',
-          background: isOnline ? '#4A8A30' : 'var(--error-text)',
+          background: isOnline ? 'var(--tag-green-text)' : 'var(--error-text)',
           animation: isOnline ? 'statusPulse 2s ease-in-out infinite' : 'none',
           flexShrink: 0,
         }}
@@ -32,7 +32,7 @@ export default function StatusDot({ status, showLabel }: StatusDotProps) {
           style={{
             fontFamily: 'var(--font-ui)',
             fontSize: 10,
-            color: isOnline ? '#4A8A30' : 'var(--error-text)',
+            color: isOnline ? 'var(--tag-green-text)' : 'var(--error-text)',
             fontWeight: 500,
           }}
         >

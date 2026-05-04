@@ -1,6 +1,6 @@
 // === FILE: frontend/packages/admin/src/pages/Billing/BillingPage.tsx ===
 import { useQuery } from '@tanstack/react-query';
-import { Skeleton, EmptyState, useToast, formatDate, daysUntil } from '@qrmenu/ui';
+import { Skeleton, EmptyState, useToast, formatDate, daysUntil, ConfirmModal } from '@qrmenu/ui';
 import { getSubscription, upgradeSubscription, cancelSubscription } from '../../api/billing';
 import { useState } from 'react';
 
@@ -36,12 +36,13 @@ const UPGRADE_PLANS = [
 ];
 
 function cardStyle(): React.CSSProperties {
-  return { background: '#FDFAF5', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', padding: 24 };
+  return { background: 'var(--cream-bg)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', padding: 24 };
 }
 
 export default function BillingPage() {
   const { showToast } = useToast();
   const [cancelling, setCancelling] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['subscription'],
@@ -61,7 +62,6 @@ export default function BillingPage() {
   };
 
   const handleCancel = async () => {
-    if (!confirm('Отменить подписку? Доступ сохранится до конца периода.')) return;
     setCancelling(true);
     try {
       await cancelSubscription();
@@ -71,6 +71,7 @@ export default function BillingPage() {
       showToast('Ошибка: не удалось отменить', 'error');
     } finally {
       setCancelling(false);
+      setShowCancelModal(false);
     }
   };
 
@@ -133,7 +134,7 @@ export default function BillingPage() {
                   <ul style={{ margin: '0 0 14px', padding: '0 0 0 16px', fontSize: 12, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', lineHeight: 1.8 }}>
                     {p.features.map((f) => <li key={f}>{f}</li>)}
                   </ul>
-                  <button onClick={() => handleUpgrade(p.plan)} style={{ width: '100%', padding: '8px', background: 'var(--ink-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>
+                  <button onClick={() => handleUpgrade(p.plan)} style={{ width: '100%', padding: '8px', background: 'var(--ink-primary)', color: 'var(--cream-surface)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>
                     Перейти на {p.label}
                   </button>
                 </div>
@@ -143,7 +144,7 @@ export default function BillingPage() {
 
           {sub.status === 'active' && (
             <div style={{ marginTop: 16, textAlign: 'right' }}>
-              <button onClick={handleCancel} disabled={cancelling} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', textDecoration: 'underline' }}>
+              <button onClick={() => setShowCancelModal(true)} disabled={cancelling} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', textDecoration: 'underline' }}>
                 {cancelling ? 'Отмена...' : 'Отменить подписку'}
               </button>
             </div>
@@ -182,6 +183,16 @@ export default function BillingPage() {
           </table>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={showCancelModal}
+        title="Отменить подписку?"
+        message="Доступ к платным функциям сохранится до конца оплаченного периода."
+        confirmText="Отменить подписку"
+        onConfirm={handleCancel}
+        onCancel={() => setShowCancelModal(false)}
+        danger
+      />
     </div>
   );
 }

@@ -60,7 +60,7 @@ export default function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
     <>
       <div
         style={{
-          background: '#FDFAF5',
+          background: 'var(--cream-bg)',
           border: '0.5px solid var(--cream-border)',
           borderRadius: 'var(--radius-lg)',
           boxShadow: 'var(--shadow-card)',
@@ -84,7 +84,7 @@ export default function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
                   onChange={(e) => setNameValue(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleRename(); if (e.key === 'Escape') setEditName(false); }}
                   autoFocus
-                  style={{ flex: 1, background: 'white', border: '0.5px solid var(--accent-gold)', borderRadius: 'var(--radius-md)', padding: '4px 8px', fontSize: 14, fontFamily: 'var(--font-ui)', outline: 'none' }}
+                  style={{ flex: 1, background: 'var(--cream-surface)', border: '0.5px solid var(--accent-gold)', borderRadius: 'var(--radius-md)', padding: '4px 8px', fontSize: 14, fontFamily: 'var(--font-ui)', outline: 'none' }}
                 />
                 <button onClick={handleRename} style={{ background: 'var(--ink-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', padding: '4px 10px', cursor: 'pointer', fontSize: 12 }}>✓</button>
               </div>
@@ -114,7 +114,7 @@ export default function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
               ⋯
             </button>
             {menuOpen && (
-              <div style={{ position: 'absolute', right: 0, top: 28, background: 'white', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-card)', zIndex: 10, minWidth: 140, overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', right: 0, top: 28, background: 'var(--cream-surface)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-card)', zIndex: 10, minWidth: 140, overflow: 'hidden' }}>
                 <button onClick={() => { setEditName(true); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--ink-primary)' }}>
                   ✏️ Переименовать
                 </button>

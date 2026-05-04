@@ -1,5 +1,5 @@
 // === FILE: frontend/packages/owner/src/api/owner.ts ===
-import { ownerApi } from '../store/ownerStore'
+import { ownerApi } from './ownerApi'
 
 export interface OwnerRestaurant {
   id: string
@@ -46,18 +46,21 @@ export interface PlatformStats {
   new_this_month: number
   churn_this_month: number
   conversion_rate: number
+  starter_count: number
+  business_count: number
+  pro_count: number
 }
 
 export async function ownerLogin(
   email: string,
   password: string,
 ): Promise<{ access_token: string }> {
-  const { data } = await ownerApi.post('/owner/login', { email, password })
+  const { data } = await ownerApi.post('/api/v1/owner/login', { email, password })
   return data
 }
 
 export async function getPlatformStats(): Promise<PlatformStats> {
-  const { data } = await ownerApi.get('/owner/stats')
+  const { data } = await ownerApi.get('/api/v1/owner/stats')
   return data
 }
 
@@ -68,7 +71,7 @@ export async function getRestaurants(params: {
   page?: number
   limit?: number
 }): Promise<{ items: OwnerRestaurant[]; total: number; pages: number }> {
-  const { data } = await ownerApi.get('/owner/restaurants', { params })
+  const { data } = await ownerApi.get('/api/v1/owner/restaurants', { params })
   return data
 }
 
@@ -76,22 +79,22 @@ export async function updateRestaurant(
   id: string,
   patch: { is_active?: boolean; plan?: string },
 ): Promise<void> {
-  await ownerApi.patch(`/owner/restaurants/${id}`, patch)
+  await ownerApi.patch(`/api/v1/owner/restaurants/${id}`, patch)
 }
 
-export async function getRevenue(months = 6): Promise<RevenueMonth[]> {
-  const { data } = await ownerApi.get('/owner/revenue', { params: { months } })
+export async function getRevenue(year: number): Promise<RevenueMonth[]> {
+  const { data } = await ownerApi.get('/api/v1/owner/revenue', { params: { year } })
   return data
 }
 
 export async function getPayments(
   page = 1,
 ): Promise<{ items: PaymentRecord[]; total: number }> {
-  const { data } = await ownerApi.get('/owner/payments', { params: { page } })
+  const { data } = await ownerApi.get('/api/v1/owner/payments', { params: { page } })
   return data
 }
 
 export async function getSystemHealth(): Promise<ServiceHealth[]> {
-  const { data } = await ownerApi.get('/owner/health')
+  const { data } = await ownerApi.get('/api/v1/owner/system/health')
   return data
 }

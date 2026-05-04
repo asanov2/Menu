@@ -22,7 +22,7 @@ export default function ViewToggle({ viewMode, onViewModeChange }: ViewTogglePro
         display: 'flex',
         gap: 4,
         padding: '6px 16px 8px',
-        background: '#221A10',
+        background: 'var(--ink-primary)',
       }}
     >
       {VIEWS.map(({ mode, icon, key }) => {
@@ -40,9 +40,9 @@ export default function ViewToggle({ viewMode, onViewModeChange }: ViewTogglePro
               fontSize: 10,
               fontFamily: 'var(--font-ui)',
               fontWeight: 500,
-              background: active ? '#1A1208' : 'transparent',
-              color: active ? '#FDFAF5' : '#A09080',
-              border: active ? 'none' : '0.5px solid #403020',
+              background: active ? 'var(--sidebar-bg)' : 'transparent',
+              color: active ? 'var(--sidebar-text)' : 'var(--sidebar-muted)',
+              border: active ? 'none' : '0.5px solid rgba(255,255,255,0.15)',
               cursor: 'pointer',
               minHeight: 28,
               transition: 'all 0.15s',
