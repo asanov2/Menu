@@ -1,9 +1,9 @@
-// === FILE: frontend/packages/admin/src/pages/Menus/components/CategoryFormModal.tsx ===
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
+import { INPUT_STYLE, useInputFocus, Z_INDEX, ANIMATION } from '@qrmenu/ui';
 
 const schema = z.object({ name: z.string().min(1, 'Обязательное поле').max(80) });
 type FormData = z.infer<typeof schema>;
@@ -16,22 +16,12 @@ interface CategoryFormModalProps {
   loading?: boolean;
 }
 
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  background: 'var(--cream-surface)',
-  border: '0.5px solid var(--cream-border)',
-  borderRadius: 'var(--radius-md)',
-  padding: '10px 12px',
-  fontSize: 13,
-  fontFamily: 'var(--font-ui)',
-  outline: 'none',
-  boxSizing: 'border-box',
-};
-
 export default function CategoryFormModal({ isOpen, initialName, onSave, onCancel, loading }: CategoryFormModalProps) {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  const nameFocus = useInputFocus(!!errors.name);
 
   useEffect(() => {
     if (isOpen) reset({ name: initialName ?? '' });
@@ -50,15 +40,16 @@ export default function CategoryFormModal({ isOpen, initialName, onSave, onCance
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: ANIMATION.fadeMs }}
             onClick={onCancel}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(26,18,8,0.45)', backdropFilter: 'blur(4px)', zIndex: 200 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(26,18,8,0.5)', backdropFilter: 'blur(4px)', zIndex: Z_INDEX.modal }}
           />
           <motion.div
             key="modal"
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            transition={ANIMATION.spring}
             style={{
               position: 'fixed',
               top: '50%',
@@ -69,7 +60,7 @@ export default function CategoryFormModal({ isOpen, initialName, onSave, onCance
               background: 'var(--cream-bg)',
               borderRadius: 'var(--radius-xl)',
               padding: '24px',
-              zIndex: 201,
+              zIndex: Z_INDEX.modalInner,
               boxShadow: 'var(--shadow-modal)',
             }}
           >
@@ -79,10 +70,9 @@ export default function CategoryFormModal({ isOpen, initialName, onSave, onCance
             <form onSubmit={handleSubmit(onSubmit)}>
               <input
                 {...register('name')}
+                {...nameFocus}
                 placeholder="Название категории"
-                style={{ ...inputStyle, borderColor: errors.name ? 'var(--error-text)' : 'var(--cream-border)' }}
-                onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
-                onBlur={(e) => { e.target.style.borderColor = errors.name ? 'var(--error-text)' : 'var(--cream-border)'; }}
+                style={{ ...INPUT_STYLE, borderColor: errors.name ? 'var(--error-text)' : 'var(--cream-border)' }}
                 autoFocus
               />
               {errors.name && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 4, fontFamily: 'var(--font-ui)' }}>{errors.name.message}</div>}

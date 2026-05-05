@@ -1,10 +1,9 @@
-// === FILE: frontend/packages/admin/src/pages/Login/LoginPage.tsx ===
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useToast } from '@qrmenu/ui';
+import { useToast, INPUT_STYLE, useInputFocus } from '@qrmenu/ui';
 import { login } from '../../api/auth';
 import { useAuthStore } from '../../store/authStore';
 
@@ -13,18 +12,6 @@ const schema = z.object({
   password: z.string().min(1, 'Введите пароль'),
 });
 type FormData = z.infer<typeof schema>;
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  background: 'var(--cream-surface)',
-  border: '0.5px solid var(--cream-border)',
-  borderRadius: 'var(--radius-md)',
-  padding: '10px 12px',
-  fontSize: 13,
-  fontFamily: 'var(--font-ui)',
-  outline: 'none',
-  boxSizing: 'border-box',
-};
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -36,6 +23,9 @@ export default function LoginPage() {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  const emailFocus    = useInputFocus(!!errors.email);
+  const passwordFocus = useInputFocus(!!errors.password);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -93,11 +83,10 @@ export default function LoginPage() {
             <input
               id="login-email"
               {...register('email')}
+              {...emailFocus}
               type="email"
               placeholder="Email"
-              style={{ ...inputStyle, borderColor: errors.email ? 'var(--error-text)' : 'var(--cream-border)' }}
-              onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
-              onBlur={(e) => { e.target.style.borderColor = errors.email ? 'var(--error-text)' : 'var(--cream-border)'; }}
+              style={{ ...INPUT_STYLE, borderColor: errors.email ? 'var(--error-text)' : 'var(--cream-border)' }}
             />
             {errors.email && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 4, fontFamily: 'var(--font-ui)' }}>{errors.email.message}</div>}
           </div>
@@ -108,11 +97,10 @@ export default function LoginPage() {
               <input
                 id="login-password"
                 {...register('password')}
+                {...passwordFocus}
                 type={showPass ? 'text' : 'password'}
                 placeholder="Пароль"
-                style={{ ...inputStyle, paddingRight: 40, borderColor: errors.password ? 'var(--error-text)' : 'var(--cream-border)' }}
-                onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
-                onBlur={(e) => { e.target.style.borderColor = errors.password ? 'var(--error-text)' : 'var(--cream-border)'; }}
+                style={{ ...INPUT_STYLE, paddingRight: 40, borderColor: errors.password ? 'var(--error-text)' : 'var(--cream-border)' }}
               />
               <button
                 type="button"

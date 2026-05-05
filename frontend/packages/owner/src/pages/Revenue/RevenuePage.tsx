@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { formatPrice, formatDate } from '@qrmenu/ui'
+import { formatPrice, formatDate, EmptyState } from '@qrmenu/ui'
 import { getRevenue, getPayments, getPlatformStats } from '../../api/owner'
 import KPICard from '../../components/KPICard'
 import DataTable from '../../components/DataTable'
@@ -63,7 +63,7 @@ export default function RevenuePage() {
     queryKey: ['platform-stats'],
     queryFn: getPlatformStats,
   })
-  const { data: revenue } = useQuery({
+  const { data: revenue, error: revenueError, refetch: refetchRevenue } = useQuery({
     queryKey: ['revenue', now.getFullYear()],
     queryFn: () => getRevenue(now.getFullYear()),
   })
@@ -195,35 +195,51 @@ export default function RevenuePage() {
         >
           Выручка по месяцам (12 мес.)
         </div>
-        <ResponsiveContainer width="100%" height={240}>
-          <BarChart
-            data={revenueData}
-            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-          >
-            <XAxis
-              dataKey="name"
-              tick={{ fontFamily: 'var(--font-ui)', fontSize: 11, fill: 'var(--ink-secondary)' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontFamily: 'var(--font-ui)', fontSize: 10, fill: 'var(--ink-secondary)' }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={v => `${Math.round((v as number) / 1000)}k`}
-            />
-            <Tooltip
-              formatter={(v: number) => [formatPrice(v), 'Выручка']}
-              contentStyle={{
-                fontFamily: 'var(--font-ui)',
-                fontSize: 12,
-                borderRadius: 8,
-                border: '1px solid var(--cream-border)',
-              }}
-            />
-            <Bar dataKey="value" fill="var(--accent-gold)" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        {revenueError ? (
+          <EmptyState
+            icon="⚠️"
+            title="Ошибка загрузки"
+            description="Не удалось загрузить данные выручки"
+            action={
+              <button
+                onClick={() => refetchRevenue()}
+                style={{ marginTop: 8, padding: '6px 14px', fontFamily: 'var(--font-ui)', fontSize: 12, border: '1px solid var(--cream-border)', borderRadius: 'var(--radius-sm)', background: 'transparent', color: 'var(--ink-secondary)', cursor: 'pointer' }}
+              >
+                Повторить
+              </button>
+            }
+          />
+        ) : (
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart
+              data={revenueData}
+              margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+            >
+              <XAxis
+                dataKey="name"
+                tick={{ fontFamily: 'var(--font-ui)', fontSize: 11, fill: 'var(--ink-secondary)' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontFamily: 'var(--font-ui)', fontSize: 10, fill: 'var(--ink-secondary)' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={v => `${Math.round((v as number) / 1000)}k`}
+              />
+              <Tooltip
+                formatter={(v: number) => [formatPrice(v), 'Выручка']}
+                contentStyle={{
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: 12,
+                  borderRadius: 8,
+                  border: '1px solid var(--cream-border)',
+                }}
+              />
+              <Bar dataKey="value" fill="var(--accent-gold)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Payments table */}

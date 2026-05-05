@@ -1,4 +1,3 @@
-// === FILE: frontend/packages/owner/src/pages/Login/OwnerLoginPage.tsx ===
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
@@ -6,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useOwnerStore } from '../../store/ownerStore'
 import { ownerLogin } from '../../api/owner'
+import { INPUT_STYLE, LABEL_STYLE, useInputFocus, getApiErrorMessage } from '@qrmenu/ui'
 
 const schema = z.object({
   email: z.string().email('Введите корректный email'),
@@ -13,30 +13,6 @@ const schema = z.object({
 })
 
 type FormData = z.infer<typeof schema>
-
-const inputStyle = (hasError: boolean): React.CSSProperties => ({
-  width: '100%',
-  padding: '10px 12px',
-  fontFamily: 'var(--font-ui)',
-  fontSize: 13,
-  color: 'var(--ink-primary)',
-  background: 'var(--cream-bg)',
-  border: `1px solid ${hasError ? 'var(--error-border)' : 'var(--cream-border)'}`,
-  borderRadius: 'var(--radius-sm)',
-  outline: 'none',
-  boxSizing: 'border-box',
-})
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontFamily: 'var(--font-ui)',
-  fontSize: 11,
-  fontWeight: 500,
-  color: 'var(--ink-secondary)',
-  marginBottom: 6,
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
-}
 
 export default function OwnerLoginPage() {
   const [serverError, setServerError] = useState('')
@@ -50,6 +26,9 @@ export default function OwnerLoginPage() {
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
 
+  const emailFocus    = useInputFocus(!!errors.email)
+  const passwordFocus = useInputFocus(!!errors.password)
+
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     setServerError('')
@@ -57,8 +36,8 @@ export default function OwnerLoginPage() {
       const res = await ownerLogin(data.email, data.password)
       setToken(res.access_token)
       navigate('/dashboard')
-    } catch (e: any) {
-      setServerError(e.response?.data?.message ?? 'Неверные данные для входа')
+    } catch (e: unknown) {
+      setServerError(getApiErrorMessage(e, 'Неверные данные для входа'))
     } finally {
       setLoading(false)
     }
@@ -115,44 +94,32 @@ export default function OwnerLoginPage() {
           style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
         >
           <div>
-            <label style={labelStyle}>Email</label>
+            <label style={LABEL_STYLE}>Email</label>
             <input
               {...register('email')}
+              {...emailFocus}
               type="email"
               placeholder="owner@qrmenu.kz"
-              style={inputStyle(!!errors.email)}
+              style={{ ...INPUT_STYLE, borderColor: errors.email ? 'var(--error-text)' : 'var(--cream-border)' }}
             />
             {errors.email && (
-              <div
-                style={{
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 11,
-                  color: 'var(--error-text)',
-                  marginTop: 4,
-                }}
-              >
+              <div style={{ fontFamily: 'var(--font-ui)', fontSize: 11, color: 'var(--error-text)', marginTop: 4 }}>
                 {errors.email.message}
               </div>
             )}
           </div>
 
           <div>
-            <label style={labelStyle}>Пароль</label>
+            <label style={LABEL_STYLE}>Пароль</label>
             <input
               {...register('password')}
+              {...passwordFocus}
               type="password"
               placeholder="••••••••"
-              style={inputStyle(!!errors.password)}
+              style={{ ...INPUT_STYLE, borderColor: errors.password ? 'var(--error-text)' : 'var(--cream-border)' }}
             />
             {errors.password && (
-              <div
-                style={{
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 11,
-                  color: 'var(--error-text)',
-                  marginTop: 4,
-                }}
-              >
+              <div style={{ fontFamily: 'var(--font-ui)', fontSize: 11, color: 'var(--error-text)', marginTop: 4 }}>
                 {errors.password.message}
               </div>
             )}

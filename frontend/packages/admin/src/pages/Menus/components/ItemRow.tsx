@@ -1,5 +1,5 @@
 // === FILE: frontend/packages/admin/src/pages/Menus/components/ItemRow.tsx ===
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatPrice, useToast, ConfirmModal } from '@qrmenu/ui';
 import type { MenuItem } from '@qrmenu/ui';
@@ -12,7 +12,7 @@ interface ItemRowProps {
   onEdit: (item: MenuItem) => void;
 }
 
-export default function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowProps) {
+function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowProps) {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const [optimisticAvailable, setOptimisticAvailable] = useState(item.is_available);
@@ -140,3 +140,5 @@ export default function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowPro
     </>
   );
 }
+
+export default memo(ItemRow);

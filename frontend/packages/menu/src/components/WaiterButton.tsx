@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { callWaiter } from '../api/menu';
+import { TOAST_DURATION_MS } from '@qrmenu/ui';
 
 interface WaiterButtonProps {
   slug: string;
@@ -21,7 +22,7 @@ export default function WaiterButton({ slug, table }: WaiterButtonProps) {
     } finally {
       setLoading(false);
       setCalled(true);
-      setTimeout(() => setCalled(false), 3000);
+      setTimeout(() => setCalled(false), TOAST_DURATION_MS);
     }
   };
 

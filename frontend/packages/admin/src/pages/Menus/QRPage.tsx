@@ -1,9 +1,8 @@
-// === FILE: frontend/packages/admin/src/pages/Menus/QRPage.tsx ===
 import { useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
-import { Skeleton } from '@qrmenu/ui';
+import { Skeleton, PLAN } from '@qrmenu/ui';
 import { getMenu } from '../../api/menus';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -22,7 +21,7 @@ export default function QRPage() {
 
   const appUrl = import.meta.env.VITE_APP_URL ?? '';
   const qrValue = menu?.slug ? `${appUrl}/m/${menu.slug}` : '';
-  const canTable = restaurant?.plan === 'business' || restaurant?.plan === 'pro';
+  const canTable = restaurant?.plan === PLAN.BUSINESS || restaurant?.plan === PLAN.PRO;
 
   const downloadPNG = () => {
     const canvas = canvasRef.current?.querySelector('canvas');

@@ -76,7 +76,7 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
             onClick={handleRemove}
             style={{
               position: 'absolute', inset: 0, background: 'rgba(26,18,8,0.55)', display: 'flex',
-              alignItems: 'center', justifyContent: 'center', color: 'white',
+              alignItems: 'center', justifyContent: 'center', color: 'var(--cream-surface)',
               fontSize: 13, fontFamily: 'var(--font-ui)', fontWeight: 500,
             }}
           >

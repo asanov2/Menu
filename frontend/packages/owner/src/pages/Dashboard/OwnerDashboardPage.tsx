@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { formatPrice, formatDate } from '@qrmenu/ui'
+import { formatPrice, formatDate, Skeleton } from '@qrmenu/ui'
 import { getPlatformStats, getRevenue, getPayments } from '../../api/owner'
 import KPICard from '../../components/KPICard'
 import DataTable from '../../components/DataTable'
@@ -90,7 +90,7 @@ export default function OwnerDashboardPage() {
     year: 'numeric',
   })
 
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['platform-stats'],
     queryFn: getPlatformStats,
     refetchInterval: 60_000,
@@ -157,41 +157,49 @@ export default function OwnerDashboardPage() {
       </div>
 
       {/* KPI row */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: 16,
-        }}
-      >
-        <KPICard
-          label="Ресторанов"
-          value={stats?.total_restaurants ?? '—'}
-          sub={`+${stats?.new_this_month ?? 0} этот месяц`}
-          subColor="green"
-          icon="🏪"
-        />
-        <KPICard
-          label="MRR"
-          value={stats ? formatPrice(stats.mrr_kzt) : '—'}
-          subColor="gold"
-          icon="💰"
-        />
-        <KPICard
-          label="Триал"
-          value={stats?.trial_restaurants ?? '—'}
-          sub={`конверсия ${stats ? Math.round(stats.conversion_rate * 100) : 0}%`}
-          subColor="gold"
-          icon="⏱️"
-        />
-        <KPICard
-          label="Churn"
-          value={stats?.churn_this_month ?? '—'}
-          sub="этот месяц"
-          subColor="red"
-          icon="📉"
-        />
-      </div>
+      {isLoadingStats ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} height="80px" borderRadius="var(--radius-md)" />
+          ))}
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 16,
+          }}
+        >
+          <KPICard
+            label="Ресторанов"
+            value={stats?.total_restaurants ?? '—'}
+            sub={`+${stats?.new_this_month ?? 0} этот месяц`}
+            subColor="green"
+            icon="🏪"
+          />
+          <KPICard
+            label="MRR"
+            value={stats ? formatPrice(stats.mrr_kzt) : '—'}
+            subColor="gold"
+            icon="💰"
+          />
+          <KPICard
+            label="Триал"
+            value={stats?.trial_restaurants ?? '—'}
+            sub={`конверсия ${stats ? Math.round(stats.conversion_rate * 100) : 0}%`}
+            subColor="gold"
+            icon="⏱️"
+          />
+          <KPICard
+            label="Churn"
+            value={stats?.churn_this_month ?? '—'}
+            sub="этот месяц"
+            subColor="red"
+            icon="📉"
+          />
+        </div>
+      )}
 
       {/* Charts row */}
       <div

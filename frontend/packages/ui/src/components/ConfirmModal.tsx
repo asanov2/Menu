@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Z_INDEX, ANIMATION } from '../constants';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ export default function ConfirmModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: ANIMATION.fadeMs }}
             onClick={onCancel}
             style={{
               position: 'fixed',
@@ -39,7 +39,7 @@ export default function ConfirmModal({
               background: 'rgba(26,18,8,0.5)',
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
-              zIndex: 200,
+              zIndex: Z_INDEX.modal,
             }}
           />
 
@@ -48,7 +48,7 @@ export default function ConfirmModal({
             initial={{ opacity: 0, scale: 0.94, y: -12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: -12 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            transition={ANIMATION.spring}
             style={{
               position: 'fixed',
               top: '50%',
@@ -59,7 +59,7 @@ export default function ConfirmModal({
               background: 'var(--cream-surface)',
               borderRadius: 'var(--radius-xl)',
               padding: '24px 24px 20px',
-              zIndex: 201,
+              zIndex: Z_INDEX.modalInner,
               boxShadow: 'var(--shadow-modal)',
             }}
           >

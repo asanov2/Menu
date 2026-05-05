@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import type { MenuItem } from '@qrmenu/ui';
-import { TagBadge, formatPrice } from '@qrmenu/ui';
+import { TagBadge, formatPrice, Z_INDEX, ANIMATION } from '@qrmenu/ui';
 
 interface ItemModalProps {
   item: MenuItem | null;
@@ -32,15 +32,15 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: ANIMATION.fadeMs }}
             onClick={onClose}
             style={{
               position: 'fixed',
               inset: 0,
-              background: 'rgba(26,18,8,0.6)',
+              background: 'rgba(26,18,8,0.5)',
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
-              zIndex: 100,
+              zIndex: Z_INDEX.modal,
             }}
           />
 
@@ -59,7 +59,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
               maxWidth: 390,
               background: 'var(--cream-bg)',
               borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0',
-              zIndex: 101,
+              zIndex: Z_INDEX.modalInner,
               maxHeight: '92dvh',
               overflowY: 'auto',
               paddingBottom: 'env(safe-area-inset-bottom, 24px)',
@@ -100,7 +100,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                 src={item.image_url}
                 alt={item.name}
                 loading="lazy"
-                style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block' }}
+                style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', display: 'block' }}
               />
             ) : (
               <div

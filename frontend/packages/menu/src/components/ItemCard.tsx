@@ -55,6 +55,7 @@ function ItemImage({
     flexShrink: 0,
     display: 'block',
     filter: grayscale ? 'grayscale(1)' : undefined,
+    aspectRatio: '1',
   };
 
   if (src) {

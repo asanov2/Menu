@@ -1,4 +1,3 @@
-// === FILE: frontend/packages/admin/src/pages/Menus/components/CategorySection.tsx ===
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -14,7 +13,7 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
-import { useToast, ConfirmModal, EmptyState } from '@qrmenu/ui';
+import { useToast, ConfirmModal, EmptyState, getApiErrorMessage } from '@qrmenu/ui';
 import type { Category, MenuItem } from '@qrmenu/ui';
 import { deleteCategory } from '../../../api/categories';
 import { createItem, updateItem, reorderItems } from '../../../api/items';
@@ -58,6 +57,11 @@ export default function CategorySection({ category, allCategories, menuId, dragH
     }
   };
 
+  const handleEditItem = (item: MenuItem) => {
+    setEditingItem(item);
+    setItemFormOpen(true);
+  };
+
   const handleSaveItem = async (data: Partial<MenuItem> & { category_id: string }) => {
     setItemSaving(true);
     try {
@@ -72,8 +76,7 @@ export default function CategorySection({ category, allCategories, menuId, dragH
       setItemFormOpen(false);
       setEditingItem(undefined);
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Неизвестная ошибка';
-      showToast(`Ошибка: ${msg}`, 'error');
+      showToast(`Ошибка: ${getApiErrorMessage(err)}`, 'error');
     } finally {
       setItemSaving(false);
     }
@@ -135,7 +138,7 @@ export default function CategorySection({ category, allCategories, menuId, dragH
                   item={item}
                   categoryId={category.id}
                   menuId={menuId}
-                  onEdit={(it) => { setEditingItem(it); setItemFormOpen(true); }}
+                  onEdit={handleEditItem}
                 />
               ))}
             </SortableContext>

@@ -33,7 +33,7 @@ export default function Topbar() {
     <header
       style={{
         height: 52,
-        background: 'white',
+        background: 'var(--cream-surface)',
         borderBottom: '0.5px solid var(--cream-border)',
         display: 'flex',
         alignItems: 'center',
@@ -71,7 +71,7 @@ export default function Topbar() {
               justifyContent: 'center',
               fontSize: 12,
               fontWeight: 700,
-              color: 'white',
+              color: 'var(--cream-surface)',
               fontFamily: 'var(--font-ui)',
               flexShrink: 0,
             }}

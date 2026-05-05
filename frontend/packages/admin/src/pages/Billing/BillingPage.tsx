@@ -1,6 +1,5 @@
-// === FILE: frontend/packages/admin/src/pages/Billing/BillingPage.tsx ===
 import { useQuery } from '@tanstack/react-query';
-import { Skeleton, EmptyState, useToast, formatDate, daysUntil, ConfirmModal } from '@qrmenu/ui';
+import { Skeleton, EmptyState, useToast, formatDate, daysUntil, ConfirmModal, TRIAL_DAYS, PLAN, getApiErrorMessage } from '@qrmenu/ui';
 import { getSubscription, upgradeSubscription, cancelSubscription } from '../../api/billing';
 import { useState } from 'react';
 
@@ -18,31 +17,36 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  active: { background: 'var(--tag-green-bg)', color: 'var(--tag-green-text)', border: '0.5px solid var(--tag-green-border)' },
-  trial: { background: 'var(--tag-blue-bg)', color: 'var(--tag-blue-text)', border: '0.5px solid var(--tag-blue-border)' },
-  expired: { background: 'var(--tag-red-bg, #FEF2F2)', color: 'var(--tag-red-text, #B91C1C)', border: '0.5px solid var(--tag-red-border, #FECACA)' },
-  cancelled: { background: 'var(--cream-muted)', color: 'var(--ink-secondary)', border: '0.5px solid var(--cream-border)' },
+  active:    { background: 'var(--tag-green-bg)',  color: 'var(--tag-green-text)',  border: '0.5px solid var(--tag-green-border)' },
+  trial:     { background: 'var(--tag-blue-bg)',   color: 'var(--tag-blue-text)',   border: '0.5px solid var(--tag-blue-border)' },
+  expired:   { background: 'var(--tag-red-bg)',    color: 'var(--tag-red-text)',    border: '0.5px solid var(--tag-red-border)' },
+  cancelled: { background: 'var(--cream-muted)',   color: 'var(--ink-secondary)',   border: '0.5px solid var(--cream-border)' },
 };
 
 const PAYMENT_STATUS_STYLE: Record<string, React.CSSProperties> = {
   success: { background: 'var(--tag-green-bg)', color: 'var(--tag-green-text)', border: '0.5px solid var(--tag-green-border)' },
   pending: { background: 'var(--accent-gold-bg)', color: 'var(--warning-text)', border: '0.5px solid var(--accent-gold-border)' },
-  failed: { background: 'var(--tag-red-bg, #FEF2F2)', color: 'var(--tag-red-text, #B91C1C)', border: '0.5px solid var(--tag-red-border, #FECACA)' },
+  failed:  { background: 'var(--tag-red-bg)',   color: 'var(--tag-red-text)',   border: '0.5px solid var(--tag-red-border)' },
 };
 
 const UPGRADE_PLANS = [
-  { plan: 'business', label: 'Business', price: '4 900 ₸/мес', features: ['До 5 меню', 'QR на столы', 'Аналитика 30 дней'] },
-  { plan: 'pro', label: 'Pro', price: '9 900 ₸/мес', features: ['Безлимит меню', 'Приоритет поддержка', 'Аналитика 90 дней', 'Белый ярлык'] },
+  { plan: PLAN.BUSINESS, label: 'Business', price: '4 900 ₸/мес', features: ['До 5 меню', 'QR на столы', 'Аналитика 30 дней'] },
+  { plan: PLAN.PRO,      label: 'Pro',      price: '9 900 ₸/мес', features: ['Безлимит меню', 'Приоритет поддержка', 'Аналитика 90 дней', 'Белый ярлык'] },
 ];
 
-function cardStyle(): React.CSSProperties {
-  return { background: 'var(--cream-bg)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', padding: 24 };
-}
+const CARD_STYLE: React.CSSProperties = {
+  background: 'var(--cream-bg)',
+  border: '0.5px solid var(--cream-border)',
+  borderRadius: 'var(--radius-lg)',
+  boxShadow: 'var(--shadow-card)',
+  padding: 24,
+};
 
 export default function BillingPage() {
   const { showToast } = useToast();
   const [cancelling, setCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['subscription'],
@@ -53,11 +57,14 @@ export default function BillingPage() {
   const payments = data?.payments ?? [];
 
   const handleUpgrade = async (plan: string) => {
+    setUpgradingPlan(plan);
     try {
       const result = await upgradeSubscription(plan);
       window.location.href = result.payment_url;
-    } catch {
-      showToast('Ошибка: не удалось перейти к оплате', 'error');
+    } catch (err: unknown) {
+      showToast(getApiErrorMessage(err, 'Ошибка: не удалось перейти к оплате'), 'error');
+    } finally {
+      setUpgradingPlan(null);
     }
   };
 
@@ -85,14 +92,13 @@ export default function BillingPage() {
   }
 
   const trialDays = sub?.trial_ends_at ? daysUntil(sub.trial_ends_at) : 0;
-  const trialTotal = 14;
-  const trialProgress = Math.max(0, Math.min(100, (trialDays / trialTotal) * 100));
+  const trialProgress = Math.max(0, Math.min(100, (trialDays / TRIAL_DAYS) * 100));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Current plan */}
       {sub && (
-        <div style={cardStyle()}>
+        <div style={CARD_STYLE}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--ink-primary)', marginBottom: 8 }}>
@@ -121,11 +127,11 @@ export default function BillingPage() {
             </div>
           )}
 
-          {sub.plan !== 'pro' && (
+          {sub.plan !== PLAN.PRO && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12, marginTop: 8 }}>
               {UPGRADE_PLANS.filter((p) => {
-                if (sub.plan === 'starter') return true;
-                if (sub.plan === 'business') return p.plan === 'pro';
+                if (sub.plan === PLAN.STARTER) return true;
+                if (sub.plan === PLAN.BUSINESS) return p.plan === PLAN.PRO;
                 return false;
               }).map((p) => (
                 <div key={p.plan} style={{ border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-lg)', padding: 16 }}>
@@ -134,8 +140,12 @@ export default function BillingPage() {
                   <ul style={{ margin: '0 0 14px', padding: '0 0 0 16px', fontSize: 12, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', lineHeight: 1.8 }}>
                     {p.features.map((f) => <li key={f}>{f}</li>)}
                   </ul>
-                  <button onClick={() => handleUpgrade(p.plan)} style={{ width: '100%', padding: '8px', background: 'var(--ink-primary)', color: 'var(--cream-surface)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>
-                    Перейти на {p.label}
+                  <button
+                    onClick={() => handleUpgrade(p.plan)}
+                    disabled={upgradingPlan === p.plan}
+                    style={{ width: '100%', padding: '8px', background: 'var(--ink-primary)', color: 'var(--cream-surface)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: upgradingPlan === p.plan ? 'not-allowed' : 'pointer', opacity: upgradingPlan === p.plan ? 0.7 : 1 }}
+                  >
+                    {upgradingPlan === p.plan ? '...' : `Перейти на ${p.label}`}
                   </button>
                 </div>
               ))}
@@ -153,7 +163,7 @@ export default function BillingPage() {
       )}
 
       {/* Payment history */}
-      <div style={cardStyle()}>
+      <div style={CARD_STYLE}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--ink-primary)', marginBottom: 16 }}>История платежей</div>
         {payments.length === 0 ? (
           <EmptyState icon="💳" title="Нет платежей" description="История платежей появится после первой оплаты" />

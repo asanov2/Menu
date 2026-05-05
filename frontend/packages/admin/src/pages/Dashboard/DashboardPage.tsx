@@ -1,28 +1,39 @@
-// === FILE: frontend/packages/admin/src/pages/Dashboard/DashboardPage.tsx ===
-import { useState } from 'react';
+import { CSSProperties, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { EmptyState, Skeleton } from '@qrmenu/ui';
+import { EmptyState, Skeleton, PLAN, ANALYTICS_DAYS, TOP_ITEMS_LIMIT } from '@qrmenu/ui';
 import { getOverview } from '../../api/analytics';
 import { useAuth } from '../../hooks/useAuth';
 
 const DAYS_OPTIONS = [
-  { label: '7д', value: 7 },
+  { label: '7д',  value: 7 },
   { label: '30д', value: 30 },
-  { label: '90д', value: 90 },
+  { label: '90д', value: ANALYTICS_DAYS[PLAN.PRO] },
 ];
 
-function cardStyle(): React.CSSProperties {
-  return {
-    background: 'var(--cream-bg)',
-    border: '0.5px solid var(--cream-border)',
-    borderRadius: 'var(--radius-lg)',
-    boxShadow: 'var(--shadow-card)',
-    padding: '20px 24px',
-  };
-}
+const CARD_STYLE: CSSProperties = {
+  background: 'var(--cream-bg)',
+  border: '0.5px solid var(--cream-border)',
+  borderRadius: 'var(--radius-lg)',
+  boxShadow: 'var(--shadow-card)',
+  padding: '20px 24px',
+};
+
+const getDayButtonStyle = (isActive: boolean, isLocked: boolean): CSSProperties => ({
+  padding: '6px 14px',
+  borderRadius: 'var(--radius-md)',
+  border: '0.5px solid var(--cream-border)',
+  background: isActive ? 'var(--ink-primary)' : 'var(--cream-surface)',
+  color: isActive ? 'var(--cream-bg)' : isLocked ? 'var(--ink-tertiary)' : 'var(--ink-secondary)',
+  fontSize: 12,
+  fontFamily: 'var(--font-ui)',
+  cursor: isLocked ? 'not-allowed' : 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 4,
+});
 
 export default function DashboardPage() {
   const { restaurant } = useAuth();
@@ -34,14 +45,20 @@ export default function DashboardPage() {
     staleTime: 1000 * 60 * 5,
   });
 
+  const peakHour = data?.most_common_peak_hour != null
+    ? `${String(data.most_common_peak_hour).padStart(2, '0')}:00`
+    : '—';
+
   const chartData = data ? [
     { label: 'Просмотры меню', value: data.total_menu_views },
     { label: 'Просмотры блюд', value: data.total_item_views },
   ] : [];
 
-  const peakHour = data?.most_common_peak_hour != null
-    ? `${String(data.most_common_peak_hour).padStart(2, '0')}:00`
-    : '—';
+  const statCards = [
+    { label: 'Просмотров меню', value: data?.total_menu_views ?? 0 },
+    { label: 'Просмотров блюд', value: data?.total_item_views ?? 0 },
+    { label: 'Пиковый час',     value: peakHour },
+  ];
 
   return (
     <div>
@@ -52,25 +69,13 @@ export default function DashboardPage() {
         </h1>
         <div style={{ display: 'flex', gap: 6 }}>
           {DAYS_OPTIONS.map((opt) => {
-            const isLocked = opt.value === 90 && restaurant?.plan !== 'pro';
+            const isLocked = opt.value === ANALYTICS_DAYS[PLAN.PRO] && restaurant?.plan !== PLAN.PRO;
             const isActive = days === opt.value;
             return (
               <button
                 key={opt.value}
                 onClick={() => !isLocked && setDays(opt.value)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '0.5px solid var(--cream-border)',
-                  background: isActive ? 'var(--ink-primary)' : 'var(--cream-surface)',
-                  color: isActive ? 'var(--cream-bg)' : isLocked ? 'var(--ink-tertiary)' : 'var(--ink-secondary)',
-                  fontSize: 12,
-                  fontFamily: 'var(--font-ui)',
-                  cursor: isLocked ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
+                style={getDayButtonStyle(isActive, isLocked)}
               >
                 {isLocked && <span style={{ fontSize: 10 }}>🔒</span>}
                 {opt.label}
@@ -84,31 +89,27 @@ export default function DashboardPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} style={cardStyle()}>
+            <div key={i} style={CARD_STYLE}>
               <Skeleton height="14px" width="60%" />
               <div style={{ marginTop: 10 }}><Skeleton height="28px" width="40%" /></div>
             </div>
           ))
         ) : (
-          <>
-            <div style={cardStyle()}>
-              <div style={{ fontSize: 10, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Просмотров меню</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--ink-primary)' }}>{data?.total_menu_views ?? 0}</div>
+          statCards.map((stat) => (
+            <div key={stat.label} style={CARD_STYLE}>
+              <div style={{ fontSize: 10, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                {stat.label}
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--ink-primary)' }}>
+                {stat.value}
+              </div>
             </div>
-            <div style={cardStyle()}>
-              <div style={{ fontSize: 10, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Просмотров блюд</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--ink-primary)' }}>{data?.total_item_views ?? 0}</div>
-            </div>
-            <div style={cardStyle()}>
-              <div style={{ fontSize: 10, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Пиковый час</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--ink-primary)' }}>{peakHour}</div>
-            </div>
-          </>
+          ))
         )}
       </div>
 
       {/* Chart */}
-      <div style={{ ...cardStyle(), marginBottom: 24 }}>
+      <div style={{ ...CARD_STYLE, marginBottom: 24 }}>
         <div style={{ fontSize: 13, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginBottom: 16 }}>Обзор просмотров</div>
         {isLoading ? (
           <Skeleton height="200px" />
@@ -129,7 +130,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Top items */}
-      <div style={cardStyle()}>
+      <div style={CARD_STYLE}>
         <div style={{ fontSize: 15, fontFamily: 'var(--font-display)', color: 'var(--ink-primary)', marginBottom: 16 }}>Топ блюда</div>
         {isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -147,7 +148,7 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {data.top_items.slice(0, 10).map((item, idx) => (
+              {data.top_items.slice(0, TOP_ITEMS_LIMIT).map((item, idx) => (
                 <tr
                   key={item.item_id}
                   style={{ borderBottom: '0.5px solid var(--cream-border)' }}

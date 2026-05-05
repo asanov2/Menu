@@ -6,6 +6,7 @@ import React, {
   ReactNode,
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TOAST_DURATION_MS, Z_INDEX } from '../constants';
 
 type ToastType = 'success' | 'error' | 'warning';
 
@@ -53,7 +54,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => [...prev.slice(-2), { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
+    }, TOAST_DURATION_MS);
   }, []);
 
   return (
@@ -64,7 +65,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           position: 'fixed',
           top: 16,
           right: 16,
-          zIndex: 9999,
+          zIndex: Z_INDEX.toast,
           display: 'flex',
           flexDirection: 'column',
           gap: 8,

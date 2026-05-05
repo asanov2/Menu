@@ -1,5 +1,5 @@
 // === FILE: frontend/packages/admin/src/pages/Menus/components/MenuCard.tsx ===
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { ConfirmModal, useToast } from '@qrmenu/ui';
@@ -13,7 +13,7 @@ interface MenuCardProps {
 
 const LANG_LABEL: Record<string, string> = { ru: 'RU', kz: 'KZ', en: 'EN' };
 
-export default function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
+function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -86,7 +86,7 @@ export default function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
                   autoFocus
                   style={{ flex: 1, background: 'var(--cream-surface)', border: '0.5px solid var(--accent-gold)', borderRadius: 'var(--radius-md)', padding: '4px 8px', fontSize: 14, fontFamily: 'var(--font-ui)', outline: 'none' }}
                 />
-                <button onClick={handleRename} style={{ background: 'var(--ink-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', padding: '4px 10px', cursor: 'pointer', fontSize: 12 }}>✓</button>
+                <button onClick={handleRename} style={{ background: 'var(--ink-primary)', color: 'var(--cream-surface)', border: 'none', borderRadius: 'var(--radius-md)', padding: '4px 10px', cursor: 'pointer', fontSize: 12 }}>✓</button>
               </div>
             ) : (
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--ink-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -159,3 +159,5 @@ export default function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
     </>
   );
 }
+
+export default memo(MenuCard);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useMenu } from '../hooks/useMenu';
@@ -30,23 +30,23 @@ export default function MenuPage() {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [showSearch, setShowSearch] = useState(false);
 
-  const visibleCategories = (data?.categories ?? []).filter((c) => c.is_visible);
+  const visibleCategories = useMemo(
+    () => (data?.categories ?? []).filter((c) => c.is_visible),
+    [data?.categories],
+  );
   const { query, setQuery, filteredItems } = useSearch(data?.categories ?? []);
 
   useEffect(() => {
     if (visibleCategories.length > 0 && !activeCategory) {
       setActiveCategory(visibleCategories[0].id);
     }
-  }, [visibleCategories.length, activeCategory]);
-
-  useEffect(() => {
-    const onScroll = () => setShowSearch(window.scrollY > 80 || query.length > 0);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [query]);
+  }, [visibleCategories, activeCategory]);
 
   useEffect(() => {
     if (query.length > 0) setShowSearch(true);
+    const onScroll = () => setShowSearch(window.scrollY > 80 || query.length > 0);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, [query]);
 
   const handleViewModeChange = (mode: ViewMode) => {

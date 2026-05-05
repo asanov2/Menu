@@ -122,7 +122,7 @@ export default function MenuDetailPage() {
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           <a
-            href={`https://qrmenu.kz/menu/${menu?.id}`}
+            href={`${import.meta.env.VITE_APP_URL ?? ''}/menu/${menu?.slug}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '0.5px solid var(--cream-border)', color: 'var(--ink-secondary)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}

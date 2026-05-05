@@ -1,5 +1,5 @@
 // === FILE: frontend/packages/owner/src/pages/Restaurants/RestaurantsPage.tsx ===
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { formatDate } from '@qrmenu/ui'
 import { ConfirmModal } from '@qrmenu/ui'
@@ -70,15 +70,32 @@ export default function RestaurantsPage() {
     onError: () => showToast('Ошибка при сохранении', 'error'),
   })
 
-  const handleToggleActive = (r: OwnerRestaurant) => {
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value)
+    setPage(1)
+  }, [])
+
+  const handleFilterChange = useCallback((f: string) => {
+    setActiveFilter(f)
+    setPage(1)
+  }, [])
+
+  const handleConfirmDeactivate = useCallback(() => {
+    if (confirmTarget) {
+      updateMut.mutate({ id: confirmTarget.id, patch: { is_active: false } })
+    }
+    setConfirmTarget(null)
+  }, [confirmTarget, updateMut])
+
+  const handleToggleActive = useCallback((r: OwnerRestaurant) => {
     if (r.is_active) {
       setConfirmTarget(r)
     } else {
       updateMut.mutate({ id: r.id, patch: { is_active: true } })
     }
-  }
+  }, [updateMut])
 
-  const rows = (data?.items ?? []).map(r => ({
+  const rows = useMemo(() => (data?.items ?? []).map(r => ({
     name: (
       <span style={{ opacity: r.is_active ? 1 : 0.6 }}>
         <div
@@ -162,7 +179,7 @@ export default function RestaurantsPage() {
         {r.is_active ? 'Деактивировать' : 'Активировать'}
       </button>
     ),
-  }))
+  })), [data?.items, updateMut, handleToggleActive])
 
   const total = data?.total ?? 0
   const pages = data?.pages ?? 1
@@ -216,7 +233,7 @@ export default function RestaurantsPage() {
           </span>
           <input
             value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1) }}
+            onChange={handleSearchChange}
             placeholder="Поиск по названию или slug..."
             style={{
               width: '100%',
@@ -240,7 +257,7 @@ export default function RestaurantsPage() {
           {FILTERS.map(f => (
             <button
               key={f}
-              onClick={() => { setActiveFilter(f); setPage(1) }}
+              onClick={() => handleFilterChange(f)}
               style={{
                 padding: '4px 12px',
                 fontFamily: 'var(--font-ui)',
@@ -348,12 +365,7 @@ export default function RestaurantsPage() {
         confirmText="Деактивировать"
         cancelText="Отмена"
         danger
-        onConfirm={() => {
-          if (confirmTarget) {
-            updateMut.mutate({ id: confirmTarget.id, patch: { is_active: false } })
-          }
-          setConfirmTarget(null)
-        }}
+        onConfirm={handleConfirmDeactivate}
         onCancel={() => setConfirmTarget(null)}
       />
     </div>

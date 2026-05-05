@@ -30,6 +30,7 @@ services:
       - admin-service
       - billing-service
       - analytics-service
+      - owner-service
       - menu-frontend
       - admin-frontend
       - owner-frontend
@@ -187,6 +188,26 @@ services:
     networks:
       - qrmenu-network
     restart: unless-stopped
+
+  owner-service:
+    build:
+      context: ./services/owner
+      dockerfile: Dockerfile
+    env_file:
+      - ./services/owner/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - qrmenu-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   menu-frontend:
     build:
