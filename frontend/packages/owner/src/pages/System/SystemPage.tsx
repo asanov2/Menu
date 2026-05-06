@@ -5,13 +5,13 @@ import { getSystemHealth } from '../../api/owner'
 import StatusDot from '../../components/StatusDot'
 
 export default function SystemPage() {
-  const { data: services, dataUpdatedAt } = useQuery({
+  const { data: health, dataUpdatedAt } = useQuery({
     queryKey: ['system-health'],
     queryFn: getSystemHealth,
     refetchInterval: 30_000,
   })
 
-  const hasOffline = (services ?? []).some(s => s.status === 'offline')
+  const hasOffline = health ? !health.all_healthy : false
 
   const lastUpdated = dataUpdatedAt
     ? new Date(dataUpdatedAt).toLocaleTimeString('ru-RU', {
@@ -91,10 +91,10 @@ export default function SystemPage() {
           gap: 12,
         }}
       >
-        {services
-          ? services.map(svc => {
+        {health
+          ? health.services.map(svc => {
               const isOffline = svc.status === 'offline'
-              const checkedAt = new Date(svc.last_checked).toLocaleTimeString(
+              const checkedAt = new Date(svc.checked_at).toLocaleTimeString(
                 'ru-RU',
                 { hour: '2-digit', minute: '2-digit', second: '2-digit' },
               )

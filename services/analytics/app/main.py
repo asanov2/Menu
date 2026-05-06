@@ -4,8 +4,6 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from alembic import command
-from alembic.config import Config
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
 
@@ -25,19 +23,29 @@ scheduler = AsyncIOScheduler(timezone="UTC")
 
 
 def run_migrations() -> None:
+    import subprocess
+    import sys
     try:
-        alembic_cfg = Config("alembic.ini")
-        command.upgrade(alembic_cfg, "head")
-        logger.info("Migrations applied successfully")
+        result = subprocess.run(
+            [sys.executable, "-m", "alembic", "upgrade", "head"],
+            capture_output=True,
+            text=True,
+            cwd="/app",
+        )
+        if result.returncode == 0:
+            logger.info("✅ Migrations applied successfully")
+            if result.stdout:
+                logger.info(result.stdout)
+        else:
+            logger.error(f"❌ Migration failed: {result.stderr}")
     except Exception as e:
-        logger.error(f"Migration failed: {e}")
-        raise
+        logger.error(f"❌ Migration error: {e}")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("analytics-service starting up")
-    await asyncio.sleep(2)
+    await asyncio.sleep(3)
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, run_migrations)
 

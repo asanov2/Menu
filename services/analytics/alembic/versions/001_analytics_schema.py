@@ -17,7 +17,10 @@ def upgrade() -> None:
     op.execute("CREATE SCHEMA IF NOT EXISTS analytics")
 
     op.execute("""
-        CREATE TYPE analytics.event_type_enum AS ENUM ('menu_view', 'item_view')
+        DO $$ BEGIN
+            CREATE TYPE analytics.event_type_enum AS ENUM ('menu_view', 'item_view');
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$
     """)
 
     op.execute("""

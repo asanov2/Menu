@@ -69,7 +69,7 @@ export default function CategorySection({ category, allCategories, menuId, dragH
         await updateItem(editingItem.id, data);
         showToast('Блюдо обновлено ✓', 'success');
       } else {
-        await createItem({ name: data.name!, price: data.price!, category_id: data.category_id, ...data });
+        await createItem({ ...data, name: data.name!, price: data.price! });
         showToast('Блюдо добавлено ✓', 'success');
       }
       queryClient.invalidateQueries({ queryKey: ['categories', menuId] });

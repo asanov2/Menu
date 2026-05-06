@@ -6,46 +6,59 @@ export interface OwnerRestaurant {
   name: string
   slug: string
   email: string
-  plan: 'starter' | 'business' | 'pro'
-  status: 'active' | 'trial' | 'expired'
+  plan: string
+  status: string
   is_active: boolean
   created_at: string
   trial_ends_at: string | null
-  subscription_end: string | null
+}
+
+export interface RestaurantList {
+  items: OwnerRestaurant[]
+  total: number
+  page: number
+  pages: number
 }
 
 export interface RevenueMonth {
   month: string
-  total_kzt: number
-  restaurant_count: number
+  amount: number
+  count: number
 }
 
 export interface PaymentRecord {
   id: string
   restaurant_name: string
-  plan: string
   amount: number
   status: string
   provider: string
-  paid_at: string
+  created_at: string
+}
+
+export interface PaymentList {
+  items: PaymentRecord[]
+  total: number
+  page: number
+  pages: number
 }
 
 export interface ServiceHealth {
   name: string
   status: 'online' | 'offline'
   response_ms: number | null
-  last_checked: string
+  checked_at: string
+}
+
+export interface SystemHealth {
+  services: ServiceHealth[]
+  all_healthy: boolean
 }
 
 export interface PlatformStats {
   total_restaurants: number
   active_restaurants: number
-  trial_restaurants: number
-  expired_restaurants: number
-  mrr_kzt: number
-  new_this_month: number
-  churn_this_month: number
-  conversion_rate: number
+  trial_count: number
+  mrr: number
   starter_count: number
   business_count: number
   pro_count: number
@@ -70,7 +83,7 @@ export async function getRestaurants(params: {
   status?: string
   page?: number
   limit?: number
-}): Promise<{ items: OwnerRestaurant[]; total: number; pages: number }> {
+}): Promise<RestaurantList> {
   const { data } = await ownerApi.get('/api/v1/owner/restaurants', { params })
   return data
 }
@@ -87,14 +100,12 @@ export async function getRevenue(year: number): Promise<RevenueMonth[]> {
   return data
 }
 
-export async function getPayments(
-  page = 1,
-): Promise<{ items: PaymentRecord[]; total: number }> {
+export async function getPayments(page = 1): Promise<PaymentList> {
   const { data } = await ownerApi.get('/api/v1/owner/payments', { params: { page } })
   return data
 }
 
-export async function getSystemHealth(): Promise<ServiceHealth[]> {
+export async function getSystemHealth(): Promise<SystemHealth> {
   const { data } = await ownerApi.get('/api/v1/owner/system/health')
   return data
 }

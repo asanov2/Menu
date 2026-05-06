@@ -12,10 +12,17 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str
     AUTH_SERVICE_URL: str = "http://auth-service:8002"
-    INTERNAL_SECRET: str
+    INTERNAL_SECRET: str = "changeme"
 
-    KASPI_WEBHOOK_SECRET: str
-    CLOUDPAYMENTS_WEBHOOK_SECRET: str
+    KASPI_MERCHANT_ID: str = "test"
+    KASPI_SECRET_KEY: str = "test"
+    KASPI_WEBHOOK_SECRET: str = "test"
+    KASPI_PAY_API_URL: str = "https://api.kaspi.kz/pay/v1"
+
+    CLOUDPAYMENTS_PUBLIC_ID: str = "test"
+    CLOUDPAYMENTS_API_SECRET: str = "test"
+    CLOUDPAYMENTS_WEBHOOK_SECRET: str = "test"
+    CLOUDPAYMENTS_API_URL: str = "https://api.cloudpayments.ru"
 
     TRIAL_DAYS: int = 14
 

@@ -16,7 +16,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute("CREATE TYPE plantype AS ENUM ('starter', 'business', 'pro')")
+    sa.Enum("starter", "business", "pro", name="plantype").create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "restaurants",
@@ -67,4 +67,4 @@ def downgrade() -> None:
     op.drop_index("ix_restaurants_slug", "restaurants")
     op.drop_index("ix_restaurants_email", "restaurants")
     op.drop_table("restaurants")
-    op.execute("DROP TYPE plantype")
+    sa.Enum(name="plantype").drop(op.get_bind(), checkfirst=True)

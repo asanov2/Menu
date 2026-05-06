@@ -19,16 +19,28 @@ def upgrade() -> None:
     op.execute("CREATE SCHEMA IF NOT EXISTS billing")
 
     op.execute("""
-        CREATE TYPE billing.plan_enum AS ENUM ('starter', 'business', 'pro')
+        DO $$ BEGIN
+            CREATE TYPE billing.plan_enum AS ENUM ('starter', 'business', 'pro');
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$
     """)
     op.execute("""
-        CREATE TYPE billing.subscription_status_enum AS ENUM ('active', 'expired', 'cancelled', 'trial')
+        DO $$ BEGIN
+            CREATE TYPE billing.subscription_status_enum AS ENUM ('active', 'expired', 'cancelled', 'trial');
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$
     """)
     op.execute("""
-        CREATE TYPE billing.payment_status_enum AS ENUM ('pending', 'success', 'failed', 'refunded')
+        DO $$ BEGIN
+            CREATE TYPE billing.payment_status_enum AS ENUM ('pending', 'success', 'failed', 'refunded');
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$
     """)
     op.execute("""
-        CREATE TYPE billing.payment_provider_enum AS ENUM ('kaspi', 'cloudpayments', 'manual')
+        DO $$ BEGIN
+            CREATE TYPE billing.payment_provider_enum AS ENUM ('kaspi', 'cloudpayments', 'manual');
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$
     """)
 
     op.execute("""

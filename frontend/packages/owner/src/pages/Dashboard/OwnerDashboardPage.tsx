@@ -63,24 +63,6 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-function PlanBadge({ plan }: { plan: string }) {
-  return (
-    <span
-      style={{
-        padding: '2px 8px',
-        background: 'var(--accent-gold-bg)',
-        color: 'var(--accent-gold)',
-        border: '1px solid var(--accent-gold-border)',
-        borderRadius: 'var(--radius-full)',
-        fontFamily: 'var(--font-ui)',
-        fontSize: 10,
-        fontWeight: 500,
-      }}
-    >
-      {plan}
-    </span>
-  )
-}
 
 export default function OwnerDashboardPage() {
   const now = new Date()
@@ -107,7 +89,7 @@ export default function OwnerDashboardPage() {
 
   const revenueData = (revenue ?? []).map(r => ({
     name: monthShort(r.month),
-    value: r.total_kzt,
+    value: r.amount,
   }))
 
   const total = stats?.total_restaurants ?? 0
@@ -122,10 +104,10 @@ export default function OwnerDashboardPage() {
 
   const paymentRows = (payments?.items ?? []).slice(0, 10).map(p => ({
     restaurant: p.restaurant_name,
-    plan: <PlanBadge plan={p.plan} />,
     amount: formatPrice(p.amount),
     status: <StatusBadge status={p.status} />,
-    date: formatDate(p.paid_at),
+    provider: p.provider,
+    date: formatDate(p.created_at),
   }))
 
   return (
@@ -155,29 +137,25 @@ export default function OwnerDashboardPage() {
           <KPICard
             label="Ресторанов"
             value={stats?.total_restaurants ?? '—'}
-            subtitle={`+${stats?.new_this_month ?? 0} этот месяц`}
-            subtitleColor="green"
             icon="🏪"
           />
           <KPICard
             label="MRR"
-            value={stats ? formatPrice(stats.mrr_kzt) : '—'}
+            value={stats ? formatPrice(stats.mrr) : '—'}
             subtitleColor="gold"
             icon="💰"
           />
           <KPICard
             label="Триал"
-            value={stats?.trial_restaurants ?? '—'}
-            subtitle={`конверсия ${stats ? Math.round(stats.conversion_rate * 100) : 0}%`}
+            value={stats?.trial_count ?? '—'}
             subtitleColor="gold"
             icon="⏱️"
           />
           <KPICard
-            label="Churn"
-            value={stats?.churn_this_month ?? '—'}
-            subtitle="этот месяц"
-            subtitleColor="red"
-            icon="📉"
+            label="Активных"
+            value={stats?.active_restaurants ?? '—'}
+            subtitleColor="green"
+            icon="✅"
           />
         </div>
       )}
@@ -321,9 +299,9 @@ export default function OwnerDashboardPage() {
         <DataTable
           columns={[
             { key: 'restaurant', label: 'Ресторан' },
-            { key: 'plan', label: 'План', width: '80px' },
             { key: 'amount', label: 'Сумма', width: '100px' },
             { key: 'status', label: 'Статус', width: '90px' },
+            { key: 'provider', label: 'Провайдер', width: '90px' },
             { key: 'date', label: 'Дата', width: '100px' },
           ]}
           rows={paymentRows}

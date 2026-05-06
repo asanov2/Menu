@@ -74,10 +74,10 @@ export default function RevenuePage() {
 
   const revenueData = (revenue ?? []).map(r => ({
     name: monthShort(r.month),
-    value: r.total_kzt,
+    value: r.amount,
   }))
 
-  const yearTotal = (revenue ?? []).reduce((s, r) => s + r.total_kzt, 0)
+  const yearTotal = (revenue ?? []).reduce((s, r) => s + r.amount, 0)
   const avgCheck =
     payments?.total && yearTotal > 0
       ? Math.round(yearTotal / payments.total)
@@ -86,10 +86,9 @@ export default function RevenuePage() {
   const rows = (payments?.items ?? []).map(p => {
     const s = STATUS_STYLE[p.status] ?? STATUS_STYLE.pending
     return {
-      date: formatDate(p.paid_at),
+      date: formatDate(p.created_at),
       restaurant: p.restaurant_name,
       amount: formatPrice(p.amount),
-      plan: p.plan,
       status: (
         <span
           style={{
@@ -111,9 +110,9 @@ export default function RevenuePage() {
   })
 
   const handleExport = () => {
-    const headers = ['Дата', 'Ресторан', 'Сумма', 'Тариф', 'Статус', 'Провайдер']
+    const headers = ['Дата', 'Ресторан', 'Сумма', 'Статус', 'Провайдер']
     const csvRows = (payments?.items ?? []).map(p =>
-      [p.paid_at, p.restaurant_name, p.amount, p.plan, p.status, p.provider]
+      [p.created_at, p.restaurant_name, p.amount, p.status, p.provider]
         .map(escapeCSV)
         .join(','),
     )
@@ -128,7 +127,7 @@ export default function RevenuePage() {
   }
 
   const total = payments?.total ?? 0
-  const pages = Math.max(1, Math.ceil(total / LIMIT))
+  const pages = payments?.pages ?? 1
   const from = total === 0 ? 0 : (page - 1) * LIMIT + 1
   const to = Math.min(page * LIMIT, total)
 
@@ -144,7 +143,7 @@ export default function RevenuePage() {
           gap: 16,
         }}
       >
-        <KPICard label="МРР (текущий)" value={stats ? formatPrice(stats.mrr_kzt) : '—'} subtitleColor="gold" icon="📈" />
+        <KPICard label="МРР (текущий)" value={stats ? formatPrice(stats.mrr) : '—'} subtitleColor="gold" icon="📈" />
         <KPICard label="Всего за год" value={formatPrice(yearTotal)} subtitleColor="default" icon="💎" />
         <KPICard label="Средний чек" value={avgCheck ? formatPrice(avgCheck) : '—'} subtitleColor="default" icon="🧾" />
       </div>
@@ -269,7 +268,6 @@ export default function RevenuePage() {
             { key: 'date', label: 'Дата', width: '100px' },
             { key: 'restaurant', label: 'Ресторан' },
             { key: 'amount', label: 'Сумма', width: '110px' },
-            { key: 'plan', label: 'Тариф', width: '80px' },
             { key: 'status', label: 'Статус', width: '90px' },
             { key: 'provider', label: 'Провайдер', width: '90px' },
           ]}

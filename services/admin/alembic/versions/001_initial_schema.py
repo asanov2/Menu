@@ -16,7 +16,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute("CREATE TYPE languagetype AS ENUM ('ru', 'kz', 'en')")
+    sa.Enum("ru", "kz", "en", name="languagetype").create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "menus",
@@ -136,4 +136,4 @@ def downgrade() -> None:
     op.drop_table("categories")
     op.drop_index("ix_menus_restaurant_id", "menus")
     op.drop_table("menus")
-    op.execute("DROP TYPE languagetype")
+    sa.Enum(name="languagetype").drop(op.get_bind(), checkfirst=True)
