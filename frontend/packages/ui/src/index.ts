@@ -31,3 +31,7 @@ export { ToastProvider, useToast } from './components/Toast';
 export { default as ConfirmModal } from './components/ConfirmModal';
 export { default as EmptyState } from './components/EmptyState';
 export { default as Skeleton } from './components/Skeleton';
+export { FormField } from './components/FormField';
+export { StatusBadge } from './components/StatusBadge';
+export { SectionHeading } from './components/SectionHeading';
+export { KPICard } from './components/KPICard';

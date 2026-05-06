@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { INPUT_STYLE, useInputFocus, Z_INDEX, ANIMATION } from '@qrmenu/ui';
+import { INPUT_STYLE, useInputFocus, Z_INDEX, ANIMATION, FormField } from '@qrmenu/ui';
 
 const schema = z.object({ name: z.string().min(1, 'Обязательное поле').max(80) });
 type FormData = z.infer<typeof schema>;
@@ -68,14 +68,15 @@ export default function CategoryFormModal({ isOpen, initialName, onSave, onCance
               {initialName ? 'Редактировать категорию' : 'Новая категория'}
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
-              <input
-                {...register('name')}
-                {...nameFocus}
-                placeholder="Название категории"
-                style={{ ...INPUT_STYLE, borderColor: errors.name ? 'var(--error-text)' : 'var(--cream-border)' }}
-                autoFocus
-              />
-              {errors.name && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 4, fontFamily: 'var(--font-ui)' }}>{errors.name.message}</div>}
+              <FormField label="Название категории" error={errors.name?.message} required>
+                <input
+                  {...register('name')}
+                  {...nameFocus}
+                  placeholder="Название категории"
+                  autoFocus
+                  style={{ ...INPUT_STYLE, borderColor: errors.name ? 'var(--error-text)' : 'var(--cream-border)' }}
+                />
+              </FormField>
               <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'flex-end' }}>
                 <button type="button" onClick={onCancel} style={{ padding: '9px 18px', borderRadius: 'var(--radius-md)', background: 'var(--cream-muted)', border: '0.5px solid var(--cream-border)', color: 'var(--ink-secondary)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>
                   Отмена

@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useToast, INPUT_STYLE, useInputFocus, getApiErrorMessage } from '@qrmenu/ui';
+import { useToast, INPUT_STYLE, useInputFocus, getApiErrorMessage, FormField } from '@qrmenu/ui';
 import { useState } from 'react';
 import { updateProfile, changePassword } from '../../api/auth';
 import { useAuthStore } from '../../store/authStore';
@@ -45,10 +45,10 @@ export default function ProfilePage() {
     resolver: zodResolver(passwordSchema),
   });
 
-  const profileNameFocus    = useInputFocus(!!ep.name);
-  const profileEmailFocus   = useInputFocus(!!ep.email);
-  const oldPasswordFocus    = useInputFocus(!!epass.old_password);
-  const newPasswordFocus    = useInputFocus(!!epass.new_password);
+  const profileNameFocus     = useInputFocus(!!ep.name);
+  const profileEmailFocus    = useInputFocus(!!ep.email);
+  const oldPasswordFocus     = useInputFocus(!!epass.old_password);
+  const newPasswordFocus     = useInputFocus(!!epass.new_password);
   const confirmPasswordFocus = useInputFocus(!!epass.confirm_password);
 
   const onSaveProfile = async (data: ProfileData) => {
@@ -97,18 +97,16 @@ export default function ProfilePage() {
         </div>
 
         <form onSubmit={hsp(onSaveProfile)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div>
-            <label htmlFor="profile-name" style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', display: 'block', marginBottom: 4 }}>Название ресторана</label>
+          <FormField label="Название ресторана" error={ep.name?.message} required>
             <input
               id="profile-name"
               {...rp('name')}
               {...profileNameFocus}
               style={{ ...INPUT_STYLE, borderColor: ep.name ? 'var(--error-text)' : 'var(--cream-border)' }}
             />
-            {ep.name && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 3, fontFamily: 'var(--font-ui)' }}>{ep.name.message}</div>}
-          </div>
-          <div>
-            <label htmlFor="profile-email" style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', display: 'block', marginBottom: 4 }}>Email</label>
+          </FormField>
+
+          <FormField label="Email" error={ep.email?.message} required>
             <input
               id="profile-email"
               {...rp('email')}
@@ -116,8 +114,8 @@ export default function ProfilePage() {
               type="email"
               style={{ ...INPUT_STYLE, borderColor: ep.email ? 'var(--error-text)' : 'var(--cream-border)' }}
             />
-            {ep.email && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 3, fontFamily: 'var(--font-ui)' }}>{ep.email.message}</div>}
-          </div>
+          </FormField>
+
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button type="submit" disabled={profileSaving} style={{ padding: '9px 20px', background: 'var(--ink-primary)', color: 'var(--cream-bg)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', fontWeight: 500, cursor: profileSaving ? 'not-allowed' : 'pointer', opacity: profileSaving ? 0.7 : 1 }}>
               {profileSaving ? 'Сохранение...' : 'Сохранить'}
@@ -130,23 +128,36 @@ export default function ProfilePage() {
       <div style={CARD_STYLE_LOCAL}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--ink-primary)', marginBottom: 20 }}>Изменить пароль</div>
         <form onSubmit={hspass(onChangePassword)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {[
-            { name: 'old_password' as const, label: 'Текущий пароль',    id: 'pass-old',     err: epass.old_password,    focus: oldPasswordFocus },
-            { name: 'new_password' as const, label: 'Новый пароль',      id: 'pass-new',     err: epass.new_password,    focus: newPasswordFocus },
-            { name: 'confirm_password' as const, label: 'Подтвердите пароль', id: 'pass-confirm', err: epass.confirm_password, focus: confirmPasswordFocus },
-          ].map(({ name, label, id, err, focus }) => (
-            <div key={name}>
-              <label htmlFor={id} style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', display: 'block', marginBottom: 4 }}>{label}</label>
-              <input
-                id={id}
-                {...rpass(name)}
-                {...focus}
-                type="password"
-                style={{ ...INPUT_STYLE, borderColor: err ? 'var(--error-text)' : 'var(--cream-border)' }}
-              />
-              {err && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 3, fontFamily: 'var(--font-ui)' }}>{err.message}</div>}
-            </div>
-          ))}
+          <FormField label="Текущий пароль" error={epass.old_password?.message} required>
+            <input
+              id="pass-old"
+              {...rpass('old_password')}
+              {...oldPasswordFocus}
+              type="password"
+              style={{ ...INPUT_STYLE, borderColor: epass.old_password ? 'var(--error-text)' : 'var(--cream-border)' }}
+            />
+          </FormField>
+
+          <FormField label="Новый пароль" error={epass.new_password?.message} required>
+            <input
+              id="pass-new"
+              {...rpass('new_password')}
+              {...newPasswordFocus}
+              type="password"
+              style={{ ...INPUT_STYLE, borderColor: epass.new_password ? 'var(--error-text)' : 'var(--cream-border)' }}
+            />
+          </FormField>
+
+          <FormField label="Подтвердите пароль" error={epass.confirm_password?.message} required>
+            <input
+              id="pass-confirm"
+              {...rpass('confirm_password')}
+              {...confirmPasswordFocus}
+              type="password"
+              style={{ ...INPUT_STYLE, borderColor: epass.confirm_password ? 'var(--error-text)' : 'var(--cream-border)' }}
+            />
+          </FormField>
+
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button type="submit" disabled={passSaving} style={{ padding: '9px 20px', background: 'var(--ink-primary)', color: 'var(--cream-bg)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', fontWeight: 500, cursor: passSaving ? 'not-allowed' : 'pointer', opacity: passSaving ? 0.7 : 1 }}>
               {passSaving ? 'Изменение...' : 'Изменить пароль'}

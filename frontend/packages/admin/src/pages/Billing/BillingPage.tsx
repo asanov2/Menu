@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Skeleton, EmptyState, useToast, formatDate, daysUntil, ConfirmModal, TRIAL_DAYS, PLAN, getApiErrorMessage } from '@qrmenu/ui';
+import { Skeleton, EmptyState, useToast, formatDate, daysUntil, ConfirmModal, TRIAL_DAYS, PLAN, getApiErrorMessage, StatusBadge, SectionHeading } from '@qrmenu/ui';
 import { getSubscription, upgradeSubscription, cancelSubscription } from '../../api/billing';
 import { useState } from 'react';
 
@@ -7,26 +7,6 @@ const PLAN_LABEL: Record<string, string> = {
   starter: 'Starter',
   business: 'Business',
   pro: 'Pro',
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  active: 'Активна',
-  trial: 'Пробный',
-  expired: 'Истекла',
-  cancelled: 'Отменена',
-};
-
-const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  active:    { background: 'var(--tag-green-bg)',  color: 'var(--tag-green-text)',  border: '0.5px solid var(--tag-green-border)' },
-  trial:     { background: 'var(--tag-blue-bg)',   color: 'var(--tag-blue-text)',   border: '0.5px solid var(--tag-blue-border)' },
-  expired:   { background: 'var(--tag-red-bg)',    color: 'var(--tag-red-text)',    border: '0.5px solid var(--tag-red-border)' },
-  cancelled: { background: 'var(--cream-muted)',   color: 'var(--ink-secondary)',   border: '0.5px solid var(--cream-border)' },
-};
-
-const PAYMENT_STATUS_STYLE: Record<string, React.CSSProperties> = {
-  success: { background: 'var(--tag-green-bg)', color: 'var(--tag-green-text)', border: '0.5px solid var(--tag-green-border)' },
-  pending: { background: 'var(--accent-gold-bg)', color: 'var(--warning-text)', border: '0.5px solid var(--accent-gold-border)' },
-  failed:  { background: 'var(--tag-red-bg)',   color: 'var(--tag-red-text)',   border: '0.5px solid var(--tag-red-border)' },
 };
 
 const UPGRADE_PLANS = [
@@ -100,13 +80,11 @@ export default function BillingPage() {
       {sub && (
         <div style={CARD_STYLE}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-            <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--ink-primary)', marginBottom: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--ink-primary)' }}>
                 {PLAN_LABEL[sub.plan] ?? sub.plan}
               </div>
-              <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 'var(--radius-sm)', fontSize: 11, fontFamily: 'var(--font-ui)', fontWeight: 600, ...(STATUS_STYLE[sub.status] ?? {}) }}>
-                {STATUS_LABEL[sub.status] ?? sub.status}
-              </span>
+              <StatusBadge status={sub.status as 'active' | 'trial' | 'expired' | 'cancelled'} />
             </div>
             <div style={{ fontSize: 12, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', textAlign: 'right' }}>
               <div>Следующее списание:</div>
@@ -164,7 +142,7 @@ export default function BillingPage() {
 
       {/* Payment history */}
       <div style={CARD_STYLE}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--ink-primary)', marginBottom: 16 }}>История платежей</div>
+        <SectionHeading>История платежей</SectionHeading>
         {payments.length === 0 ? (
           <EmptyState icon="💳" title="Нет платежей" description="История платежей появится после первой оплаты" />
         ) : (
@@ -182,9 +160,10 @@ export default function BillingPage() {
                   <td style={{ padding: '10px 8px', color: 'var(--ink-secondary)' }}>{formatDate(p.created_at)}</td>
                   <td style={{ padding: '10px 8px', color: 'var(--ink-primary)', fontWeight: 500 }}>{p.amount.toLocaleString('ru-RU')} ₸</td>
                   <td style={{ padding: '10px 8px' }}>
-                    <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontSize: 11, fontWeight: 600, ...(PAYMENT_STATUS_STYLE[p.status] ?? {}) }}>
-                      {p.status === 'success' ? 'Оплачен' : p.status === 'pending' ? 'Ожидание' : 'Ошибка'}
-                    </span>
+                    <StatusBadge
+                      status={p.status === 'success' ? 'online' : p.status as 'failed' | 'pending'}
+                      label={p.status === 'success' ? 'Оплачен' : p.status === 'pending' ? 'Ожидание' : 'Ошибка'}
+                    />
                   </td>
                   <td style={{ padding: '10px 8px', color: 'var(--ink-secondary)' }}>{p.provider}</td>
                 </tr>

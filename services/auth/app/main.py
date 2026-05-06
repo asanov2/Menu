@@ -1,6 +1,10 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from alembic import command
+from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -13,9 +17,24 @@ from app.core.config import settings
 from app.core.database import engine
 from app.models import restaurant  # noqa: F401 — registers models with metadata
 
+logger = logging.getLogger(__name__)
+
+
+def run_migrations() -> None:
+    try:
+        alembic_cfg = Config("alembic.ini")
+        command.upgrade(alembic_cfg, "head")
+        logger.info("Migrations applied successfully")
+    except Exception as e:
+        logger.error(f"Migration failed: {e}")
+        raise
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    await asyncio.sleep(2)
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, run_migrations)
     yield
     await engine.dispose()
 

@@ -9,9 +9,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { formatPrice, formatDate, EmptyState } from '@qrmenu/ui'
+import { formatPrice, formatDate, EmptyState, KPICard, SectionHeading } from '@qrmenu/ui'
 import { getRevenue, getPayments, getPlatformStats } from '../../api/owner'
-import KPICard from '../../components/KPICard'
 import DataTable from '../../components/DataTable'
 
 const MONTH_SHORT = [
@@ -135,17 +134,7 @@ export default function RevenuePage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <h2
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 22,
-          fontWeight: 600,
-          color: 'var(--ink-primary)',
-          margin: 0,
-        }}
-      >
-        Выручка
-      </h2>
+      <SectionHeading size="lg" style={{ marginBottom: 0 }}>Выручка</SectionHeading>
 
       {/* Summary KPI */}
       <div
@@ -155,24 +144,9 @@ export default function RevenuePage() {
           gap: 16,
         }}
       >
-        <KPICard
-          label="МРР (текущий)"
-          value={stats ? formatPrice(stats.mrr_kzt) : '—'}
-          subColor="gold"
-          icon="📈"
-        />
-        <KPICard
-          label="Всего за год"
-          value={formatPrice(yearTotal)}
-          subColor="default"
-          icon="💎"
-        />
-        <KPICard
-          label="Средний чек"
-          value={avgCheck ? formatPrice(avgCheck) : '—'}
-          subColor="default"
-          icon="🧾"
-        />
+        <KPICard label="МРР (текущий)" value={stats ? formatPrice(stats.mrr_kzt) : '—'} subtitleColor="gold" icon="📈" />
+        <KPICard label="Всего за год" value={formatPrice(yearTotal)} subtitleColor="default" icon="💎" />
+        <KPICard label="Средний чек" value={avgCheck ? formatPrice(avgCheck) : '—'} subtitleColor="default" icon="🧾" />
       </div>
 
       {/* Revenue chart */}

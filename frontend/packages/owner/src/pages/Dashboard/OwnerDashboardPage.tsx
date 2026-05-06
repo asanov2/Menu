@@ -8,9 +8,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { formatPrice, formatDate, Skeleton } from '@qrmenu/ui'
+import { formatPrice, formatDate, Skeleton, KPICard, SectionHeading } from '@qrmenu/ui'
 import { getPlatformStats, getRevenue, getPayments } from '../../api/owner'
-import KPICard from '../../components/KPICard'
 import DataTable from '../../components/DataTable'
 
 const MONTH_SHORT = [
@@ -132,26 +131,8 @@ export default function OwnerDashboardPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div>
-        <h2
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 22,
-            fontWeight: 600,
-            color: 'var(--ink-primary)',
-            margin: 0,
-          }}
-        >
-          Дашборд
-        </h2>
-        <p
-          style={{
-            fontFamily: 'var(--font-ui)',
-            fontSize: 12,
-            color: 'var(--ink-secondary)',
-            margin: '4px 0 0',
-            textTransform: 'capitalize',
-          }}
-        >
+        <SectionHeading size="lg" style={{ marginBottom: 4 }}>Дашборд</SectionHeading>
+        <p style={{ fontFamily: 'var(--font-ui)', fontSize: 12, color: 'var(--ink-secondary)', margin: 0, textTransform: 'capitalize' }}>
           {monthYear}
         </p>
       </div>
@@ -174,28 +155,28 @@ export default function OwnerDashboardPage() {
           <KPICard
             label="Ресторанов"
             value={stats?.total_restaurants ?? '—'}
-            sub={`+${stats?.new_this_month ?? 0} этот месяц`}
-            subColor="green"
+            subtitle={`+${stats?.new_this_month ?? 0} этот месяц`}
+            subtitleColor="green"
             icon="🏪"
           />
           <KPICard
             label="MRR"
             value={stats ? formatPrice(stats.mrr_kzt) : '—'}
-            subColor="gold"
+            subtitleColor="gold"
             icon="💰"
           />
           <KPICard
             label="Триал"
             value={stats?.trial_restaurants ?? '—'}
-            sub={`конверсия ${stats ? Math.round(stats.conversion_rate * 100) : 0}%`}
-            subColor="gold"
+            subtitle={`конверсия ${stats ? Math.round(stats.conversion_rate * 100) : 0}%`}
+            subtitleColor="gold"
             icon="⏱️"
           />
           <KPICard
             label="Churn"
             value={stats?.churn_this_month ?? '—'}
-            sub="этот месяц"
-            subColor="red"
+            subtitle="этот месяц"
+            subtitleColor="red"
             icon="📉"
           />
         </div>

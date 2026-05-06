@@ -4,14 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MenuItem, Category } from '@qrmenu/ui';
-import { INPUT_STYLE, useInputFocus, Z_INDEX, ANIMATION } from '@qrmenu/ui';
+import { INPUT_STYLE, useInputFocus, Z_INDEX, ANIMATION, FormField } from '@qrmenu/ui';
 import ImageUpload from './ImageUpload';
 
 const schema = z.object({
   name: z.string().min(1, 'Обязательное поле').max(100),
   description: z.string().max(500).optional(),
   price: z.coerce.number().min(0, 'Минимум 0'),
-  category_id: z.string().min(1),
+  category_id: z.string().min(1, 'Выберите категорию'),
   preparation_time: z.coerce.number().min(1).max(180).optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
   tags: z.array(z.string()),
   is_available: z.boolean(),
@@ -76,12 +76,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
 
   const toggleTag = useCallback((tag: string) => {
     const current = (getValues('tags') ?? []) as string[];
-    setValue(
-      'tags',
-      current.includes(tag)
-        ? current.filter(t => t !== tag)
-        : [...current, tag]
-    );
+    setValue('tags', current.includes(tag) ? current.filter(t => t !== tag) : [...current, tag]);
   }, [getValues, setValue]);
 
   const onSubmit = async (data: FormData) => {
@@ -140,8 +135,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
               />
 
               {/* Name */}
-              <div>
-                <label htmlFor="item-name" style={{ display: 'none' }}>Название блюда</label>
+              <FormField label="Название блюда" error={errors.name?.message} required>
                 <input
                   id="item-name"
                   {...register('name')}
@@ -149,25 +143,24 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                   placeholder="Название блюда"
                   style={{ ...INPUT_STYLE, borderColor: errors.name ? 'var(--error-text)' : 'var(--cream-border)' }}
                 />
-                {errors.name && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 3, fontFamily: 'var(--font-ui)' }}>{errors.name.message}</div>}
-              </div>
+              </FormField>
 
               {/* Description */}
-              <label htmlFor="item-description" style={{ display: 'none' }}>Описание</label>
-              <textarea
-                id="item-description"
-                {...register('description')}
-                placeholder="Описание (необязательно)"
-                rows={3}
-                style={{ ...INPUT_STYLE, resize: 'vertical', minHeight: 72 }}
-                onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
-                onBlur={(e) => { e.target.style.borderColor = 'var(--cream-border)'; }}
-              />
+              <FormField label="Описание">
+                <textarea
+                  id="item-description"
+                  {...register('description')}
+                  placeholder="Описание (необязательно)"
+                  rows={3}
+                  style={{ ...INPUT_STYLE, resize: 'vertical', minHeight: 72 }}
+                  onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
+                  onBlur={(e) => { e.target.style.borderColor = 'var(--cream-border)'; }}
+                />
+              </FormField>
 
               {/* Price + Prep time */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <div>
-                  <label htmlFor="item-price" style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', display: 'block', marginBottom: 4 }}>Цена ₸</label>
+                <FormField label="Цена ₸" error={errors.price?.message} required>
                   <input
                     id="item-price"
                     {...register('price')}
@@ -178,10 +171,8 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                     placeholder="0"
                     style={INPUT_STYLE}
                   />
-                  {errors.price && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 3, fontFamily: 'var(--font-ui)' }}>{errors.price.message}</div>}
-                </div>
-                <div>
-                  <label htmlFor="item-prep" style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', display: 'block', marginBottom: 4 }}>Время приг. (мин)</label>
+                </FormField>
+                <FormField label="Время приг. (мин)">
                   <input
                     id="item-prep"
                     {...register('preparation_time')}
@@ -193,12 +184,11 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                     onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
                     onBlur={(e) => { e.target.style.borderColor = 'var(--cream-border)'; }}
                   />
-                </div>
+                </FormField>
               </div>
 
               {/* Category */}
-              <div>
-                <label htmlFor="item-category" style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', display: 'block', marginBottom: 4 }}>Категория</label>
+              <FormField label="Категория" error={errors.category_id?.message} required>
                 <select
                   id="item-category"
                   {...register('category_id')}
@@ -208,7 +198,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                   <option value="">Выберите категорию</option>
                   {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
-              </div>
+              </FormField>
 
               {/* Tags */}
               <div>
@@ -247,18 +237,11 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                   role="switch"
                   aria-checked={isAvailable}
                   onClick={() => setValue('is_available', !isAvailable)}
-                  style={{
-                    width: 36, height: 20, borderRadius: 10,
-                    background: isAvailable ? 'var(--accent-gold)' : 'var(--cream-border)',
-                    position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0,
-                    border: 'none', padding: 0,
-                  }}
+                  style={{ width: 36, height: 20, borderRadius: 10, background: isAvailable ? 'var(--accent-gold)' : 'var(--cream-border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0, border: 'none', padding: 0 }}
                 >
                   <div style={{ position: 'absolute', top: 2, left: isAvailable ? 'calc(100% - 18px)' : 2, width: 16, height: 16, borderRadius: '50%', background: 'var(--cream-surface)', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
                 </button>
-                <span style={{ fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--ink-secondary)' }}>
-                  В наличии
-                </span>
+                <span style={{ fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--ink-secondary)' }}>В наличии</span>
               </div>
 
               <div style={{ height: 24 }} />

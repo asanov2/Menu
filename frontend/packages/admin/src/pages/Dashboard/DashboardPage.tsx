@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { EmptyState, Skeleton, PLAN, ANALYTICS_DAYS, TOP_ITEMS_LIMIT } from '@qrmenu/ui';
+import { EmptyState, Skeleton, PLAN, ANALYTICS_DAYS, TOP_ITEMS_LIMIT, SectionHeading } from '@qrmenu/ui';
 import { getOverview } from '../../api/analytics';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -131,7 +131,7 @@ export default function DashboardPage() {
 
       {/* Top items */}
       <div style={CARD_STYLE}>
-        <div style={{ fontSize: 15, fontFamily: 'var(--font-display)', color: 'var(--ink-primary)', marginBottom: 16 }}>Топ блюда</div>
+        <SectionHeading size="sm">Топ блюда</SectionHeading>
         {isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} height="36px" />)}

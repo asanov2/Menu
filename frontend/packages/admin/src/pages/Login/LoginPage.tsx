@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useToast, INPUT_STYLE, useInputFocus } from '@qrmenu/ui';
+import { useToast, INPUT_STYLE, useInputFocus, FormField } from '@qrmenu/ui';
 import { login } from '../../api/auth';
 import { useAuthStore } from '../../store/authStore';
 
@@ -78,8 +78,7 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <label htmlFor="login-email" style={{ display: 'none' }}>Email</label>
+          <FormField label="Email" error={errors.email?.message} required>
             <input
               id="login-email"
               {...register('email')}
@@ -88,11 +87,9 @@ export default function LoginPage() {
               placeholder="Email"
               style={{ ...INPUT_STYLE, borderColor: errors.email ? 'var(--error-text)' : 'var(--cream-border)' }}
             />
-            {errors.email && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 4, fontFamily: 'var(--font-ui)' }}>{errors.email.message}</div>}
-          </div>
+          </FormField>
 
-          <div>
-            <label htmlFor="login-password" style={{ display: 'none' }}>Пароль</label>
+          <FormField label="Пароль" error={errors.password?.message} required>
             <div style={{ position: 'relative' }}>
               <input
                 id="login-password"
@@ -110,8 +107,7 @@ export default function LoginPage() {
                 {showPass ? '🙈' : '👁'}
               </button>
             </div>
-            {errors.password && <div style={{ fontSize: 11, color: 'var(--error-text)', marginTop: 4, fontFamily: 'var(--font-ui)' }}>{errors.password.message}</div>}
-          </div>
+          </FormField>
 
           <button
             type="submit"

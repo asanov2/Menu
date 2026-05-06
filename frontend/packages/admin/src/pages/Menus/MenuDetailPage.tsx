@@ -1,11 +1,9 @@
-// === FILE: frontend/packages/admin/src/pages/Menus/MenuDetailPage.tsx ===
-import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import {
   DndContext,
   closestCenter,
-  DragEndEvent,
   PointerSensor,
   useSensor,
   useSensors,
@@ -13,16 +11,16 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
-  arrayMove,
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Skeleton, EmptyState, useToast } from '@qrmenu/ui';
 import type { Category } from '@qrmenu/ui';
 import { getMenu } from '../../api/menus';
-import { getCategories, createCategory, reorderCategories } from '../../api/categories';
+import { getCategories, createCategory } from '../../api/categories';
 import CategorySection from './components/CategorySection';
 import CategoryFormModal from './components/CategoryFormModal';
+import { useCategoryDnd } from './hooks/useCategoryDnd';
 
 function SortableCategory({ category, allCategories, menuId }: { category: Category; allCategories: Category[]; menuId: string }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: category.id });
@@ -51,9 +49,9 @@ export default function MenuDetailPage() {
   const { showToast } = useToast();
   const [catFormOpen, setCatFormOpen] = useState(false);
   const [catSaving, setCatSaving] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const { handleDragEnd } = useCategoryDnd(id!);
 
   const { data: menu, isLoading: menuLoading } = useQuery({
     queryKey: ['menu', id],
@@ -61,32 +59,11 @@ export default function MenuDetailPage() {
     enabled: !!id,
   });
 
-  const { data: fetchedCategories, isLoading: catsLoading } = useQuery({
+  const { data: categories = [], isLoading: catsLoading } = useQuery({
     queryKey: ['categories', id],
     queryFn: () => getCategories(id!),
     enabled: !!id,
   });
-
-  useEffect(() => {
-    if (fetchedCategories) setCategories(fetchedCategories);
-  }, [fetchedCategories]);
-
-  const displayCategories = categories.length > 0 ? categories : (fetchedCategories ?? []);
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-    const oldIdx = displayCategories.findIndex((c) => c.id === active.id);
-    const newIdx = displayCategories.findIndex((c) => c.id === over.id);
-    const reordered = arrayMove(displayCategories, oldIdx, newIdx);
-    setCategories(reordered);
-    try {
-      await reorderCategories(reordered.map((c, i) => ({ id: c.id, sort_order: i })));
-    } catch {
-      setCategories(displayCategories);
-      showToast('Ошибка сортировки', 'error');
-    }
-  };
 
   const handleCreateCategory = async (name: string) => {
     setCatSaving(true);
@@ -139,7 +116,7 @@ export default function MenuDetailPage() {
       </div>
 
       {/* Categories */}
-      {displayCategories.length === 0 ? (
+      {categories.length === 0 ? (
         <EmptyState
           icon="📂"
           title="Нет категорий"
@@ -151,10 +128,10 @@ export default function MenuDetailPage() {
           }
         />
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={displayCategories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-            {displayCategories.map((cat) => (
-              <SortableCategory key={cat.id} category={cat} allCategories={displayCategories} menuId={id!} />
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, categories)}>
+          <SortableContext items={categories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+            {categories.map((cat) => (
+              <SortableCategory key={cat.id} category={cat} allCategories={categories} menuId={id!} />
             ))}
           </SortableContext>
         </DndContext>

@@ -1,8 +1,11 @@
 # === FILE: services/analytics/app/main.py ===
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from alembic import command
+from alembic.config import Config
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
 
@@ -21,9 +24,22 @@ logger = logging.getLogger(__name__)
 scheduler = AsyncIOScheduler(timezone="UTC")
 
 
+def run_migrations() -> None:
+    try:
+        alembic_cfg = Config("alembic.ini")
+        command.upgrade(alembic_cfg, "head")
+        logger.info("Migrations applied successfully")
+    except Exception as e:
+        logger.error(f"Migration failed: {e}")
+        raise
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("analytics-service starting up")
+    await asyncio.sleep(2)
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, run_migrations)
 
     await start_consumer(app.state)
 

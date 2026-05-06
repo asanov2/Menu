@@ -1,6 +1,10 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from alembic import command
+from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,9 +15,24 @@ from app.core.database import engine
 from app.core.minio_client import ensure_bucket_exists
 from app.core.redis_client import close_redis
 
+logger = logging.getLogger(__name__)
+
+
+def run_migrations() -> None:
+    try:
+        alembic_cfg = Config("alembic.ini")
+        command.upgrade(alembic_cfg, "head")
+        logger.info("Migrations applied successfully")
+    except Exception as e:
+        logger.error(f"Migration failed: {e}")
+        raise
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    await asyncio.sleep(2)
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, run_migrations)
     # fix #9: initialize persistent httpx client (reuses TCP connections)
     await auth_client.init_client()
     # fix #22: bucket check only on startup, not on every upload

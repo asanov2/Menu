@@ -1,5 +1,5 @@
-// === FILE: frontend/packages/admin/src/layout/Sidebar.tsx ===
 import { NavLink } from 'react-router-dom';
+import { StatusBadge } from '@qrmenu/ui';
 import { useAuth } from '../hooks/useAuth';
 
 const NAV_ITEMS = [
@@ -8,13 +8,6 @@ const NAV_ITEMS = [
   { icon: '💳', label: 'Подписка', to: '/billing' },
   { icon: '⚙️', label: 'Профиль', to: '/profile' },
 ];
-
-const PLAN_STYLE: Record<string, { bg: string; color: string; border: string }> = {
-  starter:  { bg: 'var(--cream-muted)',    color: 'var(--ink-secondary)',  border: 'var(--cream-border)' },
-  business: { bg: 'var(--tag-green-bg)',   color: 'var(--tag-green-text)', border: 'var(--tag-green-border)' },
-  pro:      { bg: 'var(--accent-gold-bg)', color: 'var(--warning-text)',   border: 'var(--accent-gold-border)' },
-  trial:    { bg: 'var(--tag-blue-bg)',    color: 'var(--tag-blue-text)',  border: 'var(--tag-blue-border)' },
-};
 
 export default function Sidebar() {
   const { restaurant, logout } = useAuth();
@@ -35,14 +28,7 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div style={{ padding: '22px 16px 16px' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 18,
-            color: 'var(--sidebar-text)',
-            letterSpacing: '0.02em',
-          }}
-        >
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--sidebar-text)', letterSpacing: '0.02em' }}>
           qrmenu.kz
         </div>
         <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', marginTop: 14 }} />
@@ -71,15 +57,11 @@ export default function Sidebar() {
             })}
             onMouseEnter={(e) => {
               const el = e.currentTarget;
-              if (!el.getAttribute('aria-current')) {
-                el.style.background = 'rgba(255,255,255,0.06)';
-              }
+              if (!el.getAttribute('aria-current')) el.style.background = 'rgba(255,255,255,0.06)';
             }}
             onMouseLeave={(e) => {
               const el = e.currentTarget;
-              if (!el.getAttribute('aria-current')) {
-                el.style.background = 'transparent';
-              }
+              if (!el.getAttribute('aria-current')) el.style.background = 'transparent';
             }}
           >
             <span style={{ fontSize: 15 }}>{item.icon}</span>
@@ -97,34 +79,13 @@ export default function Sidebar() {
             <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--sidebar-text)', fontFamily: 'var(--font-ui)', marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {restaurant.name}
             </div>
-            {(() => {
-              const s = PLAN_STYLE[restaurant.plan] ?? PLAN_STYLE.starter;
-              return (
-                <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontSize: 10, fontWeight: 600, fontFamily: 'var(--font-ui)', background: s.bg, color: s.color, border: `0.5px solid ${s.border}` }}>
-                  {restaurant.plan}
-                </span>
-              );
-            })()}
+            <StatusBadge status={restaurant.plan as 'starter' | 'business' | 'pro'} />
           </div>
         )}
 
         <button
           onClick={logout}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--sidebar-muted)',
-            fontSize: 13,
-            fontFamily: 'var(--font-ui)',
-            cursor: 'pointer',
-            padding: '6px 6px',
-            borderRadius: 'var(--radius-md)',
-            width: '100%',
-            transition: 'color 0.15s',
-          }}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', color: 'var(--sidebar-muted)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer', padding: '6px 6px', borderRadius: 'var(--radius-md)', width: '100%', transition: 'color 0.15s' }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sidebar-text)'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sidebar-muted)'; }}
         >
