@@ -43,7 +43,7 @@ class RestaurantService:
             WITH latest_sub AS (
                 SELECT DISTINCT ON (restaurant_id)
                     restaurant_id, plan, status, trial_ends_at, created_at
-                FROM subscriptions
+                FROM billing.subscriptions
                 ORDER BY restaurant_id, created_at DESC
             )
             SELECT
@@ -107,7 +107,7 @@ class RestaurantService:
                   ),
                   latest_sub AS (
                     SELECT DISTINCT ON (restaurant_id) *
-                    FROM subscriptions
+                    FROM billing.subscriptions
                     ORDER BY restaurant_id, created_at DESC
                   ),
                   sub_stats AS (
@@ -120,7 +120,7 @@ class RestaurantService:
                   ),
                   mrr AS (
                     SELECT COALESCE(SUM(amount), 0) AS amount
-                    FROM payments
+                    FROM billing.payments
                     WHERE status = 'success'
                       AND created_at >= date_trunc('month', now())
                   )
@@ -167,7 +167,7 @@ class RestaurantService:
                     UPDATE subscriptions
                     SET plan = :plan
                     WHERE id = (
-                        SELECT id FROM subscriptions
+                        SELECT id FROM billing.subscriptions
                         WHERE restaurant_id = :restaurant_id
                         ORDER BY created_at DESC
                         LIMIT 1
@@ -183,7 +183,7 @@ class RestaurantService:
                 WITH latest_sub AS (
                     SELECT DISTINCT ON (restaurant_id)
                         restaurant_id, status, trial_ends_at
-                    FROM subscriptions
+                    FROM billing.subscriptions
                     ORDER BY restaurant_id, created_at DESC
                 )
                 SELECT

@@ -5,9 +5,7 @@ Revises:
 Create Date: 2024-01-01 00:00:00.000000
 """
 
-import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects import postgresql
 
 revision = "001"
 down_revision = None
@@ -16,55 +14,34 @@ depends_on = None
 
 
 def upgrade() -> None:
-    sa.Enum("starter", "business", "pro", name="plantype").create(op.get_bind(), checkfirst=True)
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE plantype AS ENUM ('starter', 'business', 'pro');
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$
+    """)
 
-    op.create_table(
-        "restaurants",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("email", sa.String(255), nullable=False),
-        sa.Column("hashed_password", sa.String(255), nullable=False),
-        sa.Column("name", sa.String(255), nullable=False),
-        sa.Column("slug", sa.String(100), nullable=False),
-        sa.Column(
-            "plan",
-            sa.Enum("starter", "business", "pro", name="plantype"),
-            nullable=False,
-            server_default="starter",
-        ),
-        sa.Column(
-            "is_active",
-            sa.Boolean(),
-            nullable=False,
-            server_default=sa.text("true"),
-        ),
-        sa.Column(
-            "is_verified",
-            sa.Boolean(),
-            nullable=False,
-            server_default=sa.text("false"),
-        ),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            nullable=False,
-            server_default=sa.text("now()"),
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            nullable=False,
-            server_default=sa.text("now()"),
-        ),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("email", name="uq_restaurants_email"),
-        sa.UniqueConstraint("slug", name="uq_restaurants_slug"),
-    )
-    op.create_index("ix_restaurants_email", "restaurants", ["email"])
-    op.create_index("ix_restaurants_slug", "restaurants", ["slug"])
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS restaurants (
+            id              UUID PRIMARY KEY,
+            email           VARCHAR(255) NOT NULL,
+            hashed_password VARCHAR(255) NOT NULL,
+            name            VARCHAR(255) NOT NULL,
+            slug            VARCHAR(100) NOT NULL,
+            plan            plantype NOT NULL DEFAULT 'starter',
+            is_active       BOOLEAN NOT NULL DEFAULT true,
+            is_verified     BOOLEAN NOT NULL DEFAULT false,
+            created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+            CONSTRAINT uq_restaurants_email UNIQUE (email),
+            CONSTRAINT uq_restaurants_slug  UNIQUE (slug)
+        )
+    """)
+
+    op.execute("CREATE INDEX IF NOT EXISTS ix_restaurants_email ON restaurants (email)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_restaurants_slug  ON restaurants (slug)")
 
 
 def downgrade() -> None:
-    op.drop_index("ix_restaurants_slug", "restaurants")
-    op.drop_index("ix_restaurants_email", "restaurants")
-    op.drop_table("restaurants")
-    sa.Enum(name="plantype").drop(op.get_bind(), checkfirst=True)
+    op.execute("DROP TABLE IF EXISTS restaurants")
+    op.execute("DROP TYPE  IF EXISTS plantype")

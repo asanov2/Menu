@@ -20,7 +20,7 @@ class RevenueService:
                     to_char(created_at, 'YYYY-MM') AS month,
                     SUM(amount)::float             AS amount,
                     COUNT(*)::int                  AS count
-                FROM payments
+                FROM billing.payments
                 WHERE status = 'success'
                   AND EXTRACT(YEAR FROM created_at) = :year
                 GROUP BY month
@@ -37,7 +37,7 @@ class RevenueService:
         offset = (page - 1) * limit
 
         count_result = await self._db.execute(
-            text("SELECT COUNT(*) FROM payments")
+            text("SELECT COUNT(*) FROM billing.payments")
         )
         total: int = count_result.scalar_one()
 
@@ -50,8 +50,8 @@ class RevenueService:
                     p.provider,
                     p.created_at,
                     r.name AS restaurant_name
-                FROM payments p
-                JOIN restaurants r ON r.id = p.restaurant_id
+                FROM billing.payments p
+                JOIN public.restaurants r ON r.id = p.restaurant_id
                 ORDER BY p.created_at DESC
                 LIMIT :limit OFFSET :offset
             """),

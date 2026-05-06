@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAuth: (token, restaurant) => {
     localStorage.setItem('admin_token', token);
     localStorage.setItem('admin_restaurant', JSON.stringify(restaurant));
-    set({ token, restaurant });
+    set({ token, restaurant, isLoading: false });
   },
 
   logout: () => {

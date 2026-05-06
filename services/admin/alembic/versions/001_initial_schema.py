@@ -5,9 +5,7 @@ Revises:
 Create Date: 2024-01-01 00:00:00.000000
 """
 
-import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects import postgresql
 
 revision = "001"
 down_revision = None
@@ -16,124 +14,71 @@ depends_on = None
 
 
 def upgrade() -> None:
-    sa.Enum("ru", "kz", "en", name="languagetype").create(op.get_bind(), checkfirst=True)
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE languagetype AS ENUM ('ru', 'kz', 'en');
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$
+    """)
 
-    op.create_table(
-        "menus",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("restaurant_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("name", sa.String(255), nullable=False),
-        sa.Column(
-            "is_default",
-            sa.Boolean(),
-            nullable=False,
-            server_default=sa.text("false"),
-        ),
-        sa.Column(
-            "language",
-            sa.Enum("ru", "kz", "en", name="languagetype"),
-            nullable=False,
-            server_default="ru",
-        ),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            nullable=False,
-            server_default=sa.text("now()"),
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            nullable=False,
-            server_default=sa.text("now()"),
-        ),
-        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_index("ix_menus_restaurant_id", "menus", ["restaurant_id"])
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS menus (
+            id            UUID PRIMARY KEY,
+            restaurant_id UUID NOT NULL,
+            name          VARCHAR(255) NOT NULL,
+            is_default    BOOLEAN NOT NULL DEFAULT false,
+            language      languagetype NOT NULL DEFAULT 'ru',
+            created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+            deleted_at    TIMESTAMPTZ
+        )
+    """)
 
-    op.create_table(
-        "categories",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("menu_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("restaurant_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("name", sa.String(255), nullable=False),
-        sa.Column("description", sa.Text(), nullable=True),
-        sa.Column(
-            "sort_order", sa.Integer(), nullable=False, server_default=sa.text("0")
-        ),
-        sa.Column(
-            "is_visible",
-            sa.Boolean(),
-            nullable=False,
-            server_default=sa.text("true"),
-        ),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            nullable=False,
-            server_default=sa.text("now()"),
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            nullable=False,
-            server_default=sa.text("now()"),
-        ),
-        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.PrimaryKeyConstraint("id"),
-        sa.ForeignKeyConstraint(["menu_id"], ["menus.id"], ondelete="CASCADE"),
-    )
-    op.create_index("ix_categories_menu_id", "categories", ["menu_id"])
-    op.create_index("ix_categories_restaurant_id", "categories", ["restaurant_id"])
+    op.execute("CREATE INDEX IF NOT EXISTS ix_menus_restaurant_id ON menus (restaurant_id)")
 
-    op.create_table(
-        "items",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("category_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("restaurant_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("name", sa.String(255), nullable=False),
-        sa.Column("description", sa.Text(), nullable=True),
-        sa.Column("price", sa.Numeric(10, 2), nullable=False),
-        sa.Column("image_url", sa.String(500), nullable=True),
-        sa.Column(
-            "is_available",
-            sa.Boolean(),
-            nullable=False,
-            server_default=sa.text("true"),
-        ),
-        sa.Column(
-            "sort_order", sa.Integer(), nullable=False, server_default=sa.text("0")
-        ),
-        sa.Column("preparation_time", sa.Integer(), nullable=True),
-        sa.Column("tags", postgresql.ARRAY(sa.String()), nullable=True),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            nullable=False,
-            server_default=sa.text("now()"),
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            nullable=False,
-            server_default=sa.text("now()"),
-        ),
-        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.PrimaryKeyConstraint("id"),
-        sa.ForeignKeyConstraint(["category_id"], ["categories.id"], ondelete="CASCADE"),
-    )
-    op.create_index("ix_items_category_id", "items", ["category_id"])
-    op.create_index("ix_items_restaurant_id", "items", ["restaurant_id"])
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS categories (
+            id            UUID PRIMARY KEY,
+            menu_id       UUID NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+            restaurant_id UUID NOT NULL,
+            name          VARCHAR(255) NOT NULL,
+            description   TEXT,
+            sort_order    INTEGER NOT NULL DEFAULT 0,
+            is_visible    BOOLEAN NOT NULL DEFAULT true,
+            created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+            deleted_at    TIMESTAMPTZ
+        )
+    """)
+
+    op.execute("CREATE INDEX IF NOT EXISTS ix_categories_menu_id       ON categories (menu_id)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_categories_restaurant_id ON categories (restaurant_id)")
+
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS items (
+            id               UUID PRIMARY KEY,
+            category_id      UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+            restaurant_id    UUID NOT NULL,
+            name             VARCHAR(255) NOT NULL,
+            description      TEXT,
+            price            NUMERIC(10,2) NOT NULL,
+            image_url        VARCHAR(500),
+            is_available     BOOLEAN NOT NULL DEFAULT true,
+            sort_order       INTEGER NOT NULL DEFAULT 0,
+            preparation_time INTEGER,
+            tags             TEXT[],
+            created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+            deleted_at       TIMESTAMPTZ
+        )
+    """)
+
+    op.execute("CREATE INDEX IF NOT EXISTS ix_items_category_id   ON items (category_id)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_items_restaurant_id ON items (restaurant_id)")
 
 
 def downgrade() -> None:
-    op.drop_index("ix_items_restaurant_id", "items")
-    op.drop_index("ix_items_category_id", "items")
-    op.drop_table("items")
-    op.drop_index("ix_categories_restaurant_id", "categories")
-    op.drop_index("ix_categories_menu_id", "categories")
-    op.drop_table("categories")
-    op.drop_index("ix_menus_restaurant_id", "menus")
-    op.drop_table("menus")
-    sa.Enum(name="languagetype").drop(op.get_bind(), checkfirst=True)
+    op.execute("DROP TABLE IF EXISTS items")
+    op.execute("DROP TABLE IF EXISTS categories")
+    op.execute("DROP TABLE IF EXISTS menus")
+    op.execute("DROP TYPE  IF EXISTS languagetype")

@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast, INPUT_STYLE, useInputFocus, FormField } from '@qrmenu/ui';
-import { login } from '../../api/auth';
+import { login, getMe } from '../../api/auth';
 import { useAuthStore } from '../../store/authStore';
 
 const schema = z.object({
@@ -31,7 +31,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const result = await login(data.email, data.password);
-      setAuth(result.access_token, result.restaurant);
+      const restaurant = await getMe(result.access_token);
+      setAuth(result.access_token, restaurant);
       navigate('/dashboard');
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;

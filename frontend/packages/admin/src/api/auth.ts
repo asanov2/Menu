@@ -2,13 +2,14 @@
 import { adminApi } from '@qrmenu/ui';
 import type { RestaurantAuth } from '@qrmenu/ui';
 
-export async function login(email: string, password: string): Promise<{ access_token: string; restaurant: RestaurantAuth }> {
+export async function login(email: string, password: string): Promise<{ access_token: string; token_type: string }> {
   const { data } = await adminApi.post('/api/v1/auth/login', { email, password });
   return data;
 }
 
-export async function getMe(): Promise<RestaurantAuth> {
-  const { data } = await adminApi.get('/api/v1/auth/me');
+export async function getMe(token?: string): Promise<RestaurantAuth> {
+  const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const { data } = await adminApi.get('/api/v1/auth/me', config);
   return data;
 }
 

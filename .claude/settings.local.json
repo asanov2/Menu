@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST \"http://localhost:8081/api/v1/owner/login\" -H \"Content-Type: application/json\" -d '{\"email\":\"asanov@gmail.com\",\"password\":\"owner\"}')",
+      "Bash(curl -s -X POST \"http://localhost:8081/api/v1/owner/login\" -H \"Content-Type: application/json\" -d '{\"email\":\"asanov@gmail.com\",\"password\":\"owner\"}')"
+    ]
+  }
+}
