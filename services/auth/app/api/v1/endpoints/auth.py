@@ -9,10 +9,12 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_restaurant
 from app.models.restaurant import Restaurant
 from app.schemas.auth import (
+    ChangePasswordRequest,
     LoginRequest,
     RegisterRequest,
     RestaurantResponse,
     TokenResponse,
+    UpdateProfileRequest,
     VerifyTokenResponse,
 )
 from app.services.auth_service import AuthService
@@ -77,6 +79,27 @@ async def me(
     current_restaurant: Restaurant = Depends(get_current_restaurant),
 ) -> RestaurantResponse:
     return RestaurantResponse.model_validate(current_restaurant)
+
+
+@router.put("/profile", response_model=RestaurantResponse)
+async def update_profile(
+    data: UpdateProfileRequest,
+    current_restaurant: Restaurant = Depends(get_current_restaurant),
+    db: AsyncSession = Depends(get_db),
+) -> RestaurantResponse:
+    service = AuthService(db)
+    restaurant = await service.update_profile(current_restaurant.id, data.name, data.email)
+    return RestaurantResponse.model_validate(restaurant)
+
+
+@router.put("/change-password", status_code=status.HTTP_204_NO_CONTENT)
+async def change_password(
+    data: ChangePasswordRequest,
+    current_restaurant: Restaurant = Depends(get_current_restaurant),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    service = AuthService(db)
+    await service.change_password(current_restaurant.id, data.old_password, data.new_password)
 
 
 # fix #16 + #12: db IS used now — verify_token_payload checks is_active in DB.

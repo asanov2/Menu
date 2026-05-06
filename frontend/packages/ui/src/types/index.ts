@@ -59,8 +59,8 @@ export interface RestaurantAuth {
 
 export interface TopItem {
   item_id: string;
-  item_name: string;
-  view_count: number;
+  views: number;
+  rank: number;
 }
 
 export interface OverviewStats {

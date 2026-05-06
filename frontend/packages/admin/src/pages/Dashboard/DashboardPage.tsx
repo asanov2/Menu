@@ -156,8 +156,8 @@ export default function DashboardPage() {
                   onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'; }}
                 >
                   <td style={{ padding: '10px 8px', color: 'var(--ink-tertiary)' }}>{idx + 1}</td>
-                  <td style={{ padding: '10px 8px', color: 'var(--ink-primary)' }}>{item.item_name}</td>
-                  <td style={{ padding: '10px 8px', textAlign: 'right', color: 'var(--ink-secondary)' }}>{item.view_count}</td>
+                  <td style={{ padding: '10px 8px', color: 'var(--ink-primary)' }}>{item.item_id}</td>
+                  <td style={{ padding: '10px 8px', textAlign: 'right', color: 'var(--ink-secondary)' }}>{item.views}</td>
                 </tr>
               ))}
             </tbody>

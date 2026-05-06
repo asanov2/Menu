@@ -34,6 +34,17 @@ async def create_menu(
     return MenuResponse.model_validate(menu)
 
 
+@router.get("/{menu_id}", response_model=MenuResponse)
+async def get_menu(
+    menu_id: UUID,
+    current: CurrentRestaurant = Depends(get_current_restaurant),
+    db: AsyncSession = Depends(get_db),
+) -> MenuResponse:
+    service = MenuService(db)
+    menu = await service.get_menu(current.id, menu_id)
+    return MenuResponse.model_validate(menu)
+
+
 @router.put("/{menu_id}", response_model=MenuResponse)
 async def update_menu(
     menu_id: UUID,

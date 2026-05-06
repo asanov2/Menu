@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   DndContext,
   closestCenter,
@@ -16,7 +16,7 @@ import {
 import { useToast, ConfirmModal, EmptyState, getApiErrorMessage } from '@qrmenu/ui';
 import type { Category, MenuItem } from '@qrmenu/ui';
 import { deleteCategory } from '../../../api/categories';
-import { createItem, updateItem, reorderItems } from '../../../api/items';
+import { createItem, getItems, updateItem, reorderItems } from '../../../api/items';
 import SortableItem from './SortableItem';
 import ItemFormModal from './ItemFormModal';
 import CategoryFormModal from './CategoryFormModal';
@@ -32,7 +32,10 @@ interface CategorySectionProps {
 export default function CategorySection({ category, allCategories, menuId, dragHandleProps }: CategorySectionProps) {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
-  const [items, setItems] = useState<MenuItem[]>(category.items ?? []);
+  const { data: items = [] } = useQuery<MenuItem[]>({
+    queryKey: ['items', category.id],
+    queryFn: () => getItems(category.id),
+  });
   const [itemFormOpen, setItemFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | undefined>();
   const [itemSaving, setItemSaving] = useState(false);
@@ -48,11 +51,10 @@ export default function CategorySection({ category, allCategories, menuId, dragH
     const oldIndex = items.findIndex((i) => i.id === active.id);
     const newIndex = items.findIndex((i) => i.id === over.id);
     const reordered = arrayMove(items, oldIndex, newIndex);
-    setItems(reordered);
     try {
       await reorderItems(reordered.map((item, idx) => ({ id: item.id, sort_order: idx })));
+      queryClient.invalidateQueries({ queryKey: ['items', category.id] });
     } catch {
-      setItems(items);
       showToast('Ошибка сортировки', 'error');
     }
   };
@@ -72,7 +74,7 @@ export default function CategorySection({ category, allCategories, menuId, dragH
         await createItem({ ...data, name: data.name!, price: data.price! });
         showToast('Блюдо добавлено ✓', 'success');
       }
-      queryClient.invalidateQueries({ queryKey: ['categories', menuId] });
+      queryClient.invalidateQueries({ queryKey: ['items', category.id] });
       setItemFormOpen(false);
       setEditingItem(undefined);
     } catch (err: unknown) {

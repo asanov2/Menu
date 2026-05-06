@@ -127,6 +127,31 @@ class AuthService:
             extra={"plan": restaurant.plan.value, "slug": restaurant.slug},
         )
 
+    async def update_profile(self, restaurant_id: UUID, name: str | None, email: str | None) -> "Restaurant":
+        restaurant = await self.get_by_id(restaurant_id)
+        if not restaurant:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        if name is not None:
+            restaurant.name = name
+        if email is not None:
+            restaurant.email = email
+        try:
+            await self._db.commit()
+        except IntegrityError:
+            await self._db.rollback()
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
+        await self._db.refresh(restaurant)
+        return restaurant
+
+    async def change_password(self, restaurant_id: UUID, old_password: str, new_password: str) -> None:
+        restaurant = await self.get_by_id(restaurant_id)
+        if not restaurant:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        if not verify_password(old_password, restaurant.hashed_password):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
+        restaurant.hashed_password = hash_password(new_password)
+        await self._db.commit()
+
     async def verify_token_payload(self, token: str) -> dict:
         # fix #12 + #16: now async — checks is_active in DB so deactivated
         # restaurants cannot use their remaining token lifetime.
