@@ -20,6 +20,8 @@ body {
   background: var(--cream-bg);
   color: var(--ink-primary);
   min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 img {

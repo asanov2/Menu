@@ -24,8 +24,10 @@ export default function CategoryTabs({ categories, activeId, onSelect }: Categor
       style={{
         display: 'flex',
         overflowX: 'auto',
+        overflowY: 'hidden',
         background: 'var(--ink-primary)',
         padding: '0 16px',
+        WebkitOverflowScrolling: 'touch',
       }}
     >
       {categories

@@ -37,7 +37,7 @@ export default function MenuHeader({
   const { t } = useTranslation();
 
   return (
-    <div style={{ position: 'sticky', top: 0, zIndex: 30 }}>
+    <div style={{ width: '100%', overflow: 'hidden' }}>
       {/* Top bar */}
       <div
         style={{

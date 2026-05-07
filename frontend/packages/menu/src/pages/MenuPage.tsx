@@ -102,11 +102,14 @@ export default function MenuPage() {
   return (
     <div
       style={{
-        maxWidth: 390,
+        width: '100%',
+        maxWidth: 600,
         margin: '0 auto',
         minHeight: '100dvh',
         paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
         background: 'var(--cream-bg)',
+        overflowX: 'hidden',
+        position: 'relative',
       }}
     >
       {/* Sticky header + search */}
