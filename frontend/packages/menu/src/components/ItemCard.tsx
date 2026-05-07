@@ -107,7 +107,7 @@ function ListCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 4 }}>
-          {item.tags.map((tag) => (
+          {(item.tags ?? []).map((tag) => (
             <TagBadge key={tag} tag={tag} />
           ))}
           {!item.is_available && <StopBadge />}
@@ -197,7 +197,7 @@ function CardCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
 
       <div style={{ padding: '8px 10px' }}>
         <div style={{ marginBottom: 4, minHeight: 18 }}>
-          {item.tags[0] && <TagBadge tag={item.tags[0]} />}
+          {item.tags?.[0] && <TagBadge tag={item.tags[0]} />}
         </div>
         <div
           style={{

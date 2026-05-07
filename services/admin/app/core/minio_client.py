@@ -28,9 +28,17 @@ async def get_minio_client() -> AsyncGenerator:
         yield client
 
 
+_PUBLIC_POLICY = """{{"Version":"2012-10-17","Statement":[{{"Effect":"Allow","Principal":{{"AWS":["*"]}},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::{bucket}/*"]}}]}}"""
+
+
 async def ensure_bucket_exists() -> None:
     async with get_minio_client() as client:
         try:
             await client.head_bucket(Bucket=settings.minio_bucket)
         except Exception:
             await client.create_bucket(Bucket=settings.minio_bucket)
+        # Ensure public read policy is always applied
+        await client.put_bucket_policy(
+            Bucket=settings.minio_bucket,
+            Policy=_PUBLIC_POLICY.format(bucket=settings.minio_bucket),
+        )

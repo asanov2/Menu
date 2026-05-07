@@ -2,10 +2,10 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.menu import Menu
+from app.models.menu import Category, Item, Menu
 from app.schemas.menu import MenuCreate, MenuUpdate
 
 
@@ -13,13 +13,41 @@ class MenuService:
     def __init__(self, db: AsyncSession) -> None:
         self._db = db
 
-    async def list_menus(self, restaurant_id: UUID) -> list[Menu]:
+    async def list_menus(self, restaurant_id: UUID) -> list[dict]:
+        items_count_sq = (
+            select(func.count(Item.id))
+            .join(Category, Item.category_id == Category.id)
+            .where(
+                Category.menu_id == Menu.id,
+                Item.deleted_at.is_(None),
+                Category.deleted_at.is_(None),
+            )
+            .correlate(Menu)
+            .scalar_subquery()
+        )
+
         result = await self._db.execute(
-            select(Menu)
-            .where(and_(Menu.restaurant_id == restaurant_id, Menu.deleted_at == None))  # noqa: E711
+            select(Menu, items_count_sq.label("items_count"))
+            .where(
+                Menu.restaurant_id == restaurant_id,
+                Menu.deleted_at.is_(None),
+            )
             .order_by(Menu.created_at)
         )
-        return list(result.scalars().all())
+
+        return [
+            {
+                "id": menu.id,
+                "restaurant_id": menu.restaurant_id,
+                "name": menu.name,
+                "is_default": menu.is_default,
+                "language": menu.language,
+                "items_count": count or 0,
+                "created_at": menu.created_at,
+                "updated_at": menu.updated_at,
+            }
+            for menu, count in result.all()
+        ]
 
     async def get_menu(self, restaurant_id: UUID, menu_id: UUID) -> Menu:
         result = await self._db.execute(

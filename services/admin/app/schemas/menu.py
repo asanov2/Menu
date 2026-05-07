@@ -25,6 +25,7 @@ class MenuResponse(BaseModel):
     name: str
     is_default: bool
     language: str
+    items_count: int = 0
     created_at: datetime
     updated_at: datetime
 

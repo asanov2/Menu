@@ -18,6 +18,7 @@ import { Skeleton, EmptyState, useToast } from '@qrmenu/ui';
 import type { Category } from '@qrmenu/ui';
 import { getMenu } from '../../api/menus';
 import { getCategories, createCategory } from '../../api/categories';
+import { useAuth } from '../../hooks/useAuth';
 import CategorySection from './components/CategorySection';
 import CategoryFormModal from './components/CategoryFormModal';
 import { useCategoryDnd } from './hooks/useCategoryDnd';
@@ -47,6 +48,7 @@ export default function MenuDetailPage() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const { restaurant } = useAuth();
   const [catFormOpen, setCatFormOpen] = useState(false);
   const [catSaving, setCatSaving] = useState(false);
 
@@ -99,7 +101,7 @@ export default function MenuDetailPage() {
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           <a
-            href={`${import.meta.env.VITE_APP_URL ?? ''}/menu/${menu?.slug}`}
+            href={`${import.meta.env.VITE_APP_URL ?? ''}/menu/${restaurant?.slug}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '0.5px solid var(--cream-border)', color: 'var(--ink-secondary)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}

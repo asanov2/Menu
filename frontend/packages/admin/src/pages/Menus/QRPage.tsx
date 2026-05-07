@@ -20,7 +20,7 @@ export default function QRPage() {
   });
 
   const appUrl = import.meta.env.VITE_APP_URL ?? '';
-  const qrValue = menu?.slug ? `${appUrl}/m/${menu.slug}` : '';
+  const qrValue = restaurant?.slug ? `${appUrl}/m/${restaurant.slug}` : '';
   const canTable = restaurant?.plan === PLAN.BUSINESS || restaurant?.plan === PLAN.PRO;
 
   const downloadPNG = () => {

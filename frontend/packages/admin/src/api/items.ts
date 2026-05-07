@@ -27,5 +27,5 @@ export async function toggleAvailable(id: string): Promise<MenuItem> {
 }
 
 export async function reorderItems(items: { id: string; sort_order: number }[]): Promise<void> {
-  await adminApi.put('/api/v1/admin/items/reorder', { items });
+  await adminApi.put('/api/v1/admin/items/reorder', items);
 }

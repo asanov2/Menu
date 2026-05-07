@@ -7,8 +7,11 @@ from app.core.database import get_db
 from app.core.rabbitmq import publish_menu_event
 from app.schemas.menu import (
     CategoriesOnlyResponse,
+    CategoryResponse,
     ItemsFilterResponse,
-    MenuResponse,
+    MenuInfo,
+    MenuPageResponse,
+    RestaurantInfo,
 )
 from app.services.cache_service import (
     get_cached_categories,
@@ -23,21 +26,29 @@ from app.services.menu_service import MenuService
 router = APIRouter()
 
 
-@router.get("/{slug}", response_model=MenuResponse)
+@router.get("/{slug}", response_model=MenuPageResponse)
 async def get_menu(
     request: Request,
     slug: str,
     db: AsyncSession = Depends(get_db),
-) -> MenuResponse:
+) -> MenuPageResponse:
     cached = await get_cached_menu(slug)
     if cached:
-        return MenuResponse(**cached)
+        return MenuPageResponse.model_validate(cached)
 
     service = MenuService(db)
     restaurant, menu = await service.get_full_menu(slug)
 
-    response = MenuResponse.model_validate(menu)
-    await set_cached_menu(slug, response.model_dump())
+    visible_cats = [c for c in menu.categories if c.is_visible]
+
+    response = MenuPageResponse(
+        restaurant=RestaurantInfo.model_validate(restaurant),
+        menu=MenuInfo.model_validate(menu),
+        categories=[CategoryResponse.model_validate(c) for c in visible_cats],
+    )
+
+    # mode='json' serialises UUIDs to str for Redis storage
+    await set_cached_menu(slug, response.model_dump(mode="json"))
 
     device_type = request.headers.get("User-Agent", "unknown")[:50]
     publish_menu_event("menu_view", str(restaurant.id), device_type=device_type)
@@ -45,7 +56,6 @@ async def get_menu(
     return response
 
 
-# fix #11: categories and items endpoints now cached
 @router.get("/{slug}/categories", response_model=list[CategoriesOnlyResponse])
 async def get_categories(
     slug: str,
@@ -60,7 +70,7 @@ async def get_categories(
     categories = await service.get_categories(restaurant.id, menu.id)
 
     response = [CategoriesOnlyResponse.model_validate(c) for c in categories]
-    await set_cached_categories(slug, [r.model_dump() for r in response])
+    await set_cached_categories(slug, [r.model_dump(mode="json") for r in response])
     return response
 
 
@@ -80,5 +90,5 @@ async def get_items(
     items = await service.get_items(restaurant.id, category_id, available_only)
 
     response = [ItemsFilterResponse.model_validate(i) for i in items]
-    await set_cached_items(slug, category_id, available_only, [r.model_dump() for r in response])
+    await set_cached_items(slug, category_id, available_only, [r.model_dump(mode="json") for r in response])
     return response

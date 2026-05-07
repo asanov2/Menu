@@ -2,7 +2,9 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import and_, select, text
+from sqlalchemy import Integer, and_, bindparam, select, text
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import UUID as pgUUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.menu import Category, Item
@@ -103,23 +105,27 @@ class ItemService:
     async def reorder_items(self, restaurant_id: UUID, items: list[ItemReorderItem]) -> None:
         if not items:
             return
-        # fix #13: single bulk UPDATE using PostgreSQL unnest — replaces N queries
+        # bindparam with explicit ARRAY type avoids the :param::cast[] syntax
+        # conflict that breaks SQLAlchemy's asyncpg dialect parameter parser.
         await self._db.execute(
             text("""
                 UPDATE items
                 SET sort_order = v.sort_order
                 FROM (
-                    SELECT unnest(:ids::uuid[]) AS id,
-                           unnest(:orders::int[]) AS sort_order
+                    SELECT unnest(:ids) AS id,
+                           unnest(:orders) AS sort_order
                 ) AS v
                 WHERE items.id = v.id
                   AND items.restaurant_id = :restaurant_id
                   AND items.deleted_at IS NULL
-            """),
+            """).bindparams(
+                bindparam("ids", type_=ARRAY(pgUUID(as_uuid=True))),
+                bindparam("orders", type_=ARRAY(Integer())),
+            ),
             {
-                "ids": [str(item.id) for item in items],
+                "ids": [item.id for item in items],
                 "orders": [item.sort_order for item in items],
-                "restaurant_id": str(restaurant_id),
+                "restaurant_id": restaurant_id,
             },
         )
         await self._db.commit()

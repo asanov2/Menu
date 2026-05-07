@@ -102,7 +102,10 @@ class RestaurantService:
                   restaurant_stats AS (
                     SELECT
                       COUNT(*)                                          AS total,
-                      COUNT(*) FILTER (WHERE is_active = TRUE)         AS active
+                      COUNT(*) FILTER (WHERE is_active = TRUE)         AS active,
+                      COUNT(*) FILTER (WHERE plan = 'starter')         AS starter_count,
+                      COUNT(*) FILTER (WHERE plan = 'business')        AS business_count,
+                      COUNT(*) FILTER (WHERE plan = 'pro')             AS pro_count
                     FROM restaurants
                   ),
                   latest_sub AS (
@@ -112,10 +115,7 @@ class RestaurantService:
                   ),
                   sub_stats AS (
                     SELECT
-                      COUNT(*) FILTER (WHERE status = 'trial')                              AS trial_count,
-                      COUNT(*) FILTER (WHERE plan = 'starter'  AND status IN ('active','trial')) AS starter_count,
-                      COUNT(*) FILTER (WHERE plan = 'business' AND status IN ('active','trial')) AS business_count,
-                      COUNT(*) FILTER (WHERE plan = 'pro'      AND status IN ('active','trial')) AS pro_count
+                      COUNT(*) FILTER (WHERE status = 'trial') AS trial_count
                     FROM latest_sub
                   ),
                   mrr AS (
@@ -129,9 +129,9 @@ class RestaurantService:
                   rs.active           AS active_restaurants,
                   ss.trial_count,
                   m.amount            AS mrr,
-                  ss.starter_count,
-                  ss.business_count,
-                  ss.pro_count
+                  rs.starter_count,
+                  rs.business_count,
+                  rs.pro_count
                 FROM restaurant_stats rs, sub_stats ss, mrr m
             """)
         )

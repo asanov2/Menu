@@ -22,5 +22,5 @@ export async function deleteCategory(id: string): Promise<void> {
 }
 
 export async function reorderCategories(items: { id: string; sort_order: number }[]): Promise<void> {
-  await adminApi.put('/api/v1/admin/categories/reorder', { items });
+  await adminApi.put('/api/v1/admin/categories/reorder', items);
 }

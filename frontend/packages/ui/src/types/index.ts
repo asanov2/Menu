@@ -13,6 +13,7 @@ export interface Menu {
   slug: string;
   language: 'ru' | 'kz' | 'en';
   is_default: boolean;
+  items_count: number;
 }
 
 export interface Category {

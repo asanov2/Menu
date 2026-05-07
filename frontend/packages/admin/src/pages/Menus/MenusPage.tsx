@@ -79,7 +79,7 @@ export default function MenusPage() {
         />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
-          {menus.map((menu) => <MenuCard key={menu.id} menu={menu} />)}
+          {menus.map((menu) => <MenuCard key={menu.id} menu={menu} itemCount={menu.items_count} />)}
         </div>
       )}
 

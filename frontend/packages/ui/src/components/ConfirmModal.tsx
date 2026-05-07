@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Z_INDEX, ANIMATION } from '../constants';
 
@@ -22,7 +23,7 @@ export default function ConfirmModal({
   onCancel,
   danger = false,
 }: ConfirmModalProps) {
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
@@ -128,6 +129,7 @@ export default function ConfirmModal({
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
