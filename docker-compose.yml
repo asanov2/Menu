@@ -226,6 +226,9 @@ services:
     build:
       context: ./frontend
       dockerfile: packages/admin/Dockerfile
+      args:
+        VITE_APP_URL: "${VITE_APP_URL:-http://localhost}"
+        VITE_API_URL: "${VITE_API_URL:-http://localhost}"
     networks:
       - qrmenu-network
     restart: unless-stopped
