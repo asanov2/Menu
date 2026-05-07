@@ -10,7 +10,10 @@ import ImageUpload from './ImageUpload';
 const schema = z.object({
   name: z.string().min(1, 'Обязательное поле').max(100),
   description: z.string().max(500).optional(),
-  price: z.coerce.number().min(0, 'Минимум 0'),
+  price: z.coerce.number()
+    .positive('Цена должна быть положительной')
+    .min(1, 'Минимальная цена 1 ₸')
+    .max(9999999, 'Максимальная цена 9 999 999 ₸'),
   category_id: z.string().min(1, 'Выберите категорию'),
   preparation_time: z.coerce.number().min(1).max(180).optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
   tags: z.array(z.string()),
@@ -166,7 +169,8 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                     {...register('price')}
                     {...priceFocus}
                     type="number"
-                    min={0}
+                    min={1}
+                    max={9999999}
                     step="0.01"
                     placeholder="0"
                     style={INPUT_STYLE}

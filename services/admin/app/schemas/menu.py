@@ -74,7 +74,7 @@ class ItemCreate(BaseModel):
     category_id: UUID
     name: str = Field(min_length=1, max_length=255)
     description: str | None = None
-    price: Decimal = Field(gt=0)
+    price: Decimal = Field(gt=Decimal('0'), le=Decimal('9999999.99'))
     image_url: str | None = None
     is_available: bool = True
     sort_order: int = 0
@@ -85,7 +85,7 @@ class ItemCreate(BaseModel):
 class ItemUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = None
-    price: Decimal | None = Field(default=None, gt=0)
+    price: Decimal | None = Field(default=None, gt=Decimal('0'), le=Decimal('9999999.99'))
     image_url: str | None = None
     is_available: bool | None = None
     sort_order: int | None = None
