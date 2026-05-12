@@ -42,11 +42,10 @@ export default function MenuPage() {
     }
   }, [visibleCategories, activeCategory]);
 
+  // Show search when user starts typing; hide when they clear it
   useEffect(() => {
     if (query.length > 0) setShowSearch(true);
-    const onScroll = () => setShowSearch(window.scrollY > 80 || query.length > 0);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    else if (query.length === 0) setShowSearch(false);
   }, [query]);
 
   const handleViewModeChange = (mode: ViewMode) => {
@@ -63,7 +62,7 @@ export default function MenuPage() {
   const handleCategoryChange = (id: string) => {
     setActiveCategory(id);
     setQuery('');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0 });
   };
 
   // Error states
@@ -108,12 +107,11 @@ export default function MenuPage() {
         minHeight: '100dvh',
         paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
         background: 'var(--cream-bg)',
-        overflowX: 'hidden',
         position: 'relative',
       }}
     >
       {/* Sticky header + search */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 30 }}>
+      <div data-sticky-header style={{ position: 'sticky', top: 0, zIndex: 30 }}>
         <MenuHeader
           restaurantName={data.restaurant.name}
           tableNumber={table}
@@ -124,6 +122,7 @@ export default function MenuPage() {
           onCategoryChange={handleCategoryChange}
           viewMode={viewMode}
           onViewModeChange={handleViewModeChange}
+          onSearchToggle={() => setShowSearch((prev) => !prev)}
         />
 
         <AnimatePresence>

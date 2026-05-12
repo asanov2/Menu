@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import type { MenuItem } from '@qrmenu/ui';
-import { TagBadge, formatPrice, Z_INDEX, ANIMATION } from '@qrmenu/ui';
+import { TagBadge, formatPrice, Z_INDEX, ANIMATION, getImageObjectPosition, getCleanImageUrl } from '@qrmenu/ui';
 
 interface ItemModalProps {
   item: MenuItem | null;
@@ -27,6 +27,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
     <AnimatePresence>
       {item && (
         <>
+          {/* Backdrop */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
@@ -44,6 +45,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
             }}
           />
 
+          {/* Bottom sheet */}
           <motion.div
             key="sheet"
             initial={{ y: '100%' }}
@@ -58,169 +60,170 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
               width: '100%',
               maxWidth: 600,
               margin: '0 auto',
-              background: 'var(--cream-bg)',
-              borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0',
+              background: 'var(--cream-surface)',
+              borderRadius: '20px 20px 0 0',
               zIndex: Z_INDEX.modalInner,
               maxHeight: '92dvh',
-              overflowY: 'auto',
-              WebkitOverflowScrolling: 'touch',
-              paddingBottom: 'env(safe-area-inset-bottom, 24px)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
               boxShadow: 'var(--shadow-modal)',
             }}
           >
-            {/* Handle */}
-            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 12, paddingBottom: 4 }}>
-              <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--cream-border)' }} />
+            {/* Drag handle */}
+            <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', paddingTop: 12, paddingBottom: 4 }}>
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--cream-border)' }} />
             </div>
 
-            {/* Close */}
+            {/* Close button */}
             <button
               onClick={onClose}
               style={{
                 position: 'absolute',
                 top: 12,
                 right: 16,
-                width: 44,
-                height: 44,
+                width: 32,
+                height: 32,
                 borderRadius: '50%',
-                background: 'var(--cream-muted)',
+                background: 'rgba(26,18,8,0.08)',
+                border: 'none',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 16,
-                color: 'var(--ink-secondary)',
-                cursor: 'pointer',
-                border: 'none',
+                color: 'var(--ink-primary)',
+                zIndex: 2,
               }}
             >
               ✕
             </button>
 
-            {/* Image */}
-            {item.image_url ? (
-              <img
-                src={item.image_url}
-                alt={item.name}
-                loading="lazy"
-                style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', display: 'block' }}
-              />
-            ) : (
-              <div
-                style={{
+            {/* Scrollable body */}
+            <div style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch', flex: 1 }}>
+              {/* Square image via paddingTop trick — always correct aspect ratio */}
+              {item.image_url ? (
+                <div style={{
                   width: '100%',
-                  height: 240,
+                  paddingTop: '100%',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                }}>
+                  <img
+                    src={getCleanImageUrl(item.image_url) ?? undefined}
+                    alt={item.name}
+                    loading="lazy"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      objectPosition: getImageObjectPosition(item.image_url),
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              ) : (
+                <div style={{
+                  width: '100%',
+                  height: 200,
                   background: 'linear-gradient(135deg, var(--cream-muted) 0%, var(--cream-border) 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 72,
-                }}
-              >
-                🍽️
-              </div>
-            )}
+                  fontSize: 64,
+                  flexShrink: 0,
+                }}>
+                  🍽️
+                </div>
+              )}
 
-            {/* Content */}
-            <div style={{ padding: '16px 20px 8px' }}>
-              {/* Tags */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-                {item.tags.map((tag) => (
-                  <TagBadge key={tag} tag={tag} />
-                ))}
-                {!item.is_available && (
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      padding: '2px 7px',
-                      borderRadius: 'var(--radius-sm)',
-                      fontSize: 9,
-                      fontWeight: 500,
-                      background: 'var(--cream-muted)',
-                      color: 'var(--ink-secondary)',
-                      border: '0.5px solid var(--cream-border)',
-                    }}
-                  >
-                    Нет в наличии
-                  </span>
+              {/* Content */}
+              <div style={{ padding: '16px 20px 24px' }}>
+                {/* Tags */}
+                {(item.tags ?? []).length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                    {(item.tags ?? []).map((tag) => (
+                      <TagBadge key={tag} tag={tag} />
+                    ))}
+                  </div>
                 )}
-              </div>
 
-              {/* Name */}
-              <div
-                style={{
+                {/* Name */}
+                <div style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: 600,
                   color: 'var(--ink-primary)',
-                  lineHeight: 1.2,
+                  lineHeight: 1.25,
                   marginBottom: 10,
-                }}
-              >
-                {item.name}
-              </div>
+                }}>
+                  {item.name}
+                </div>
 
-              {/* Description */}
-              {item.description && (
-                <div
-                  style={{
-                    fontSize: 14,
+                {/* Description */}
+                {item.description && (
+                  <div style={{
+                    fontSize: 13,
                     color: 'var(--ink-secondary)',
-                    lineHeight: 1.65,
+                    lineHeight: 1.6,
                     marginBottom: 16,
                     fontFamily: 'var(--font-ui)',
-                  }}
-                >
-                  {item.description}
+                  }}>
+                    {item.description}
+                  </div>
+                )}
+
+                {/* Divider */}
+                <div style={{ height: '0.5px', background: 'var(--cream-border)', marginBottom: 16 }} />
+
+                {/* Bottom row: prep time + price */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  {item.preparation_time ? (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      fontSize: 12,
+                      color: 'var(--ink-secondary)',
+                      fontFamily: 'var(--font-ui)',
+                    }}>
+                      <span>⏱</span>
+                      <span>~{item.preparation_time} {t('menu.minutes')}</span>
+                    </div>
+                  ) : <div />}
+
+                  <div style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 24,
+                    fontWeight: 600,
+                    color: 'var(--ink-primary)',
+                  }}>
+                    {formatPrice(item.price)}
+                  </div>
                 </div>
-              )}
 
-              {/* Prep time */}
-              {item.preparation_time && (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 13,
-                    color: 'var(--ink-tertiary)',
-                    marginBottom: 16,
-                  }}
-                >
-                  <span>🕐</span>
-                  <span>~{item.preparation_time} {t('menu.minutes')}</span>
-                </div>
-              )}
-
-              {/* Price */}
-              <div
-                style={{
-                  fontSize: 20,
-                  fontWeight: 500,
-                  color: 'var(--ink-primary)',
-                  fontFamily: 'var(--font-ui)',
-                }}
-              >
-                {formatPrice(item.price)}
-              </div>
-
-              {/* Unavailable banner */}
-              {!item.is_available && (
-                <div
-                  style={{
-                    marginTop: 16,
-                    padding: '12px 16px',
+                {/* Unavailable notice */}
+                {!item.is_available && (
+                  <div style={{
+                    marginTop: 12,
+                    padding: '10px 14px',
                     background: 'var(--cream-muted)',
-                    borderRadius: 'var(--radius-md)',
-                    textAlign: 'center',
-                    fontSize: 13,
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: 12,
                     color: 'var(--ink-secondary)',
                     fontFamily: 'var(--font-ui)',
-                  }}
-                >
-                  {t('menu.temporarilyUnavailable')}
-                </div>
-              )}
+                    textAlign: 'center',
+                  }}>
+                    {t('menu.temporarilyUnavailable')}
+                  </div>
+                )}
+
+                {/* iOS safe area */}
+                <div style={{ height: 'env(safe-area-inset-bottom, 8px)' }} />
+              </div>
             </div>
           </motion.div>
         </>

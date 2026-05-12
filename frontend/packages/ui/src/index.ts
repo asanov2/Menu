@@ -12,7 +12,7 @@ export type {
 } from './types/index';
 
 // Utils
-export { formatPrice, formatDate, daysUntil } from './utils/format';
+export { formatPrice, formatDate, daysUntil, getImageObjectPosition, getCleanImageUrl } from './utils/format';
 export { createApiClient, menuApi, adminApi } from './utils/axios';
 export { getApiErrorMessage, isAxiosError } from './utils/errors';
 

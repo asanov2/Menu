@@ -75,56 +75,100 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
         onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-card)'; }}
       >
         {/* Top row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {editName ? (
-              <div style={{ display: 'flex', gap: 6 }}>
-                <input
-                  value={nameValue}
-                  onChange={(e) => setNameValue(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleRename(); if (e.key === 'Escape') setEditName(false); }}
-                  autoFocus
-                  style={{ flex: 1, background: 'var(--cream-surface)', border: '0.5px solid var(--accent-gold)', borderRadius: 'var(--radius-md)', padding: '4px 8px', fontSize: 14, fontFamily: 'var(--font-ui)', outline: 'none' }}
-                />
-                <button onClick={handleRename} style={{ background: 'var(--ink-primary)', color: 'var(--cream-surface)', border: 'none', borderRadius: 'var(--radius-md)', padding: '4px 10px', cursor: 'pointer', fontSize: 12 }}>✓</button>
-              </div>
-            ) : (
+        {editName ? (
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <input
+              value={nameValue}
+              onChange={(e) => setNameValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleRename();
+                if (e.key === 'Escape') { setEditName(false); setNameValue(menu.name); }
+              }}
+              autoFocus
+              style={{
+                flex: 1,
+                background: 'var(--cream-surface)',
+                border: '0.5px solid var(--accent-gold)',
+                borderRadius: 'var(--radius-md)',
+                padding: '6px 10px',
+                fontSize: 14,
+                fontFamily: 'var(--font-ui)',
+                outline: 'none',
+                minWidth: 0,
+              }}
+            />
+            <button
+              onClick={handleRename}
+              style={{
+                background: 'var(--ink-primary)',
+                color: 'var(--cream-surface)',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                padding: '6px 14px',
+                cursor: 'pointer',
+                fontSize: 13,
+                fontFamily: 'var(--font-ui)',
+                fontWeight: 500,
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ✓ Сохранить
+            </button>
+            <button
+              onClick={() => { setEditName(false); setNameValue(menu.name); }}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 16,
+                color: 'var(--ink-tertiary)',
+                padding: '4px',
+                flexShrink: 0,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--ink-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {menu.name}
               </div>
-            )}
-            <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-              <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--cream-muted)', border: '0.5px solid var(--cream-border)', fontSize: 10, fontFamily: 'var(--font-ui)', color: 'var(--ink-secondary)' }}>
-                {LANG_LABEL[menu.language] ?? menu.language}
-              </span>
-              {menu.is_default && (
-                <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--tag-green-bg)', border: '0.5px solid var(--tag-green-border)', fontSize: 10, fontFamily: 'var(--font-ui)', color: 'var(--tag-green-text)' }}>
-                  По умолчанию
+              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--cream-muted)', border: '0.5px solid var(--cream-border)', fontSize: 10, fontFamily: 'var(--font-ui)', color: 'var(--ink-secondary)' }}>
+                  {LANG_LABEL[menu.language] ?? menu.language}
                 </span>
+                {menu.is_default && (
+                  <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--tag-green-bg)', border: '0.5px solid var(--tag-green-border)', fontSize: 10, fontFamily: 'var(--font-ui)', color: 'var(--tag-green-text)' }}>
+                    По умолчанию
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Three-dot menu — скрывается при редактировании */}
+            <div ref={menuRef} style={{ position: 'relative', flexShrink: 0 }}>
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--ink-tertiary)', padding: '2px 6px', lineHeight: 1 }}
+              >
+                ⋯
+              </button>
+              {menuOpen && (
+                <div style={{ position: 'absolute', right: 0, top: 28, background: 'var(--cream-surface)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-card)', zIndex: 10, minWidth: 140, overflow: 'hidden' }}>
+                  <button onClick={() => { setEditName(true); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--ink-primary)' }}>
+                    ✏️ Переименовать
+                  </button>
+                  <button onClick={() => { setConfirmDel(true); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--error-text)' }}>
+                    🗑 Удалить
+                  </button>
+                </div>
               )}
             </div>
           </div>
-
-          {/* Three-dot menu */}
-          <div ref={menuRef} style={{ position: 'relative', flexShrink: 0 }}>
-            <button
-              onClick={() => setMenuOpen((v) => !v)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--ink-tertiary)', padding: '2px 6px', lineHeight: 1 }}
-            >
-              ⋯
-            </button>
-            {menuOpen && (
-              <div style={{ position: 'absolute', right: 0, top: 28, background: 'var(--cream-surface)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-card)', zIndex: 10, minWidth: 140, overflow: 'hidden' }}>
-                <button onClick={() => { setEditName(true); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--ink-primary)' }}>
-                  ✏️ Переименовать
-                </button>
-                <button onClick={() => { setConfirmDel(true); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--error-text)' }}>
-                  🗑 Удалить
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
 
         {/* Item count */}
         <div style={{ fontSize: 13, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)' }}>

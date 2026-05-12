@@ -1,7 +1,7 @@
 // === FILE: frontend/packages/admin/src/pages/Menus/components/ItemRow.tsx ===
 import { useState, memo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { formatPrice, useToast, ConfirmModal } from '@qrmenu/ui';
+import { formatPrice, useToast, ConfirmModal, getImageObjectPosition, getCleanImageUrl } from '@qrmenu/ui';
 import type { MenuItem } from '@qrmenu/ui';
 import { toggleAvailable, deleteItem } from '../../../api/items';
 
@@ -61,7 +61,19 @@ function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowProps) {
       >
         {/* Image */}
         {item.image_url ? (
-          <img src={item.image_url} alt="" style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', objectFit: 'cover', display: 'block', flexShrink: 0 }} />
+          <img
+            src={getCleanImageUrl(item.image_url) ?? undefined}
+            alt=""
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 'var(--radius-sm)',
+              objectFit: 'cover',
+              objectPosition: getImageObjectPosition(item.image_url),
+              display: 'block',
+              flexShrink: 0,
+            }}
+          />
         ) : (
           <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', background: 'var(--cream-muted)', flexShrink: 0 }} />
         )}

@@ -15,6 +15,7 @@ interface MenuHeaderProps {
   onCategoryChange: (id: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
+  onSearchToggle?: () => void;
 }
 
 const LANGS: { code: Language; label: string }[] = [
@@ -33,6 +34,7 @@ export default function MenuHeader({
   onCategoryChange,
   viewMode,
   onViewModeChange,
+  onSearchToggle,
 }: MenuHeaderProps) {
   const { t } = useTranslation();
 
@@ -71,33 +73,55 @@ export default function MenuHeader({
           )}
         </div>
 
-        {/* Language switcher */}
-        <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-          {LANGS.map(({ code, label }) => {
-            const active = lang === code;
-            return (
-              <button
-                key={code}
-                onClick={() => onLangChange(code)}
-                style={{
-                  padding: '4px 7px',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: 11,
-                  fontFamily: 'var(--font-ui)',
-                  fontWeight: 500,
-                  background: active ? 'var(--accent-gold)' : 'transparent',
-                  color: active ? 'var(--sidebar-bg)' : 'var(--sidebar-muted)',
-                  border: 'none',
-                  cursor: 'pointer',
-                  minHeight: 28,
-                  transition: 'all 0.15s',
-                  WebkitTapHighlightColor: 'transparent',
-                }}
-              >
-                {label}
-              </button>
-            );
-          })}
+        {/* Search toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+          <button
+            onClick={onSearchToggle}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--sidebar-text)',
+              fontSize: 18,
+              padding: '4px 6px',
+              opacity: 0.75,
+              flexShrink: 0,
+              lineHeight: 1,
+              WebkitTapHighlightColor: 'transparent',
+            }}
+            aria-label="Поиск"
+          >
+            🔍
+          </button>
+
+          {/* Language switcher */}
+          <div style={{ display: 'flex', gap: 2 }}>
+            {LANGS.map(({ code, label }) => {
+              const active = lang === code;
+              return (
+                <button
+                  key={code}
+                  onClick={() => onLangChange(code)}
+                  style={{
+                    padding: '4px 7px',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: 11,
+                    fontFamily: 'var(--font-ui)',
+                    fontWeight: 500,
+                    background: active ? 'var(--accent-gold)' : 'transparent',
+                    color: active ? 'var(--sidebar-bg)' : 'var(--sidebar-muted)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    minHeight: 28,
+                    transition: 'all 0.15s',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 

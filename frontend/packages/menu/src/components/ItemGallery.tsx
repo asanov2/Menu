@@ -15,6 +15,7 @@ export default function ItemGallery({ items, onItemClick }: ItemGalleryProps) {
         gridTemplateColumns: '1fr 1fr 1fr',
         gap: 6,
         padding: '12px 16px',
+        alignItems: 'start',
       }}
     >
       {items.map((item, i) => (

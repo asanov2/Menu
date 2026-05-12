@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -42,6 +42,8 @@ interface ItemFormModalProps {
 }
 
 export default function ItemFormModal({ isOpen, item, categories, defaultCategoryId, onSave, onCancel, loading }: ItemFormModalProps) {
+  const [expanded, setExpanded] = useState(false);
+
   const { register, handleSubmit, reset, control, watch, setValue, getValues, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -57,6 +59,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
 
   useEffect(() => {
     if (isOpen) {
+      setExpanded(false);
       reset({
         name: item?.name ?? '',
         description: item?.description ?? '',
@@ -90,6 +93,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
     <AnimatePresence>
       {isOpen && (
         <>
+          {/* Backdrop */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
@@ -97,176 +101,304 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
             exit={{ opacity: 0 }}
             transition={{ duration: ANIMATION.fadeMs }}
             onClick={onCancel}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(26,18,8,0.5)', backdropFilter: 'blur(4px)', zIndex: Z_INDEX.modal }}
-          />
-          <motion.div
-            key="panel"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 32, stiffness: 300 }}
             style={{
               position: 'fixed',
-              top: 0,
-              right: 0,
+              inset: 0,
+              background: 'rgba(26,18,8,0.5)',
+              backdropFilter: 'blur(4px)',
+              zIndex: Z_INDEX.modal,
+            }}
+          />
+
+          {/* Bottom sheet */}
+          <motion.div
+            key="panel"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 280 }}
+            style={{
+              position: 'fixed',
               bottom: 0,
-              width: 420,
-              maxWidth: '100vw',
+              left: 0,
+              right: 0,
+              height: expanded ? '100dvh' : '92dvh',
+              maxHeight: '100dvh',
               background: 'var(--cream-bg)',
+              borderRadius: expanded ? 0 : '20px 20px 0 0',
               boxShadow: 'var(--shadow-modal)',
               zIndex: Z_INDEX.modalInner,
               display: 'flex',
               flexDirection: 'column',
-              overflowY: 'auto',
+              transition: 'height 0.3s ease, border-radius 0.3s ease',
+              maxWidth: 600,
+              margin: '0 auto',
             }}
           >
-            <div style={{ padding: '24px 24px 0', flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--ink-primary)' }}>
+            {/* Header */}
+            <div style={{ flexShrink: 0 }}>
+              <div style={{
+                width: 36,
+                height: 4,
+                background: 'var(--cream-border)',
+                borderRadius: 2,
+                margin: '12px auto 0',
+              }} />
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 20px 0',
+              }}>
+                <div style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 20,
+                  color: 'var(--ink-primary)',
+                }}>
                   {item ? 'Редактировать блюдо' : 'Новое блюдо'}
                 </div>
-                <button onClick={onCancel} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: 'var(--ink-tertiary)', padding: 4 }}>✕</button>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => setExpanded(prev => !prev)}
+                    title={expanded ? 'Свернуть' : 'На весь экран'}
+                    style={{
+                      background: 'var(--cream-muted)',
+                      border: '0.5px solid var(--cream-border)',
+                      borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer',
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 14,
+                      color: 'var(--ink-secondary)',
+                    }}
+                  >
+                    {expanded ? '⊡' : '⊞'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onCancel}
+                    style={{
+                      background: 'var(--cream-muted)',
+                      border: '0.5px solid var(--cream-border)',
+                      borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer',
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 16,
+                      color: 'var(--ink-secondary)',
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} style={{ flex: 1, padding: '0 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {/* Image */}
-              <Controller
-                name="image_url"
-                control={control}
-                render={({ field }) => <ImageUpload value={field.value} onChange={field.onChange} />}
-              />
-
-              {/* Name */}
-              <FormField label="Название блюда" error={errors.name?.message} required>
-                <input
-                  id="item-name"
-                  {...register('name')}
-                  {...nameFocus}
-                  placeholder="Название блюда"
-                  style={{ ...INPUT_STYLE, borderColor: errors.name ? 'var(--error-text)' : 'var(--cream-border)' }}
+            {/* Scrollable form body */}
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}
+            >
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                WebkitOverflowScrolling: 'touch',
+                padding: '16px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 14,
+              }}>
+                {/* Image */}
+                <Controller
+                  name="image_url"
+                  control={control}
+                  render={({ field }) => <ImageUpload value={field.value} onChange={field.onChange} />}
                 />
-              </FormField>
 
-              {/* Description */}
-              <FormField label="Описание">
-                <textarea
-                  id="item-description"
-                  {...register('description')}
-                  placeholder="Описание (необязательно)"
-                  rows={3}
-                  style={{ ...INPUT_STYLE, resize: 'vertical', minHeight: 72 }}
-                  onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
-                  onBlur={(e) => { e.target.style.borderColor = 'var(--cream-border)'; }}
-                />
-              </FormField>
-
-              {/* Price + Prep time */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <FormField label="Цена ₸" error={errors.price?.message} required>
+                {/* Name */}
+                <FormField label="Название блюда" error={errors.name?.message} required>
                   <input
-                    id="item-price"
-                    {...register('price')}
-                    {...priceFocus}
-                    type="number"
-                    min={1}
-                    max={9999999}
-                    step="0.01"
-                    placeholder="0"
-                    style={INPUT_STYLE}
+                    id="item-name"
+                    {...register('name')}
+                    {...nameFocus}
+                    placeholder="Название блюда"
+                    style={{ ...INPUT_STYLE, borderColor: errors.name ? 'var(--error-text)' : 'var(--cream-border)' }}
                   />
                 </FormField>
-                <FormField label="Время приг. (мин)">
-                  <input
-                    id="item-prep"
-                    {...register('preparation_time')}
-                    type="number"
-                    min={1}
-                    max={180}
-                    placeholder="—"
-                    style={INPUT_STYLE}
+
+                {/* Description */}
+                <FormField label="Описание">
+                  <textarea
+                    id="item-description"
+                    {...register('description')}
+                    placeholder="Описание (необязательно)"
+                    rows={3}
+                    style={{ ...INPUT_STYLE, resize: 'vertical', minHeight: 72 }}
                     onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
                     onBlur={(e) => { e.target.style.borderColor = 'var(--cream-border)'; }}
                   />
                 </FormField>
-              </div>
 
-              {/* Category */}
-              <FormField label="Категория" error={errors.category_id?.message} required>
-                <select
-                  id="item-category"
-                  {...register('category_id')}
-                  {...categoryFocus}
-                  style={{ ...INPUT_STYLE, appearance: 'none' }}
-                >
-                  <option value="">Выберите категорию</option>
-                  {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </FormField>
+                {/* Price + Prep time */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <FormField label="Цена ₸" error={errors.price?.message} required>
+                    <input
+                      id="item-price"
+                      {...register('price')}
+                      {...priceFocus}
+                      type="number"
+                      min={1}
+                      max={9999999}
+                      step="0.01"
+                      placeholder="0"
+                      style={INPUT_STYLE}
+                    />
+                  </FormField>
+                  <FormField label="Время приг. (мин)">
+                    <input
+                      id="item-prep"
+                      {...register('preparation_time')}
+                      type="number"
+                      min={1}
+                      max={180}
+                      placeholder="—"
+                      style={INPUT_STYLE}
+                      onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
+                      onBlur={(e) => { e.target.style.borderColor = 'var(--cream-border)'; }}
+                    />
+                  </FormField>
+                </div>
 
-              {/* Tags */}
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginBottom: 8 }}>Теги</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {ALL_TAGS.map((tag) => {
-                    const sel = tags?.includes(tag);
-                    return (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => toggleTag(tag)}
-                        style={{
-                          padding: '4px 12px',
-                          borderRadius: 'var(--radius-md)',
-                          border: sel ? 'none' : '0.5px solid var(--cream-border)',
-                          background: sel ? 'var(--ink-primary)' : 'var(--cream-surface)',
-                          color: sel ? 'var(--cream-bg)' : 'var(--ink-secondary)',
-                          fontSize: 12,
-                          fontFamily: 'var(--font-ui)',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s',
-                        }}
-                      >
-                        {TAG_LABELS[tag]}
-                      </button>
-                    );
-                  })}
+                {/* Category */}
+                <FormField label="Категория" error={errors.category_id?.message} required>
+                  <select
+                    id="item-category"
+                    {...register('category_id')}
+                    {...categoryFocus}
+                    style={{ ...INPUT_STYLE, appearance: 'none' }}
+                  >
+                    <option value="">Выберите категорию</option>
+                    {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </FormField>
+
+                {/* Tags */}
+                <div>
+                  <div style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginBottom: 8 }}>Теги</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {ALL_TAGS.map((tag) => {
+                      const sel = tags?.includes(tag);
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleTag(tag)}
+                          style={{
+                            padding: '4px 12px',
+                            borderRadius: 'var(--radius-md)',
+                            border: sel ? 'none' : '0.5px solid var(--cream-border)',
+                            background: sel ? 'var(--ink-primary)' : 'var(--cream-surface)',
+                            color: sel ? 'var(--cream-bg)' : 'var(--ink-secondary)',
+                            fontSize: 12,
+                            fontFamily: 'var(--font-ui)',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s',
+                          }}
+                        >
+                          {TAG_LABELS[tag]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Available toggle */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={isAvailable}
+                    onClick={() => setValue('is_available', !isAvailable)}
+                    style={{ width: 36, height: 20, borderRadius: 10, background: isAvailable ? 'var(--accent-gold)' : 'var(--cream-border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0, border: 'none', padding: 0 }}
+                  >
+                    <div style={{ position: 'absolute', top: 2, left: isAvailable ? 'calc(100% - 18px)' : 2, width: 16, height: 16, borderRadius: '50%', background: 'var(--cream-surface)', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                  </button>
+                  <span style={{ fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--ink-secondary)' }}>В наличии</span>
                 </div>
               </div>
 
-              {/* Available toggle */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {/* Fixed footer */}
+              <div style={{
+                flexShrink: 0,
+                padding: '12px 20px',
+                paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+                borderTop: '0.5px solid var(--cream-border)',
+                display: 'flex',
+                gap: 10,
+                background: 'var(--cream-bg)',
+              }}>
                 <button
                   type="button"
-                  role="switch"
-                  aria-checked={isAvailable}
-                  onClick={() => setValue('is_available', !isAvailable)}
-                  style={{ width: 36, height: 20, borderRadius: 10, background: isAvailable ? 'var(--accent-gold)' : 'var(--cream-border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0, border: 'none', padding: 0 }}
+                  onClick={onCancel}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'transparent',
+                    border: '1px solid var(--cream-border)',
+                    color: 'var(--ink-secondary)',
+                    fontSize: 14,
+                    fontFamily: 'var(--font-ui)',
+                    cursor: 'pointer',
+                  }}
                 >
-                  <div style={{ position: 'absolute', top: 2, left: isAvailable ? 'calc(100% - 18px)' : 2, width: 16, height: 16, borderRadius: '50%', background: 'var(--cream-surface)', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                  Отмена
                 </button>
-                <span style={{ fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--ink-secondary)' }}>В наличии</span>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    flex: 2,
+                    padding: '12px',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--ink-primary)',
+                    color: 'var(--cream-bg)',
+                    border: 'none',
+                    fontSize: 14,
+                    fontFamily: 'var(--font-ui)',
+                    fontWeight: 600,
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.7 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                  }}
+                >
+                  {loading && (
+                    <span style={{
+                      width: 14,
+                      height: 14,
+                      border: '2px solid rgba(255,255,255,0.4)',
+                      borderTopColor: 'white',
+                      borderRadius: '50%',
+                      animation: 'spin 0.6s linear infinite',
+                      display: 'inline-block',
+                    }} />
+                  )}
+                  Сохранить
+                </button>
               </div>
-
-              <div style={{ height: 24 }} />
             </form>
-
-            {/* Footer */}
-            <div style={{ padding: '16px 24px', borderTop: '0.5px solid var(--cream-border)', display: 'flex', gap: 10, justifyContent: 'flex-end', flexShrink: 0, background: 'var(--cream-bg)' }}>
-              <button type="button" onClick={onCancel} style={{ padding: '9px 18px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1px solid var(--ink-primary)', color: 'var(--ink-primary)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>
-                Отмена
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit(onSubmit)}
-                disabled={loading}
-                style={{ padding: '9px 18px', borderRadius: 'var(--radius-md)', background: 'var(--ink-primary)', color: 'var(--cream-bg)', border: 'none', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: 8 }}
-              >
-                {loading && <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'var(--cream-surface)', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />}
-                Сохранить
-              </button>
-            </div>
           </motion.div>
+
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </>
       )}
