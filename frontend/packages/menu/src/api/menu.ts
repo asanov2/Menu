@@ -3,11 +3,12 @@ import type { MenuPageResponse } from '@qrmenu/ui';
 
 export const getMenu = async (
   slug: string,
-  lang = 'ru'
+  lang = 'ru',
+  menuId?: string,
 ): Promise<MenuPageResponse> => {
-  const { data } = await menuApi.get<MenuPageResponse>(`/api/v1/menu/${slug}`, {
-    params: { lang },
-  });
+  const params: Record<string, string> = { lang };
+  if (menuId) params.menu_id = menuId;
+  const { data } = await menuApi.get<MenuPageResponse>(`/api/v1/menu/${slug}`, { params });
   return data;
 };
 

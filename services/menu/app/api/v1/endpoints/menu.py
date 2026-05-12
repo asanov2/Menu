@@ -30,14 +30,17 @@ router = APIRouter()
 async def get_menu(
     request: Request,
     slug: str,
+    menu_id: UUID | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ) -> MenuPageResponse:
-    cached = await get_cached_menu(slug)
-    if cached:
-        return MenuPageResponse.model_validate(cached)
+    # Only use cache for the default menu (no specific menu_id requested)
+    if menu_id is None:
+        cached = await get_cached_menu(slug)
+        if cached:
+            return MenuPageResponse.model_validate(cached)
 
     service = MenuService(db)
-    restaurant, menu = await service.get_full_menu(slug)
+    restaurant, menu = await service.get_full_menu(slug, menu_id=menu_id)
 
     visible_cats = [c for c in menu.categories if c.is_visible]
 
@@ -47,8 +50,9 @@ async def get_menu(
         categories=[CategoryResponse.model_validate(c) for c in visible_cats],
     )
 
-    # mode='json' serialises UUIDs to str for Redis storage
-    await set_cached_menu(slug, response.model_dump(mode="json"))
+    # Only cache the default menu response
+    if menu_id is None:
+        await set_cached_menu(slug, response.model_dump(mode="json"))
 
     device_type = request.headers.get("User-Agent", "unknown")[:50]
     publish_menu_event("menu_view", str(restaurant.id), device_type=device_type)

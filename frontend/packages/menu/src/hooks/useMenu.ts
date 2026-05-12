@@ -13,10 +13,11 @@ export const useMenu = () => {
 
   const [lang, setLang] = useState<string>(initialLang);
   const table = searchParams.get('table');
+  const menuId = searchParams.get('menu_id') ?? undefined;
 
   const query = useQuery<MenuPageResponse, Error>({
-    queryKey: ['menu', slug, lang],
-    queryFn: () => getMenu(slug!, lang),
+    queryKey: ['menu', slug, lang, menuId],
+    queryFn: () => getMenu(slug!, lang, menuId),
     staleTime: 5 * 60 * 1000,
     enabled: !!slug,
     retry: (count, err) => {

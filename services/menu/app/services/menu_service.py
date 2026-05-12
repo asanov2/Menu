@@ -53,9 +53,32 @@ class MenuService:
             )
         return menu
 
-    async def get_full_menu(self, slug: str) -> tuple[Restaurant, Menu]:
+    async def get_menu_by_id(self, restaurant_id: UUID, menu_id: UUID) -> Menu:
+        result = await self._db.execute(
+            select(Menu).where(
+                and_(
+                    Menu.id == menu_id,
+                    Menu.restaurant_id == restaurant_id,
+                    Menu.deleted_at == None,  # noqa: E711
+                )
+            )
+        )
+        menu = result.scalar_one_or_none()
+        if not menu:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Menu not found",
+            )
+        return menu
+
+    async def get_full_menu(
+        self, slug: str, menu_id: UUID | None = None
+    ) -> tuple[Restaurant, Menu]:
         restaurant = await self.get_restaurant_by_slug(slug)
-        menu = await self.get_default_menu(restaurant.id)
+        if menu_id:
+            menu = await self.get_menu_by_id(restaurant.id, menu_id)
+        else:
+            menu = await self.get_default_menu(restaurant.id)
         return restaurant, menu
 
     async def get_categories(self, restaurant_id: UUID, menu_id: UUID) -> list[Category]:
