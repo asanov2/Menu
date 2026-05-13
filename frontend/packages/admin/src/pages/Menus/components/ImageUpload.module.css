@@ -1,0 +1,129 @@
+.frame {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 280px;
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  background: var(--cream-muted);
+  border: 2px dashed var(--cream-border);
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  box-sizing: border-box;
+}
+
+.frameHasImage {
+  border: 2px solid var(--accent-gold);
+  cursor: grab;
+}
+
+.frameDragging {
+  cursor: grabbing;
+}
+
+.img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  display: block;
+}
+
+.dragHint {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-ui);
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.removeBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  border: none;
+  color: white;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.progressTrack {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 3;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent-gold);
+  transition: width 0.15s;
+}
+
+.emptyContent {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.emptyIcon {
+  font-size: 36px;
+}
+
+.emptyText {
+  font-size: 12px;
+  color: var(--ink-secondary);
+  font-family: var(--font-ui);
+  text-align: center;
+  padding: 0 16px;
+}
+
+.emptySubtext {
+  font-size: 10px;
+  color: var(--ink-tertiary);
+}
+
+.chooseBtn {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 8px auto 0;
+  padding: 8px;
+  background: var(--cream-muted);
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.fileInput {
+  display: none;
+}

@@ -1,0 +1,25 @@
+.wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.wrapperDragging {
+  opacity: 0.5;
+  background: var(--cream-muted);
+  box-shadow: var(--shadow-card);
+  scale: 1.01;
+}
+
+.dragHandle {
+  padding: 0 8px;
+  cursor: grab;
+  color: var(--ink-tertiary);
+  font-size: 14px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.itemWrapper {
+  flex: 1;
+}

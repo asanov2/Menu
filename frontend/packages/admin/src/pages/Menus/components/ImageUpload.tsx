@@ -2,6 +2,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { useToast } from '@qrmenu/ui';
 import { uploadImage } from '../../../api/upload';
+import styles from './ImageUpload.module.css';
 
 interface ImageUploadProps {
   value?: string;
@@ -217,21 +218,7 @@ export default function ImageUpload({ value, onChange, onPositionChange }: Image
       {/* Square crop frame */}
       <div
         ref={frameRef}
-        style={{
-          width: '100%',
-          aspectRatio: '1 / 1',
-          maxWidth: 280,
-          margin: '0 auto',
-          borderRadius: 'var(--radius-md)',
-          overflow: 'hidden',
-          position: 'relative',
-          background: 'var(--cream-muted)',
-          border: preview ? '2px solid var(--accent-gold)' : '2px dashed var(--cream-border)',
-          cursor: preview ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
-          userSelect: 'none',
-          touchAction: 'none',
-          boxSizing: 'border-box',
-        }}
+        className={`${styles.frame} ${preview ? (isDragging ? styles.frameDragging : styles.frameHasImage) : ''}`}
         onPointerDown={(e) => e.stopPropagation()}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
@@ -253,31 +240,14 @@ export default function ImageUpload({ value, onChange, onPositionChange }: Image
                 const img = e.currentTarget;
                 setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
               }}
+              className={styles.img}
               style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
                 objectPosition: `calc(50% + ${position.x}px) calc(50% + ${position.y}px)`,
-                pointerEvents: 'none',
-                display: 'block',
               }}
             />
 
             {!isDragging && (
-              <div style={{
-                position: 'absolute',
-                bottom: 8,
-                left: 0,
-                right: 0,
-                textAlign: 'center',
-                fontSize: 11,
-                color: 'rgba(255,255,255,0.9)',
-                fontFamily: 'var(--font-ui)',
-                pointerEvents: 'none',
-                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
-              }}>
+              <div className={styles.dragHint}>
                 ✥ Перетащите фото
               </div>
             )}
@@ -285,41 +255,24 @@ export default function ImageUpload({ value, onChange, onPositionChange }: Image
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); handleRemove(); }}
-              style={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                background: 'rgba(0,0,0,0.55)',
-                border: 'none',
-                color: 'white',
-                fontSize: 16,
-                lineHeight: 1,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 2,
-              }}
+              className={styles.removeBtn}
             >
               ×
             </button>
 
             {uploading && (
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: 'rgba(255,255,255,0.3)', zIndex: 3 }}>
-                <div style={{ height: '100%', background: 'var(--accent-gold)', width: `${progress}%`, transition: 'width 0.15s' }} />
+              <div className={styles.progressTrack}>
+                <div className={styles.progressFill} style={{ width: `${progress}%` }} />
               </div>
             )}
           </>
         ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <span style={{ fontSize: 36 }}>🖼️</span>
-            <span style={{ fontSize: 12, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', textAlign: 'center', padding: '0 16px' }}>
+          <div className={styles.emptyContent}>
+            <span className={styles.emptyIcon}>🖼️</span>
+            <span className={styles.emptyText}>
               Нажмите для загрузки
               <br />
-              <span style={{ fontSize: 10, color: 'var(--ink-tertiary)' }}>JPG, PNG, WEBP · до 5MB</span>
+              <span className={styles.emptySubtext}>JPG, PNG, WEBP · до 5MB</span>
             </span>
           </div>
         )}
@@ -328,21 +281,7 @@ export default function ImageUpload({ value, onChange, onPositionChange }: Image
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        style={{
-          display: 'block',
-          width: '100%',
-          maxWidth: 280,
-          margin: '8px auto 0',
-          padding: '8px',
-          background: 'var(--cream-muted)',
-          border: '0.5px solid var(--cream-border)',
-          borderRadius: 'var(--radius-sm)',
-          fontFamily: 'var(--font-ui)',
-          fontSize: 12,
-          color: 'var(--ink-secondary)',
-          cursor: 'pointer',
-          boxSizing: 'border-box',
-        }}
+        className={styles.chooseBtn}
       >
         {preview ? '📷 Заменить фото' : '📷 Выбрать фото'}
       </button>
@@ -351,7 +290,7 @@ export default function ImageUpload({ value, onChange, onPositionChange }: Image
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
-        style={{ display: 'none' }}
+        className={styles.fileInput}
         onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
       />
     </div>

@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ConfirmModal, useToast } from '@qrmenu/ui';
 import type { Menu } from '@qrmenu/ui';
 import { deleteMenu, updateMenu } from '../../../api/menus';
+import styles from './MenuCard.module.css';
 
 interface MenuCardProps {
   menu: Menu;
@@ -58,25 +59,10 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
 
   return (
     <>
-      <div
-        style={{
-          background: 'var(--cream-bg)',
-          border: '0.5px solid var(--cream-border)',
-          borderRadius: 'var(--radius-lg)',
-          boxShadow: 'var(--shadow-card)',
-          padding: 20,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-          position: 'relative',
-          transition: 'box-shadow 0.15s',
-        }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-modal)'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-card)'; }}
-      >
+      <div className={styles.card}>
         {/* Top row */}
         {editName ? (
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <div className={styles.editRow}>
             <input
               value={nameValue}
               onChange={(e) => setNameValue(e.target.value)}
@@ -85,63 +71,30 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
                 if (e.key === 'Escape') { setEditName(false); setNameValue(menu.name); }
               }}
               autoFocus
-              style={{
-                flex: 1,
-                background: 'var(--cream-surface)',
-                border: '0.5px solid var(--accent-gold)',
-                borderRadius: 'var(--radius-md)',
-                padding: '6px 10px',
-                fontSize: 14,
-                fontFamily: 'var(--font-ui)',
-                outline: 'none',
-                minWidth: 0,
-              }}
+              className={styles.nameInput}
             />
-            <button
-              onClick={handleRename}
-              style={{
-                background: 'var(--ink-primary)',
-                color: 'var(--cream-surface)',
-                border: 'none',
-                borderRadius: 'var(--radius-md)',
-                padding: '6px 14px',
-                cursor: 'pointer',
-                fontSize: 13,
-                fontFamily: 'var(--font-ui)',
-                fontWeight: 500,
-                flexShrink: 0,
-                whiteSpace: 'nowrap',
-              }}
-            >
+            <button onClick={handleRename} className={styles.saveBtn}>
               ✓ Сохранить
             </button>
             <button
               onClick={() => { setEditName(false); setNameValue(menu.name); }}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 16,
-                color: 'var(--ink-tertiary)',
-                padding: '4px',
-                flexShrink: 0,
-              }}
+              className={styles.cancelEditBtn}
             >
               ✕
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--ink-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div className={styles.nameRow}>
+            <div className={styles.nameContent}>
+              <div className={styles.menuName}>
                 {menu.name}
               </div>
-              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-                <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--cream-muted)', border: '0.5px solid var(--cream-border)', fontSize: 10, fontFamily: 'var(--font-ui)', color: 'var(--ink-secondary)' }}>
+              <div className={styles.badgesRow}>
+                <span className={styles.langBadge}>
                   {LANG_LABEL[menu.language] ?? menu.language}
                 </span>
                 {menu.is_default && (
-                  <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--tag-green-bg)', border: '0.5px solid var(--tag-green-border)', fontSize: 10, fontFamily: 'var(--font-ui)', color: 'var(--tag-green-text)' }}>
+                  <span className={styles.defaultBadge}>
                     По умолчанию
                   </span>
                 )}
@@ -149,19 +102,25 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
             </div>
 
             {/* Three-dot menu — скрывается при редактировании */}
-            <div ref={menuRef} style={{ position: 'relative', flexShrink: 0 }}>
+            <div ref={menuRef} className={styles.menuActionsRef}>
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--ink-tertiary)', padding: '2px 6px', lineHeight: 1 }}
+                className={styles.dotBtn}
               >
                 ⋯
               </button>
               {menuOpen && (
-                <div style={{ position: 'absolute', right: 0, top: 28, background: 'var(--cream-surface)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-card)', zIndex: 10, minWidth: 140, overflow: 'hidden' }}>
-                  <button onClick={() => { setEditName(true); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--ink-primary)' }}>
+                <div className={styles.dropdown}>
+                  <button
+                    onClick={() => { setEditName(true); setMenuOpen(false); }}
+                    className={styles.dropdownItem}
+                  >
                     ✏️ Переименовать
                   </button>
-                  <button onClick={() => { setConfirmDel(true); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--error-text)' }}>
+                  <button
+                    onClick={() => { setConfirmDel(true); setMenuOpen(false); }}
+                    className={`${styles.dropdownItem} ${styles.dropdownItemDelete}`}
+                  >
                     🗑 Удалить
                   </button>
                 </div>
@@ -171,21 +130,21 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
         )}
 
         {/* Item count */}
-        <div style={{ fontSize: 13, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)' }}>
+        <div className={styles.itemCount}>
           {itemCount} {itemCount === 1 ? 'блюдо' : itemCount < 5 ? 'блюда' : 'блюд'}
         </div>
 
         {/* Buttons */}
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className={styles.actionsRow}>
           <button
             onClick={() => navigate(`/menus/${menu.id}`)}
-            style={{ flex: 1, padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1px solid var(--ink-primary)', color: 'var(--ink-primary)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer', fontWeight: 500 }}
+            className={styles.btnOpen}
           >
             Открыть
           </button>
           <button
             onClick={() => navigate(`/menus/${menu.id}/qr`)}
-            style={{ flex: 1, padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '0.5px solid var(--cream-border)', color: 'var(--ink-secondary)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}
+            className={styles.btnQr}
           >
             QR-код
           </button>

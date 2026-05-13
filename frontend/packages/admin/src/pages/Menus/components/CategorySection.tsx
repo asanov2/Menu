@@ -21,6 +21,7 @@ import SortableItem from './SortableItem';
 import ItemFormModal from './ItemFormModal';
 import CategoryFormModal from './CategoryFormModal';
 import { updateCategory } from '../../../api/categories';
+import styles from './CategorySection.module.css';
 
 interface CategorySectionProps {
   category: Category;
@@ -112,23 +113,23 @@ export default function CategorySection({ category, allCategories, menuId, dragH
 
   return (
     <>
-      <div style={{ background: 'var(--cream-bg)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', marginBottom: 16, overflow: 'hidden' }}>
+      <div className={styles.card}>
         {/* Category header */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', borderBottom: '0.5px solid var(--cream-border)', gap: 10 }}>
-          <div {...dragHandleProps} style={{ cursor: 'grab', color: 'var(--ink-tertiary)', fontSize: 16, flexShrink: 0, userSelect: 'none' }}>⠿</div>
-          <div style={{ flex: 1, fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--ink-primary)' }}>
+        <div className={styles.header}>
+          <div {...dragHandleProps} className={styles.dragHandle}>⠿</div>
+          <div className={styles.catName}>
             {category.name}
           </div>
-          <span style={{ fontSize: 11, color: 'var(--ink-tertiary)', fontFamily: 'var(--font-ui)' }}>
+          <span className={styles.itemCount}>
             {items.length} блюд
           </span>
-          <button onClick={() => setEditCatOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--ink-tertiary)', padding: 4 }} title="Редактировать">✏️</button>
-          <button onClick={() => setConfirmDel(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--error-text)', padding: 4 }} title="Удалить">🗑</button>
+          <button onClick={() => setEditCatOpen(true)} className={styles.editBtn} title="Редактировать">✏️</button>
+          <button onClick={() => setConfirmDel(true)} className={styles.deleteBtn} title="Удалить">🗑</button>
         </div>
 
         {/* Items */}
         {items.length === 0 ? (
-          <div style={{ padding: '16px 24px' }}>
+          <div className={styles.emptyWrapper}>
             <EmptyState icon="🍽️" title="Нет блюд" description="Добавьте первое блюдо в эту категорию" />
           </div>
         ) : (
@@ -148,12 +149,12 @@ export default function CategorySection({ category, allCategories, menuId, dragH
         )}
 
         {/* Add item footer */}
-        <div style={{ padding: '10px 16px', borderTop: items.length > 0 ? '0.5px solid var(--cream-border)' : 'none' }}>
+        <div className={`${styles.footer} ${items.length > 0 ? styles.footerBordered : ''}`}>
           <button
             onClick={() => { setEditingItem(undefined); setItemFormOpen(true); }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', padding: '4px 0', display: 'flex', alignItems: 'center', gap: 6 }}
+            className={styles.addBtn}
           >
-            <span style={{ fontSize: 16 }}>+</span>
+            <span className={styles.addBtnPlus}>+</span>
             <span>Добавить блюдо</span>
           </button>
         </div>

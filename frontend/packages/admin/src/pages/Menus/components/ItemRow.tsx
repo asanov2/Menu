@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { formatPrice, useToast, ConfirmModal, getImageObjectPosition, getCleanImageUrl } from '@qrmenu/ui';
 import type { MenuItem } from '@qrmenu/ui';
 import { toggleAvailable, deleteItem } from '../../../api/items';
+import styles from './ItemRow.module.css';
 
 interface ItemRowProps {
   item: MenuItem;
@@ -49,42 +50,26 @@ function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowProps) {
 
   return (
     <>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '36px 1fr 80px 50px 32px 32px',
-          alignItems: 'center',
-          gap: 8,
-          padding: '8px 12px',
-          borderBottom: '0.5px solid var(--cream-border)',
-        }}
-      >
+      <div className={styles.row}>
         {/* Image */}
         {item.image_url ? (
           <img
             src={getCleanImageUrl(item.image_url) ?? undefined}
             alt=""
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 'var(--radius-sm)',
-              objectFit: 'cover',
-              objectPosition: getImageObjectPosition(item.image_url),
-              display: 'block',
-              flexShrink: 0,
-            }}
+            className={styles.thumb}
+            style={{ objectPosition: getImageObjectPosition(item.image_url) }}
           />
         ) : (
-          <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', background: 'var(--cream-muted)', flexShrink: 0 }} />
+          <div className={styles.thumbPlaceholder} />
         )}
 
         {/* Name */}
-        <div style={{ fontSize: 12, fontWeight: 500, fontFamily: 'var(--font-ui)', color: optimisticAvailable ? 'var(--ink-primary)' : 'var(--ink-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div className={`${styles.name} ${!optimisticAvailable ? styles.nameUnavailable : ''}`}>
           {item.name}
         </div>
 
         {/* Price */}
-        <div style={{ fontSize: 12, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)' }}>
+        <div className={styles.price}>
           {formatPrice(item.price)}
         </div>
 
@@ -93,38 +78,18 @@ function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowProps) {
           role="switch"
           aria-checked={optimisticAvailable}
           onClick={handleToggle}
-          style={{
-            width: 36,
-            height: 20,
-            borderRadius: 10,
-            background: optimisticAvailable ? 'var(--accent-gold)' : 'var(--cream-border)',
-            position: 'relative',
-            cursor: 'pointer',
-            transition: 'background 0.2s',
-            flexShrink: 0,
-            border: 'none',
-            padding: 0,
-          }}
+          className={`${styles.toggleTrack} ${optimisticAvailable ? styles.toggleTrackOn : ''}`}
         >
           <div
-            style={{
-              position: 'absolute',
-              top: 2,
-              left: optimisticAvailable ? 'calc(100% - 18px)' : 2,
-              width: 16,
-              height: 16,
-              borderRadius: '50%',
-              background: 'var(--cream-surface)',
-              transition: 'left 0.2s',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-            }}
+            className={styles.toggleThumb}
+            style={{ left: optimisticAvailable ? 'calc(100% - 18px)' : 2 }}
           />
         </button>
 
         {/* Edit */}
         <button
           onClick={() => onEdit(item)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--ink-tertiary)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          className={styles.actionBtn}
           title="Редактировать"
         >
           ✏️
@@ -133,7 +98,7 @@ function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowProps) {
         {/* Delete */}
         <button
           onClick={() => setConfirmDelete(true)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--error-text)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          className={styles.deleteBtn}
           title="Удалить"
         >
           🗑

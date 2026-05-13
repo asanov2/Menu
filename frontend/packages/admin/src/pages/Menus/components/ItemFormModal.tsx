@@ -4,8 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MenuItem, Category } from '@qrmenu/ui';
-import { INPUT_STYLE, useInputFocus, Z_INDEX, ANIMATION, FormField } from '@qrmenu/ui';
+import { INPUT_STYLE, useInputFocus, ANIMATION, FormField } from '@qrmenu/ui';
 import ImageUpload from './ImageUpload';
+import styles from './ItemFormModal.module.css';
 
 const SNAP_TRANSITION = 'transform 0.42s cubic-bezier(0.32,0.72,0,1), height 0.42s cubic-bezier(0.32,0.72,0,1), border-radius 0.3s ease';
 
@@ -151,13 +152,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
             exit={{ opacity: 0 }}
             transition={{ duration: ANIMATION.fadeMs }}
             onClick={onCancel}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(26,18,8,0.5)',
-              backdropFilter: 'blur(4px)',
-              zIndex: Z_INDEX.modal,
-            }}
+            className={styles.backdrop}
           />
 
           {/*
@@ -170,29 +165,15 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 280 }}
-            style={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              zIndex: Z_INDEX.modalInner,
-              maxWidth: 600,
-              margin: '0 auto',
-            }}
+            className={styles.panelWrapper}
           >
             {/*
               Inner div — handles snap state + drag offset.
               CSS transition runs on release; none while dragging.
             */}
             <div
+              className={`${styles.panel} ${isFullscreen ? styles.panelFullscreen : ''}`}
               style={{
-                height: isFullscreen ? '100dvh' : '92dvh',
-                background: 'var(--cream-bg)',
-                borderRadius: '20px 20px 0 0',
-                boxShadow: 'var(--shadow-modal)',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
                 transform: `translateY(${dragY}px)`,
                 transition: isDragging ? 'none' : SNAP_TRANSITION,
               }}
@@ -203,83 +184,33 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerCancel}
-                style={{
-                  flexShrink: 0,
-                  cursor: isDragging ? 'grabbing' : 'grab',
-                  touchAction: 'none',
-                  userSelect: 'none',
-                  WebkitUserSelect: 'none',
-                  paddingTop: 12,
-                }}
+                className={`${styles.dragZone} ${isDragging ? styles.dragZoneDragging : ''}`}
               >
                 {/* Visual drag handle bar */}
-                <div style={{
-                  width: 36,
-                  height: 4,
-                  borderRadius: 2,
-                  background: isDragging ? 'var(--ink-tertiary)' : 'var(--cream-border)',
-                  margin: '0 auto 12px',
-                  transition: 'background 0.15s',
-                }} />
+                <div className={`${styles.handle} ${isDragging ? styles.handleDragging : ''}`} />
 
                 {/* Header row — title + buttons */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '0 20px 16px',
-                }}>
-                  <div style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 20,
-                    color: 'var(--ink-primary)',
-                    fontWeight: 600,
-                  }}>
+                <div className={styles.headerRow}>
+                  <div className={styles.headerTitle}>
                     {item ? 'Редактировать блюдо' : 'Новое блюдо'}
                   </div>
 
                   <div
-                    style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+                    className={styles.headerButtons}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
                     <button
                       type="button"
                       onClick={() => { setSnapPoint(p => p === 'fullscreen' ? 'default' : 'fullscreen'); setDragY(0); }}
                       title={isFullscreen ? 'Свернуть' : 'На весь экран'}
-                      style={{
-                        background: 'var(--cream-muted)',
-                        border: '0.5px solid var(--cream-border)',
-                        borderRadius: 'var(--radius-sm)',
-                        cursor: 'pointer',
-                        width: 32,
-                        height: 32,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 14,
-                        color: 'var(--ink-secondary)',
-                        flexShrink: 0,
-                      }}
+                      className={styles.headerBtn}
                     >
                       {isFullscreen ? '⊡' : '⊞'}
                     </button>
                     <button
                       type="button"
                       onClick={onCancel}
-                      style={{
-                        background: 'var(--cream-muted)',
-                        border: '0.5px solid var(--cream-border)',
-                        borderRadius: 'var(--radius-sm)',
-                        cursor: 'pointer',
-                        width: 32,
-                        height: 32,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 16,
-                        color: 'var(--ink-secondary)',
-                        flexShrink: 0,
-                      }}
+                      className={`${styles.headerBtn} ${styles.headerBtnClose}`}
                     >
                       ✕
                     </button>
@@ -287,7 +218,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                 </div>
 
                 {/* Image upload */}
-                <div style={{ padding: '0 20px 16px' }}>
+                <div className={styles.imageWrapper}>
                   <Controller
                     name="image_url"
                     control={control}
@@ -300,17 +231,9 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
               {/* Scrollable form body */}
               <form
                 onSubmit={handleSubmit(onSubmit)}
-                style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}
+                className={styles.formBody}
               >
-                <div style={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  WebkitOverflowScrolling: 'touch',
-                  padding: '16px 20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 14,
-                }}>
+                <div className={styles.scrollArea}>
                   {/* Name */}
                   <FormField label="Название блюда" error={errors.name?.message} required>
                     <input
@@ -336,7 +259,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                   </FormField>
 
                   {/* Price + Prep time */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className={styles.priceGrid}>
                     <FormField label="Цена ₸" error={errors.price?.message} required>
                       <input
                         id="item-price"
@@ -380,8 +303,8 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
 
                   {/* Tags */}
                   <div>
-                    <div style={{ fontSize: 11, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginBottom: 8 }}>Теги</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    <div className={styles.tagsLabel}>Теги</div>
+                    <div className={styles.tagsRow}>
                       {ALL_TAGS.map((tag) => {
                         const sel = tags?.includes(tag);
                         return (
@@ -389,17 +312,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                             key={tag}
                             type="button"
                             onClick={() => toggleTag(tag)}
-                            style={{
-                              padding: '4px 12px',
-                              borderRadius: 'var(--radius-md)',
-                              border: sel ? 'none' : '0.5px solid var(--cream-border)',
-                              background: sel ? 'var(--ink-primary)' : 'var(--cream-surface)',
-                              color: sel ? 'var(--cream-bg)' : 'var(--ink-secondary)',
-                              fontSize: 12,
-                              fontFamily: 'var(--font-ui)',
-                              cursor: 'pointer',
-                              transition: 'all 0.15s',
-                            }}
+                            className={`${styles.tagBtn} ${sel ? styles.tagBtnSelected : ''}`}
                           >
                             {TAG_LABELS[tag]}
                           </button>
@@ -409,87 +322,44 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                   </div>
 
                   {/* Available toggle */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div className={styles.toggleRow}>
                     <button
                       type="button"
                       role="switch"
                       aria-checked={isAvailable}
                       onClick={() => setValue('is_available', !isAvailable)}
-                      style={{ width: 36, height: 20, borderRadius: 10, background: isAvailable ? 'var(--accent-gold)' : 'var(--cream-border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0, border: 'none', padding: 0 }}
+                      className={`${styles.toggleTrack} ${isAvailable ? styles.toggleTrackOn : ''}`}
                     >
-                      <div style={{ position: 'absolute', top: 2, left: isAvailable ? 'calc(100% - 18px)' : 2, width: 16, height: 16, borderRadius: '50%', background: 'var(--cream-surface)', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                      <div
+                        className={styles.toggleThumb}
+                        style={{ left: isAvailable ? 'calc(100% - 18px)' : 2 }}
+                      />
                     </button>
-                    <span style={{ fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--ink-secondary)' }}>В наличии</span>
+                    <span className={styles.toggleLabel}>В наличии</span>
                   </div>
                 </div>
 
                 {/* Fixed footer */}
-                <div style={{
-                  flexShrink: 0,
-                  padding: '12px 20px',
-                  paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
-                  borderTop: '0.5px solid var(--cream-border)',
-                  display: 'flex',
-                  gap: 10,
-                  background: 'var(--cream-bg)',
-                }}>
+                <div className={styles.footer}>
                   <button
                     type="button"
                     onClick={onCancel}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      borderRadius: 'var(--radius-md)',
-                      background: 'transparent',
-                      border: '1px solid var(--cream-border)',
-                      color: 'var(--ink-secondary)',
-                      fontSize: 14,
-                      fontFamily: 'var(--font-ui)',
-                      cursor: 'pointer',
-                    }}
+                    className={styles.btnCancel}
                   >
                     Отмена
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    style={{
-                      flex: 2,
-                      padding: '12px',
-                      borderRadius: 'var(--radius-md)',
-                      background: 'var(--ink-primary)',
-                      color: 'var(--cream-bg)',
-                      border: 'none',
-                      fontSize: 14,
-                      fontFamily: 'var(--font-ui)',
-                      fontWeight: 600,
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      opacity: loading ? 0.7 : 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 8,
-                    }}
+                    className={`${styles.btnSubmit} ${loading ? styles.btnSubmitLoading : ''}`}
                   >
-                    {loading && (
-                      <span style={{
-                        width: 14,
-                        height: 14,
-                        border: '2px solid rgba(255,255,255,0.4)',
-                        borderTopColor: 'white',
-                        borderRadius: '50%',
-                        animation: 'spin 0.6s linear infinite',
-                        display: 'inline-block',
-                      }} />
-                    )}
+                    {loading && <span className={styles.spinner} />}
                     Сохранить
                   </button>
                 </div>
               </form>
             </div>
           </motion.div>
-
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </>
       )}
     </AnimatePresence>

@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { INPUT_STYLE, useInputFocus, Z_INDEX, ANIMATION, FormField } from '@qrmenu/ui';
+import { INPUT_STYLE, useInputFocus, ANIMATION, FormField } from '@qrmenu/ui';
+import styles from './CategoryFormModal.module.css';
 
 const schema = z.object({ name: z.string().min(1, 'Обязательное поле').max(80) });
 type FormData = z.infer<typeof schema>;
@@ -41,17 +42,7 @@ export default function CategoryFormModal({ isOpen, initialName, onSave, onCance
           exit={{ opacity: 0 }}
           transition={{ duration: ANIMATION.fadeMs }}
           onClick={onCancel}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(26,18,8,0.5)',
-            backdropFilter: 'blur(4px)',
-            zIndex: Z_INDEX.modal,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0 24px',
-          }}
+          className={styles.backdrop}
         >
           <motion.div
             key="modal"
@@ -60,17 +51,9 @@ export default function CategoryFormModal({ isOpen, initialName, onSave, onCance
             exit={{ opacity: 0, scale: 0.95, y: 8 }}
             transition={ANIMATION.spring}
             onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 360,
-              background: 'var(--cream-bg)',
-              borderRadius: 'var(--radius-xl)',
-              padding: '24px',
-              boxShadow: 'var(--shadow-modal)',
-              zIndex: Z_INDEX.modalInner,
-            }}
+            className={styles.panel}
           >
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--ink-primary)', marginBottom: 18 }}>
+            <div className={styles.title}>
               {initialName ? 'Редактировать категорию' : 'Новая категория'}
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -83,18 +66,18 @@ export default function CategoryFormModal({ isOpen, initialName, onSave, onCance
                   style={{ ...INPUT_STYLE, borderColor: errors.name ? 'var(--error-text)' : 'var(--cream-border)' }}
                 />
               </FormField>
-              <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'flex-end' }}>
+              <div className={styles.actions}>
                 <button
                   type="button"
                   onClick={onCancel}
-                  style={{ padding: '9px 18px', borderRadius: 'var(--radius-md)', background: 'var(--cream-muted)', border: '0.5px solid var(--cream-border)', color: 'var(--ink-secondary)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}
+                  className={styles.btnCancel}
                 >
                   Отмена
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  style={{ padding: '9px 18px', borderRadius: 'var(--radius-md)', background: 'var(--ink-primary)', color: 'var(--cream-bg)', border: 'none', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}
+                  className={`${styles.btnSubmit} ${loading ? styles.btnSubmitLoading : ''}`}
                 >
                   {loading ? 'Сохранение...' : 'Сохранить'}
                 </button>

@@ -3,6 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { MenuItem } from '@qrmenu/ui';
 import ItemRow from './ItemRow';
+import styles from './SortableItem.module.css';
 
 interface SortableItemProps {
   item: MenuItem;
@@ -17,34 +18,21 @@ export default function SortableItem({ item, categoryId, menuId, onEdit }: Sorta
   return (
     <div
       ref={setNodeRef}
+      className={`${styles.wrapper} ${isDragging ? styles.wrapperDragging : ''}`}
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.5 : 1,
-        background: isDragging ? 'var(--cream-muted)' : 'transparent',
-        boxShadow: isDragging ? 'var(--shadow-card)' : 'none',
-        scale: isDragging ? '1.01' : '1',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
       }}
     >
       <div
         {...attributes}
         {...listeners}
-        style={{
-          padding: '0 8px',
-          cursor: 'grab',
-          color: 'var(--ink-tertiary)',
-          fontSize: 14,
-          flexShrink: 0,
-          userSelect: 'none',
-        }}
+        className={styles.dragHandle}
         title="Перетащить"
       >
         ⠿
       </div>
-      <div style={{ flex: 1 }}>
+      <div className={styles.itemWrapper}>
         <ItemRow item={item} categoryId={categoryId} menuId={menuId} onEdit={onEdit} />
       </div>
     </div>
