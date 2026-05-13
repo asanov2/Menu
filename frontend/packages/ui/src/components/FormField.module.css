@@ -1,0 +1,33 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.label {
+  font-size: 11px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.required {
+  color: var(--error-text);
+  margin-left: 2px;
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--ink-tertiary);
+  font-family: var(--font-ui);
+}
+
+.error {
+  font-size: 11px;
+  color: var(--error-text);
+  font-family: var(--font-ui);
+}

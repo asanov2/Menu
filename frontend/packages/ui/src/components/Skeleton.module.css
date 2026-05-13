@@ -1,0 +1,11 @@
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--cream-muted) 0%,
+    var(--cream-border) 50%,
+    var(--cream-muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite linear;
+  flex-shrink: 0;
+}

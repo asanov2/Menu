@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import styles from './SectionHeading.module.css';
 
 interface SectionHeadingProps {
   children: ReactNode;
@@ -10,19 +11,8 @@ interface SectionHeadingProps {
 export function SectionHeading({ children, size = 'md', action, style }: SectionHeadingProps) {
   const fontSize = { sm: 15, md: 18, lg: 22 }[size];
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: 16,
-      ...style,
-    }}>
-      <span style={{
-        fontFamily: 'var(--font-display)',
-        fontSize,
-        color: 'var(--ink-primary)',
-        lineHeight: 1.2,
-      }}>
+    <div className={styles.wrapper} style={style}>
+      <span className={styles.heading} style={{ fontSize }}>
         {children}
       </span>
       {action && <div>{action}</div>}

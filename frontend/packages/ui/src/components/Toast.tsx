@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useState,
@@ -6,7 +6,8 @@ import React, {
   ReactNode,
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TOAST_DURATION_MS, Z_INDEX } from '../constants';
+import { TOAST_DURATION_MS } from '../constants';
+import styles from './Toast.module.css';
 
 type ToastType = 'success' | 'error' | 'warning';
 
@@ -60,19 +61,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div
-        style={{
-          position: 'fixed',
-          top: 16,
-          right: 16,
-          zIndex: Z_INDEX.toast,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-          maxWidth: 320,
-          pointerEvents: 'none',
-        }}
-      >
+      <div className={styles.container}>
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
@@ -81,25 +70,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 60, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              className={styles.toast}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '10px 14px',
                 background: BG[toast.type],
                 border: `1px solid ${BORDER[toast.type]}`,
-                borderRadius: 'var(--radius-md)',
                 color: COLOR[toast.type],
-                fontSize: 13,
-                fontFamily: 'var(--font-ui)',
-                fontWeight: 500,
-                boxShadow: 'var(--shadow-card)',
-                pointerEvents: 'auto',
               }}
             >
-              <span style={{ fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
-                {ICON[toast.type]}
-              </span>
+              <span className={styles.icon}>{ICON[toast.type]}</span>
               <span>{toast.message}</span>
             </motion.div>
           ))}

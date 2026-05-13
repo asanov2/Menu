@@ -1,3 +1,5 @@
+import styles from './Skeleton.module.css';
+
 interface SkeletonProps {
   width?: string;
   height?: string;
@@ -11,16 +13,8 @@ export default function Skeleton({
 }: SkeletonProps) {
   return (
     <div
-      style={{
-        width,
-        height,
-        borderRadius,
-        background:
-          'linear-gradient(90deg, var(--cream-muted) 0%, var(--cream-border) 50%, var(--cream-muted) 100%)',
-        backgroundSize: '200% 100%',
-        animation: 'skeleton-shimmer 1.5s infinite linear',
-        flexShrink: 0,
-      }}
+      className={styles.skeleton}
+      style={{ width, height, borderRadius }}
     />
   );
 }

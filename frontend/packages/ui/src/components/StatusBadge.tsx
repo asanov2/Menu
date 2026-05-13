@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { PLAN, PLAN_STATUS, type Plan, type PlanStatus } from '../constants/plans';
+import styles from './StatusBadge.module.css';
 
 type BadgeVariant = Plan | PlanStatus | 'online' | 'offline' | 'failed' | 'pending';
 
@@ -38,20 +39,13 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, label, size = 'sm' }: StatusBadgeProps) {
-  const style = BADGE_STYLES[status] ?? BADGE_STYLES[PLAN_STATUS.EXPIRED];
+  const variantStyle = BADGE_STYLES[status] ?? BADGE_STYLES[PLAN_STATUS.EXPIRED];
   const text = label ?? BADGE_LABELS[status] ?? status;
   return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      padding: size === 'md' ? '4px 12px' : '2px 8px',
-      borderRadius: 'var(--radius-full)',
-      fontSize: size === 'md' ? 12 : 10,
-      fontFamily: 'var(--font-ui)',
-      fontWeight: 600,
-      whiteSpace: 'nowrap',
-      ...style,
-    }}>
+    <span
+      className={`${styles.badge} ${size === 'md' ? styles.md : styles.sm}`}
+      style={variantStyle}
+    >
       {text}
     </span>
   );

@@ -1,5 +1,5 @@
-import type { CSSProperties, ReactNode } from 'react';
-import { LABEL_STYLE } from '../styles/shared';
+import type { ReactNode } from 'react';
+import styles from './FormField.module.css';
 
 interface FormFieldProps {
   label: string;
@@ -11,21 +11,17 @@ interface FormFieldProps {
 
 export function FormField({ label, error, children, required, hint }: FormFieldProps) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
-      <label style={LABEL_STYLE}>
+    <div className={styles.wrapper}>
+      <label className={styles.label}>
         {label}
-        {required && <span style={{ color: 'var(--error-text)', marginLeft: 2 }}>*</span>}
+        {required && <span className={styles.required}>*</span>}
       </label>
       {children}
       {hint && !error && (
-        <span style={{ fontSize: 11, color: 'var(--ink-tertiary)', fontFamily: 'var(--font-ui)' }}>
-          {hint}
-        </span>
+        <span className={styles.hint}>{hint}</span>
       )}
       {error && (
-        <span style={{ fontSize: 11, color: 'var(--error-text)', fontFamily: 'var(--font-ui)' }}>
-          {error}
-        </span>
+        <span className={styles.error}>{error}</span>
       )}
     </div>
   );

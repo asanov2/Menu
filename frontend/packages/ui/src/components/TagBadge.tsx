@@ -1,4 +1,5 @@
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
+import styles from './TagBadge.module.css';
 
 const RU_TO_EN: Record<string, string> = {
   'Хит':    'popular',
@@ -26,22 +27,8 @@ export default function TagBadge({ tag }: TagBadgeProps) {
   if (!config) return null;
 
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 3,
-        padding: '2px 7px',
-        borderRadius: 'var(--radius-sm)',
-        fontSize: 9,
-        fontWeight: 500,
-        lineHeight: 1.5,
-        fontFamily: 'var(--font-ui)',
-        whiteSpace: 'nowrap',
-        ...config.style,
-      }}
-    >
-      <span style={{ fontSize: 9, lineHeight: 1 }}>{config.emoji}</span>
+    <span className={styles.badge} style={config.style}>
+      <span className={styles.emoji}>{config.emoji}</span>
       {config.label}
     </span>
   );
