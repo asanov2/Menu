@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { updateProfile, changePassword } from '../../api/auth';
 import { useAuthStore } from '../../store/authStore';
 import { useAuth } from '../../hooks/useAuth';
+import styles from './ProfilePage.module.css';
+import common from '../../styles/common.module.css';
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Обязательное поле'),
@@ -22,8 +24,6 @@ const passwordSchema = z.object({
   path: ['confirm_password'],
 });
 type PasswordData = z.infer<typeof passwordSchema>;
-
-const CARD_STYLE_LOCAL = { background: 'var(--cream-bg)', border: '0.5px solid var(--cream-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', padding: 24 };
 
 function initials(name: string): string {
   return name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
@@ -79,24 +79,20 @@ export default function ProfilePage() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 540 }}>
+    <div className={styles.page}>
       {/* Restaurant info */}
-      <div style={CARD_STYLE_LOCAL}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--accent-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700, color: 'var(--cream-surface)', fontFamily: 'var(--font-ui)', flexShrink: 0 }}>
+      <div className={common.card}>
+        <div className={styles.profileHeader}>
+          <div className={styles.avatar}>
             {restaurant ? initials(restaurant.name) : '?'}
           </div>
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--ink-primary)' }}>
-              {restaurant?.name}
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginTop: 2 }}>
-              {restaurant?.email}
-            </div>
+            <div className={styles.restaurantName}>{restaurant?.name}</div>
+            <div className={styles.restaurantEmail}>{restaurant?.email}</div>
           </div>
         </div>
 
-        <form onSubmit={hsp(onSaveProfile)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <form onSubmit={hsp(onSaveProfile)} className={styles.form}>
           <FormField label="Название ресторана" error={ep.name?.message} required>
             <input
               id="profile-name"
@@ -116,8 +112,12 @@ export default function ProfilePage() {
             />
           </FormField>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="submit" disabled={profileSaving} style={{ padding: '9px 20px', background: 'var(--ink-primary)', color: 'var(--cream-bg)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', fontWeight: 500, cursor: profileSaving ? 'not-allowed' : 'pointer', opacity: profileSaving ? 0.7 : 1 }}>
+          <div className={styles.formFooter}>
+            <button
+              type="submit"
+              disabled={profileSaving}
+              className={`${styles.btnSave} ${profileSaving ? styles.btnSaveLoading : ''}`}
+            >
               {profileSaving ? 'Сохранение...' : 'Сохранить'}
             </button>
           </div>
@@ -125,9 +125,9 @@ export default function ProfilePage() {
       </div>
 
       {/* Change password */}
-      <div style={CARD_STYLE_LOCAL}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--ink-primary)', marginBottom: 20 }}>Изменить пароль</div>
-        <form onSubmit={hspass(onChangePassword)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className={common.card}>
+        <div className={styles.sectionTitle}>Изменить пароль</div>
+        <form onSubmit={hspass(onChangePassword)} className={styles.form}>
           <FormField label="Текущий пароль" error={epass.old_password?.message} required>
             <input
               id="pass-old"
@@ -158,8 +158,12 @@ export default function ProfilePage() {
             />
           </FormField>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="submit" disabled={passSaving} style={{ padding: '9px 20px', background: 'var(--ink-primary)', color: 'var(--cream-bg)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', fontWeight: 500, cursor: passSaving ? 'not-allowed' : 'pointer', opacity: passSaving ? 0.7 : 1 }}>
+          <div className={styles.formFooter}>
+            <button
+              type="submit"
+              disabled={passSaving}
+              className={`${styles.btnSave} ${passSaving ? styles.btnSaveLoading : ''}`}
+            >
               {passSaving ? 'Изменение...' : 'Изменить пароль'}
             </button>
           </div>

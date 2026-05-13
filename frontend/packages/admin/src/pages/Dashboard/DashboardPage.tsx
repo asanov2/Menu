@@ -1,4 +1,4 @@
-import { CSSProperties, useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -6,34 +6,14 @@ import {
 import { EmptyState, Skeleton, PLAN, ANALYTICS_DAYS, TOP_ITEMS_LIMIT, SectionHeading } from '@qrmenu/ui';
 import { getOverview } from '../../api/analytics';
 import { useAuth } from '../../hooks/useAuth';
+import styles from './DashboardPage.module.css';
+import common from '../../styles/common.module.css';
 
 const DAYS_OPTIONS = [
   { label: '7д',  value: 7 },
   { label: '30д', value: 30 },
   { label: '90д', value: ANALYTICS_DAYS[PLAN.PRO] },
 ];
-
-const CARD_STYLE: CSSProperties = {
-  background: 'var(--cream-bg)',
-  border: '0.5px solid var(--cream-border)',
-  borderRadius: 'var(--radius-lg)',
-  boxShadow: 'var(--shadow-card)',
-  padding: '20px 24px',
-};
-
-const getDayButtonStyle = (isActive: boolean, isLocked: boolean): CSSProperties => ({
-  padding: '6px 14px',
-  borderRadius: 'var(--radius-md)',
-  border: '0.5px solid var(--cream-border)',
-  background: isActive ? 'var(--ink-primary)' : 'var(--cream-surface)',
-  color: isActive ? 'var(--cream-bg)' : isLocked ? 'var(--ink-tertiary)' : 'var(--ink-secondary)',
-  fontSize: 12,
-  fontFamily: 'var(--font-ui)',
-  cursor: isLocked ? 'not-allowed' : 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  gap: 4,
-});
 
 export default function DashboardPage() {
   const { restaurant } = useAuth();
@@ -63,11 +43,9 @@ export default function DashboardPage() {
   return (
     <div>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--ink-primary)', margin: 0 }}>
-          Дашборд
-        </h1>
-        <div style={{ display: 'flex', gap: 6 }}>
+      <div className={common.pageHeader}>
+        <h1 className={common.pageTitle}>Дашборд</h1>
+        <div className={styles.dayBtns}>
           {DAYS_OPTIONS.map((opt) => {
             const isLocked = opt.value === ANALYTICS_DAYS[PLAN.PRO] && restaurant?.plan !== PLAN.PRO;
             const isActive = days === opt.value;
@@ -75,9 +53,9 @@ export default function DashboardPage() {
               <button
                 key={opt.value}
                 onClick={() => !isLocked && setDays(opt.value)}
-                style={getDayButtonStyle(isActive, isLocked)}
+                className={`${styles.dayBtn} ${isActive ? styles.dayBtnActive : ''} ${isLocked ? styles.dayBtnLocked : ''}`}
               >
-                {isLocked && <span style={{ fontSize: 10 }}>🔒</span>}
+                {isLocked && <span className={styles.lockIcon}>🔒</span>}
                 {opt.label}
               </button>
             );
@@ -86,31 +64,27 @@ export default function DashboardPage() {
       </div>
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className={styles.statsGrid}>
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} style={CARD_STYLE}>
+            <div key={i} className={common.card}>
               <Skeleton height="14px" width="60%" />
-              <div style={{ marginTop: 10 }}><Skeleton height="28px" width="40%" /></div>
+              <div className={styles.skeletonSpacing}><Skeleton height="28px" width="40%" /></div>
             </div>
           ))
         ) : (
           statCards.map((stat) => (
-            <div key={stat.label} style={CARD_STYLE}>
-              <div style={{ fontSize: 10, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
-                {stat.label}
-              </div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--ink-primary)' }}>
-                {stat.value}
-              </div>
+            <div key={stat.label} className={common.card}>
+              <div className={styles.statLabel}>{stat.label}</div>
+              <div className={styles.statValue}>{stat.value}</div>
             </div>
           ))
         )}
       </div>
 
       {/* Chart */}
-      <div style={{ ...CARD_STYLE, marginBottom: 24 }}>
-        <div style={{ fontSize: 13, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)', marginBottom: 16 }}>Обзор просмотров</div>
+      <div className={`${common.card} ${styles.cardChart}`}>
+        <div className={styles.chartLabel}>Обзор просмотров</div>
         {isLoading ? (
           <Skeleton height="200px" />
         ) : (
@@ -130,34 +104,29 @@ export default function DashboardPage() {
       </div>
 
       {/* Top items */}
-      <div style={CARD_STYLE}>
+      <div className={common.card}>
         <SectionHeading size="sm">Топ блюда</SectionHeading>
         {isLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className={styles.skeletonList}>
             {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} height="36px" />)}
           </div>
         ) : !data?.top_items?.length ? (
           <EmptyState icon="📊" title="Нет данных" description="Пока нет просмотров за этот период" />
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, fontFamily: 'var(--font-ui)' }}>
+          <table className={common.table}>
             <thead>
-              <tr style={{ borderBottom: '0.5px solid var(--cream-border)' }}>
-                <th style={{ padding: '6px 8px', textAlign: 'left', fontSize: 11, color: 'var(--ink-secondary)', fontWeight: 500, width: 32 }}>#</th>
-                <th style={{ padding: '6px 8px', textAlign: 'left', fontSize: 11, color: 'var(--ink-secondary)', fontWeight: 500 }}>Название</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right', fontSize: 11, color: 'var(--ink-secondary)', fontWeight: 500 }}>Просмотров</th>
+              <tr className={common.theadRow}>
+                <th className={`${common.th} ${styles.thNum}`}>#</th>
+                <th className={common.th}>Название</th>
+                <th className={`${common.th} ${common.thRight}`}>Просмотров</th>
               </tr>
             </thead>
             <tbody>
               {data.top_items.slice(0, TOP_ITEMS_LIMIT).map((item, idx) => (
-                <tr
-                  key={item.item_id}
-                  style={{ borderBottom: '0.5px solid var(--cream-border)' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'var(--cream-muted)'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'; }}
-                >
-                  <td style={{ padding: '10px 8px', color: 'var(--ink-tertiary)' }}>{idx + 1}</td>
-                  <td style={{ padding: '10px 8px', color: 'var(--ink-primary)' }}>{item.item_id}</td>
-                  <td style={{ padding: '10px 8px', textAlign: 'right', color: 'var(--ink-secondary)' }}>{item.views}</td>
+                <tr key={item.item_id} className={common.tr}>
+                  <td className={common.td}>{idx + 1}</td>
+                  <td className={common.tdPrimary}>{item.item_id}</td>
+                  <td className={common.tdRight}>{item.views}</td>
                 </tr>
               ))}
             </tbody>

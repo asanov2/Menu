@@ -1,0 +1,79 @@
+.dayBtns {
+  display: flex;
+  gap: 6px;
+}
+
+.dayBtn {
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--cream-border);
+  background: var(--cream-surface);
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dayBtnActive {
+  background: var(--ink-primary);
+  color: var(--cream-bg);
+}
+
+.dayBtnLocked {
+  color: var(--ink-tertiary);
+  cursor: not-allowed;
+}
+
+.lockIcon {
+  font-size: 10px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statLabel {
+  font-size: 10px;
+  color: var(--ink-secondary);
+  font-family: var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--ink-primary);
+}
+
+.skeletonSpacing {
+  margin-top: 10px;
+}
+
+.cardChart {
+  margin-bottom: 24px;
+}
+
+.chartLabel {
+  font-size: 13px;
+  color: var(--ink-secondary);
+  font-family: var(--font-ui);
+  margin-bottom: 16px;
+}
+
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.thNum {
+  width: 32px;
+}

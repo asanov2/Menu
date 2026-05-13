@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { useToast, INPUT_STYLE, useInputFocus, FormField } from '@qrmenu/ui';
 import { login, getMe } from '../../api/auth';
 import { useAuthStore } from '../../store/authStore';
+import styles from './LoginPage.module.css';
 
 const schema = z.object({
   email: z.string().email('Введите корректный email'),
@@ -47,38 +48,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'var(--cream-warm)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 24,
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 380,
-          background: 'var(--cream-bg)',
-          border: '0.5px solid var(--cream-border)',
-          borderRadius: 'var(--radius-xl)',
-          boxShadow: 'var(--shadow-card)',
-          padding: '36px 32px 32px',
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--ink-primary)', marginBottom: 6 }}>
-            qrmenu.kz
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--ink-secondary)', fontFamily: 'var(--font-ui)' }}>
-            Панель управления рестораном
-          </div>
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <div className={styles.logoSection}>
+          <div className={styles.logoText}>qrmenu.kz</div>
+          <div className={styles.logoSubtitle}>Панель управления рестораном</div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
           <FormField label="Email" error={errors.email?.message} required>
             <input
               id="login-email"
@@ -91,7 +68,7 @@ export default function LoginPage() {
           </FormField>
 
           <FormField label="Пароль" error={errors.password?.message} required>
-            <div style={{ position: 'relative' }}>
+            <div className={styles.passwordWrapper}>
               <input
                 id="login-password"
                 {...register('password')}
@@ -103,7 +80,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPass((v) => !v)}
-                style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--ink-tertiary)', padding: 2 }}
+                className={styles.showPassBtn}
               >
                 {showPass ? '🙈' : '👁'}
               </button>
@@ -113,31 +90,16 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            style={{
-              width: '100%',
-              padding: '11px 16px',
-              background: loading ? 'var(--ink-secondary)' : 'var(--ink-primary)',
-              color: 'var(--cream-bg)',
-              border: 'none',
-              borderRadius: 'var(--radius-md)',
-              fontSize: 14,
-              fontWeight: 600,
-              fontFamily: 'var(--font-ui)',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              marginTop: 4,
-              transition: 'opacity 0.15s',
-            }}
-            onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLButtonElement).style.opacity = '0.88'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
+            className={`${styles.btnLogin} ${loading ? styles.btnLoginLoading : ''}`}
           >
             {loading ? 'Вход...' : 'Войти'}
           </button>
         </form>
       </div>
 
-      <div style={{ marginTop: 20, fontSize: 13, fontFamily: 'var(--font-ui)', color: 'var(--ink-secondary)' }}>
+      <div className={styles.footer}>
         14 дней бесплатно —{' '}
-        <span style={{ color: 'var(--ink-primary)', textDecoration: 'underline', cursor: 'pointer' }}>
+        <span className={styles.registerLink}>
           Зарегистрироваться
         </span>
       </div>

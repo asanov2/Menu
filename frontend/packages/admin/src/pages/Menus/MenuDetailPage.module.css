@@ -1,0 +1,62 @@
+.loadingSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+.breadcrumbLink {
+  color: var(--ink-secondary);
+  text-decoration: none;
+}
+
+.breadcrumbSep {
+  color: var(--ink-tertiary);
+}
+
+.breadcrumbCurrent {
+  color: var(--ink-primary);
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btnPreview {
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 0.5px solid var(--cream-border);
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btnPrimary {
+  padding: 8px 16px;
+  background: var(--ink-primary);
+  color: var(--cream-bg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+
+.sortableWrapper {
+  /* static base — transform/transition/opacity stay inline (dnd-kit) */
+}

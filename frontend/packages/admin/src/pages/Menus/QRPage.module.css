@@ -1,0 +1,143 @@
+@media print {
+  .noPrint { display: none !important; }
+  .qrCenter { display: flex; justify-content: center; margin: 40px auto; }
+}
+
+.loadingCenter {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.backRow {
+  margin-bottom: 20px;
+}
+
+.backLink {
+  color: var(--ink-secondary);
+  text-decoration: none;
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  background: var(--cream-bg);
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: 36px 40px;
+  max-width: 380px;
+  width: 100%;
+}
+
+.cardTitle {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--ink-primary);
+  margin-bottom: 24px;
+}
+
+.qrCenter {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.qrBg {
+  background: var(--cream-surface);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.hiddenSvg {
+  display: none;
+}
+
+.tableSection {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--cream-muted);
+  border-radius: var(--radius-lg);
+}
+
+.tableSectionLabel {
+  font-size: 12px;
+  color: var(--ink-secondary);
+  font-family: var(--font-ui);
+  margin-bottom: 10px;
+}
+
+.tableInputRow {
+  display: flex;
+  gap: 8px;
+}
+
+.tableInput {
+  flex: 1;
+  padding: 8px 10px;
+  background: var(--cream-surface);
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  outline: none;
+}
+
+.tableGenBtn {
+  padding: 8px 14px;
+  background: var(--ink-primary);
+  color: var(--cream-surface);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+
+.tableQrResult {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.tableQrBg {
+  background: var(--cream-surface);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.downloadRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.btnDownload {
+  flex: 1;
+  padding: 9px;
+  background: transparent;
+  border: 1px solid var(--ink-primary);
+  color: var(--ink-primary);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+
+.btnPrint {
+  flex: 1;
+  padding: 9px;
+  background: var(--ink-primary);
+  color: var(--cream-surface);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+}

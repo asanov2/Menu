@@ -22,6 +22,8 @@ import { useAuth } from '../../hooks/useAuth';
 import CategorySection from './components/CategorySection';
 import CategoryFormModal from './components/CategoryFormModal';
 import { useCategoryDnd } from './hooks/useCategoryDnd';
+import styles from './MenuDetailPage.module.css';
+import common from '../../styles/common.module.css';
 
 function SortableCategory({ category, allCategories, menuId }: { category: Category; allCategories: Category[]; menuId: string }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: category.id });
@@ -83,7 +85,7 @@ export default function MenuDetailPage() {
 
   if (menuLoading || catsLoading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className={styles.loadingSkeleton}>
         <Skeleton height="28px" width="200px" />
         {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} height="120px" borderRadius="var(--radius-lg)" />)}
       </div>
@@ -93,24 +95,24 @@ export default function MenuDetailPage() {
   return (
     <div>
       {/* Breadcrumb + actions */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-ui)', fontSize: 13 }}>
-          <Link to="/menus" style={{ color: 'var(--ink-secondary)', textDecoration: 'none' }}>Меню</Link>
-          <span style={{ color: 'var(--ink-tertiary)' }}>/</span>
-          <span style={{ color: 'var(--ink-primary)', fontWeight: 500 }}>{menu?.name ?? '...'}</span>
+      <div className={common.pageHeader}>
+        <div className={styles.breadcrumb}>
+          <Link to="/menus" className={styles.breadcrumbLink}>Меню</Link>
+          <span className={styles.breadcrumbSep}>/</span>
+          <span className={styles.breadcrumbCurrent}>{menu?.name ?? '...'}</span>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div className={styles.actions}>
           <a
             href={`${import.meta.env.VITE_APP_URL ?? ''}/menu/${restaurant?.slug}?menu_id=${id}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '0.5px solid var(--cream-border)', color: 'var(--ink-secondary)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}
+            className={styles.btnPreview}
           >
             👁 Предпросмотр
           </a>
           <button
             onClick={() => setCatFormOpen(true)}
-            style={{ padding: '8px 16px', background: 'var(--ink-primary)', color: 'var(--cream-bg)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}
+            className={styles.btnPrimary}
           >
             + Категория
           </button>
@@ -124,7 +126,7 @@ export default function MenuDetailPage() {
           title="Нет категорий"
           description="Добавьте первую категорию для организации блюд"
           action={
-            <button onClick={() => setCatFormOpen(true)} style={{ padding: '8px 16px', background: 'var(--ink-primary)', color: 'var(--cream-bg)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: 13, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>
+            <button onClick={() => setCatFormOpen(true)} className={styles.btnPrimary}>
               + Категория
             </button>
           }
