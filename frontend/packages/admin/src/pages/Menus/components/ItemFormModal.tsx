@@ -98,19 +98,22 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
 
   // ── Drag handle pointer events ──────────────────────────────────────────────
   const handlePointerDown = (e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     setIsDragging(true);
     dragStartClientY.current = e.clientY;
+    setDragY(0);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return;
     const delta = e.clientY - dragStartClientY.current;
-    if (snapPoint === 'default') {
-      setDragY(Math.max(-window.innerHeight * 0.1, delta));
-    } else {
-      setDragY(Math.max(0, delta));
-    }
+    setDragY(delta);
+  };
+
+  const handlePointerCancel = () => {
+    setIsDragging(false);
+    setDragY(0);
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -120,14 +123,14 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
     const vh = window.innerHeight;
 
     if (snapPoint === 'default') {
-      if (delta < -vh * 0.2) {
+      if (delta < -vh * 0.12) {
         setSnapPoint('fullscreen');
-      } else if (delta > vh * 0.25) {
+      } else if (delta > vh * 0.15) {
         onCancel();
         return;
       }
     } else {
-      if (delta > vh * 0.2) {
+      if (delta > vh * 0.12) {
         setSnapPoint('default');
       }
     }
@@ -173,7 +176,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
               left: 0,
               right: 0,
               zIndex: Z_INDEX.modalInner,
-              maxWidth: isFullscreen ? '100%' : 600,
+              maxWidth: 600,
               margin: '0 auto',
             }}
           >
@@ -185,7 +188,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
               style={{
                 height: isFullscreen ? '100dvh' : '92dvh',
                 background: 'var(--cream-bg)',
-                borderRadius: isFullscreen && dragY === 0 ? 0 : '20px 20px 0 0',
+                borderRadius: '20px 20px 0 0',
                 boxShadow: 'var(--shadow-modal)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -194,41 +197,51 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                 transition: isDragging ? 'none' : SNAP_TRANSITION,
               }}
             >
-              {/* Header */}
-              <div style={{ flexShrink: 0 }}>
-                {/* ── Drag handle (interactive zone) ── */}
-                <div
-                  onPointerDown={handlePointerDown}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={handlePointerUp}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingTop: 12,
-                    paddingBottom: 4,
-                    cursor: isDragging ? 'grabbing' : 'grab',
-                    touchAction: 'none',
-                    userSelect: 'none',
-                  }}
-                >
-                  <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--cream-border)' }} />
-                </div>
+              {/* ═══ DRAG ZONE — entire top area is draggable ═══ */}
+              <div
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerCancel}
+                style={{
+                  flexShrink: 0,
+                  cursor: isDragging ? 'grabbing' : 'grab',
+                  touchAction: 'none',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  paddingTop: 12,
+                }}
+              >
+                {/* Visual drag handle bar */}
+                <div style={{
+                  width: 36,
+                  height: 4,
+                  borderRadius: 2,
+                  background: isDragging ? 'var(--ink-tertiary)' : 'var(--cream-border)',
+                  margin: '0 auto 12px',
+                  transition: 'background 0.15s',
+                }} />
 
+                {/* Header row — title + buttons */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '8px 20px 0',
+                  padding: '0 20px 16px',
                 }}>
                   <div style={{
                     fontFamily: 'var(--font-display)',
                     fontSize: 20,
                     color: 'var(--ink-primary)',
+                    fontWeight: 600,
                   }}>
                     {item ? 'Редактировать блюдо' : 'Новое блюдо'}
                   </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+
+                  <div
+                    style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
                     <button
                       type="button"
                       onClick={() => { setSnapPoint(p => p === 'fullscreen' ? 'default' : 'fullscreen'); setDragY(0); }}
@@ -245,6 +258,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                         justifyContent: 'center',
                         fontSize: 14,
                         color: 'var(--ink-secondary)',
+                        flexShrink: 0,
                       }}
                     >
                       {isFullscreen ? '⊡' : '⊞'}
@@ -264,13 +278,24 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                         justifyContent: 'center',
                         fontSize: 16,
                         color: 'var(--ink-secondary)',
+                        flexShrink: 0,
                       }}
                     >
                       ✕
                     </button>
                   </div>
                 </div>
+
+                {/* Image upload */}
+                <div style={{ padding: '0 20px 16px' }}>
+                  <Controller
+                    name="image_url"
+                    control={control}
+                    render={({ field }) => <ImageUpload value={field.value} onChange={field.onChange} />}
+                  />
+                </div>
               </div>
+              {/* ═══ END DRAG ZONE ═══ */}
 
               {/* Scrollable form body */}
               <form
@@ -286,13 +311,6 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                   flexDirection: 'column',
                   gap: 14,
                 }}>
-                  {/* Image */}
-                  <Controller
-                    name="image_url"
-                    control={control}
-                    render={({ field }) => <ImageUpload value={field.value} onChange={field.onChange} />}
-                  />
-
                   {/* Name */}
                   <FormField label="Название блюда" error={errors.name?.message} required>
                     <input

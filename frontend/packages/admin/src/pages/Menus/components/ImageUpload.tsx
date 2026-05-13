@@ -232,6 +232,7 @@ export default function ImageUpload({ value, onChange, onPositionChange }: Image
           touchAction: 'none',
           boxSizing: 'border-box',
         }}
+        onPointerDown={(e) => e.stopPropagation()}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={endDrag}

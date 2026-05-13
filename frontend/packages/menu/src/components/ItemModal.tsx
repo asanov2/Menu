@@ -42,21 +42,22 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
 
   // ── Drag handle pointer events ──────────────────────────────────────────────
   const handlePointerDown = (e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     setIsDragging(true);
     dragStartClientY.current = e.clientY;
+    setDragY(0);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return;
     const delta = e.clientY - dragStartClientY.current;
-    if (snapPoint === 'default') {
-      // Slight resistance upward (small range before fullscreen snap), free downward
-      setDragY(Math.max(-window.innerHeight * 0.1, delta));
-    } else {
-      // Fullscreen: only drag downward
-      setDragY(Math.max(0, delta));
-    }
+    setDragY(delta);
+  };
+
+  const handlePointerCancel = () => {
+    setIsDragging(false);
+    setDragY(0);
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -66,18 +67,14 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
     const vh = window.innerHeight;
 
     if (snapPoint === 'default') {
-      if (delta < -vh * 0.15) {
-        // Drag up past 15vh threshold → fullscreen
+      if (delta < -vh * 0.12) {
         setSnapPoint('fullscreen');
-      } else if (delta > vh * 0.22) {
-        // Drag down past 22vh threshold → close
+      } else if (delta > vh * 0.15) {
         onClose();
         return;
       }
-      // Otherwise snap back to default
     } else {
-      // From fullscreen: drag down past 20vh → back to default
-      if (delta > vh * 0.2) {
+      if (delta > vh * 0.12) {
         setSnapPoint('default');
       }
     }
@@ -124,7 +121,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
               left: 0,
               right: 0,
               zIndex: Z_INDEX.modalInner,
-              maxWidth: isFullscreen ? '100%' : 600,
+              maxWidth: 600,
               margin: '0 auto',
             }}
           >
@@ -136,7 +133,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
               style={{
                 height: isFullscreen ? '100dvh' : '92dvh',
                 background: 'var(--cream-surface)',
-                borderRadius: isFullscreen && dragY === 0 ? 0 : '20px 20px 0 0',
+                borderRadius: '20px 20px 0 0',
                 boxShadow: 'var(--shadow-modal)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -145,77 +142,84 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                 transition: isDragging ? 'none' : SNAP_TRANSITION,
               }}
             >
-              {/* ── Drag handle (interactive zone) ── */}
+              {/* ═══ DRAG ZONE — entire top area is draggable ═══ */}
               <div
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerCancel}
                 style={{
                   flexShrink: 0,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingTop: 12,
-                  paddingBottom: 8,
                   cursor: isDragging ? 'grabbing' : 'grab',
                   touchAction: 'none',
                   userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  paddingTop: 12,
+                  position: 'relative',
                 }}
               >
-                <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--cream-border)' }} />
-              </div>
+                {/* Visual drag handle bar */}
+                <div style={{
+                  width: 36,
+                  height: 4,
+                  borderRadius: 2,
+                  background: isDragging ? 'var(--ink-tertiary)' : 'var(--cream-border)',
+                  margin: '0 auto 10px',
+                  transition: 'background 0.15s',
+                }} />
 
-              {/* ── Expand + Close buttons ── */}
-              <div style={{
-                position: 'absolute',
-                top: 8,
-                right: 12,
-                display: 'flex',
-                gap: 6,
-                zIndex: 3,
-              }}>
-                <button
-                  onClick={() => { setSnapPoint(p => p === 'fullscreen' ? 'default' : 'fullscreen'); setDragY(0); }}
-                  title={isFullscreen ? 'Свернуть' : 'На весь экран'}
+                {/* Buttons — top-right, stopPropagation prevents drag */}
+                <div
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    background: 'rgba(26,18,8,0.08)',
-                    border: 'none',
-                    cursor: 'pointer',
+                    position: 'absolute',
+                    top: 8,
+                    right: 12,
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 14,
-                    color: 'var(--ink-primary)',
+                    gap: 6,
+                    zIndex: 3,
                   }}
+                  onPointerDown={(e) => e.stopPropagation()}
                 >
-                  {isFullscreen ? '⊡' : '⊞'}
-                </button>
-                <button
-                  onClick={onClose}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    background: 'rgba(26,18,8,0.08)',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 16,
-                    color: 'var(--ink-primary)',
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
+                  <button
+                    onClick={() => { setSnapPoint(p => p === 'fullscreen' ? 'default' : 'fullscreen'); setDragY(0); }}
+                    title={isFullscreen ? 'Свернуть' : 'На весь экран'}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      background: 'rgba(26,18,8,0.08)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 14,
+                      color: 'var(--ink-primary)',
+                    }}
+                  >
+                    {isFullscreen ? '⊡' : '⊞'}
+                  </button>
+                  <button
+                    onClick={onClose}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      background: 'rgba(26,18,8,0.08)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 16,
+                      color: 'var(--ink-primary)',
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
 
-              {/* ── Scrollable body ── */}
-              <div style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch', flex: 1 }}>
-                {/* Square image via paddingTop trick */}
+                {/* Photo — inside drag zone, swipe on photo drags the modal */}
                 {item.image_url ? (
                   <div style={{
                     width: '100%',
@@ -223,11 +227,16 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                     position: 'relative',
                     overflow: 'hidden',
                     flexShrink: 0,
+                    cursor: isDragging ? 'grabbing' : 'grab',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
                   }}>
                     <img
                       src={getCleanImageUrl(item.image_url) ?? undefined}
                       alt={item.name}
                       loading="lazy"
+                      draggable={false}
+                      onDragStart={(e) => e.preventDefault()}
                       style={{
                         position: 'absolute',
                         inset: 0,
@@ -236,24 +245,31 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                         objectFit: 'cover',
                         objectPosition: getImageObjectPosition(item.image_url),
                         display: 'block',
+                        pointerEvents: 'none',
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none',
                       }}
                     />
                   </div>
                 ) : (
                   <div style={{
                     width: '100%',
-                    height: 200,
+                    height: 160,
                     background: 'linear-gradient(135deg, var(--cream-muted) 0%, var(--cream-border) 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 64,
-                    flexShrink: 0,
+                    pointerEvents: 'none',
                   }}>
                     🍽️
                   </div>
                 )}
+              </div>
+              {/* ═══ END DRAG ZONE ═══ */}
 
+              {/* ── Scrollable body ── */}
+              <div style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch', flex: 1 }}>
                 {/* Content */}
                 <div style={{ padding: '16px 20px 24px' }}>
                   {/* Tags */}
