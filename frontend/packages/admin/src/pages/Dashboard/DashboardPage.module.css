@@ -77,3 +77,43 @@
 .thNum {
   width: 32px;
 }
+
+.emptyAnalytics {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 32px 0;
+  text-align: center;
+}
+
+.emptyAnalytics span {
+  font-size: 28px;
+}
+
+.emptyAnalytics p {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+
+.emptyAnalytics small {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-tertiary);
+}
+
+.peakBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  margin-bottom: 12px;
+  background: var(--accent-gold-bg);
+  border: 1px solid var(--accent-gold-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--accent-gold);
+}

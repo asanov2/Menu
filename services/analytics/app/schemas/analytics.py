@@ -27,6 +27,7 @@ class TopItemSchema(BaseModel):
     item_id: UUID
     views: int
     rank: int
+    name: str | None = None
 
 
 class DailyRowSchema(BaseModel):

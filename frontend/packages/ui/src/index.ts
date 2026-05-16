@@ -8,6 +8,8 @@ export type {
   RestaurantAuth,
   OverviewStats,
   TopItem,
+  DailyStats,
+  PeakHourData,
   Subscription,
 } from './types/index';
 

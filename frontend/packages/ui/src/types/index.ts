@@ -62,6 +62,19 @@ export interface TopItem {
   item_id: string;
   views: number;
   rank: number;
+  name: string | null;
+}
+
+export interface DailyStats {
+  date: string;
+  menu_views: number;
+  item_views: number;
+  peak_hour: number | null;
+}
+
+export interface PeakHourData {
+  hour: number;
+  views: number;
 }
 
 export interface OverviewStats {

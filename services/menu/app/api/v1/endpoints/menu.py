@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -58,6 +58,27 @@ async def get_menu(
     publish_menu_event("menu_view", str(restaurant.id), device_type=device_type)
 
     return response
+
+
+@router.post("/{slug}/items/{item_id}/view", status_code=status.HTTP_204_NO_CONTENT)
+async def track_item_view(
+    request: Request,
+    slug: str,
+    item_id: UUID,
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    cached = await get_cached_menu(slug)
+    if cached:
+        restaurant_id = cached.get("restaurant", {}).get("id")
+    else:
+        service = MenuService(db)
+        try:
+            restaurant, _ = await service.get_full_menu(slug)
+            restaurant_id = str(restaurant.id)
+        except Exception:
+            return
+    device_type = request.headers.get("User-Agent", "unknown")[:50]
+    publish_menu_event("item_view", str(restaurant_id), item_id=str(item_id), device_type=device_type)
 
 
 @router.get("/{slug}/categories", response_model=list[CategoriesOnlyResponse])

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
 import { EmptyState, Skeleton, PLAN, ANALYTICS_DAYS, TOP_ITEMS_LIMIT, SectionHeading } from '@qrmenu/ui';
-import { getOverview } from '../../api/analytics';
+import { getOverview, getDailyStats, getPeakHours } from '../../api/analytics';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './DashboardPage.module.css';
 import common from '../../styles/common.module.css';
@@ -15,9 +15,36 @@ const DAYS_OPTIONS = [
   { label: '90д', value: ANALYTICS_DAYS[PLAN.PRO] },
 ];
 
+const TOOLTIP_STYLE = {
+  background: 'var(--cream-bg)',
+  border: '0.5px solid var(--cream-border)',
+  borderRadius: 8,
+  fontSize: 12,
+  fontFamily: 'var(--font-ui)',
+};
+
+const TICK = { fontSize: 10, fontFamily: 'var(--font-ui)', fill: 'var(--ink-tertiary)' };
+
+function getDateRange(days: number): { startDate: string; endDate: string } {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - (days - 1));
+  return {
+    endDate: end.toISOString().split('T')[0],
+    startDate: start.toISOString().split('T')[0],
+  };
+}
+
+function fmtDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return `${d.getDate()}.${d.getMonth() + 1}`;
+}
+
 export default function DashboardPage() {
   const { restaurant } = useAuth();
   const [days, setDays] = useState(7);
+
+  const { startDate, endDate } = getDateRange(days);
 
   const { data, isLoading } = useQuery({
     queryKey: ['overview', days],
@@ -25,19 +52,47 @@ export default function DashboardPage() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const peakHour = data?.most_common_peak_hour != null
+  const { data: dailyData, isLoading: isDailyLoading } = useQuery({
+    queryKey: ['analytics-daily', days],
+    queryFn: () => getDailyStats(startDate, endDate),
+    retry: false,
+  });
+
+  const { data: peakData, isLoading: isPeakLoading } = useQuery({
+    queryKey: ['analytics-peak', days],
+    queryFn: () => getPeakHours(days),
+    retry: false,
+  });
+
+  const hasData = (data?.total_menu_views ?? 0) > 0 || (data?.total_item_views ?? 0) > 0;
+  const hasDailyData = (dailyData ?? []).some(d => d.menu_views > 0 || d.item_views > 0);
+  const hasPeakData = (peakData ?? []).some(h => h.views > 0);
+
+  const peakHour = (peakData ?? []).reduce<{ hour: number; views: number } | null>(
+    (max, h) => (max === null || h.views > max.views) ? h : max,
+    null,
+  );
+
+  const peakHourStr = data?.most_common_peak_hour != null
     ? `${String(data.most_common_peak_hour).padStart(2, '0')}:00`
     : '—';
 
-  const chartData = data ? [
-    { label: 'Просмотры меню', value: data.total_menu_views },
-    { label: 'Просмотры блюд', value: data.total_item_views },
-  ] : [];
+  const dailyChartData = (dailyData ?? []).map(d => ({
+    date: fmtDate(d.date),
+    menu: d.menu_views,
+    items: d.item_views,
+  }));
+
+  const peakChartData = (peakData ?? []).map(h => ({
+    hour: `${String(h.hour).padStart(2, '0')}:00`,
+    views: h.views,
+    isPeak: peakHour !== null && h.hour === peakHour.hour && peakHour.views > 0,
+  }));
 
   const statCards = [
     { label: 'Просмотров меню', value: data?.total_menu_views ?? 0 },
     { label: 'Просмотров блюд', value: data?.total_item_views ?? 0 },
-    { label: 'Пиковый час',     value: peakHour },
+    { label: 'Пиковый час',     value: peakHourStr },
   ];
 
   return (
@@ -63,7 +118,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stat cards */}
+      {/* KPI cards */}
       <div className={styles.statsGrid}>
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
@@ -82,22 +137,58 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Chart */}
+      {/* Daily views chart */}
       <div className={`${common.card} ${styles.cardChart}`}>
-        <div className={styles.chartLabel}>Обзор просмотров</div>
-        {isLoading ? (
+        <div className={styles.chartLabel}>Просмотры по дням</div>
+        {isDailyLoading ? (
           <Skeleton height="200px" />
+        ) : !hasDailyData ? (
+          <div className={styles.emptyAnalytics}>
+            <span>📊</span>
+            <p>Аналитика появится после первых посещений меню</p>
+            <small>Данные обновляются ежедневно</small>
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+            <BarChart data={dailyChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="var(--cream-border)" />
-              <XAxis dataKey="label" tick={{ fontSize: 10, fontFamily: 'var(--font-ui)', fill: 'var(--ink-tertiary)' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-ui)', fill: 'var(--ink-tertiary)' }} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{ background: 'var(--cream-bg)', border: '0.5px solid var(--cream-border)', borderRadius: 8, fontSize: 12, fontFamily: 'var(--font-ui)' }}
-                cursor={{ fill: 'var(--cream-muted)' }}
-              />
-              <Bar dataKey="value" fill="var(--accent-gold)" radius={[4, 4, 0, 0]} />
+              <XAxis dataKey="date" tick={TICK} axisLine={false} tickLine={false} />
+              <YAxis tick={TICK} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'var(--cream-muted)' }} />
+              <Bar dataKey="menu" name="Просмотры меню" fill="var(--accent-gold)" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="items" name="Просмотры блюд" fill="var(--ink-tertiary)" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* Peak hours chart */}
+      <div className={`${common.card} ${styles.cardChart}`}>
+        {peakHour && peakHour.views > 0 && (
+          <div className={styles.peakBadge}>
+            🕐 Пиковый час: {String(peakHour.hour).padStart(2, '0')}:00 — {peakHour.views} просмотров
+          </div>
+        )}
+        <div className={styles.chartLabel}>Пиковые часы</div>
+        {isPeakLoading ? (
+          <Skeleton height="160px" />
+        ) : !hasPeakData ? (
+          <div className={styles.emptyAnalytics}>
+            <span>🕐</span>
+            <p>Нет данных о пиковых часах за этот период</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={peakChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+              <CartesianGrid vertical={false} stroke="var(--cream-border)" />
+              <XAxis dataKey="hour" tick={{ ...TICK, fontSize: 9 }} axisLine={false} tickLine={false} interval={2} />
+              <YAxis tick={TICK} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'var(--cream-muted)' }} />
+              <Bar dataKey="views" name="Просмотров" radius={[3, 3, 0, 0]}>
+                {peakChartData.map((entry, idx) => (
+                  <Cell key={idx} fill={entry.isPeak ? 'var(--accent-gold)' : 'var(--cream-border)'} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -109,6 +200,12 @@ export default function DashboardPage() {
         {isLoading ? (
           <div className={styles.skeletonList}>
             {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} height="36px" />)}
+          </div>
+        ) : !hasData ? (
+          <div className={styles.emptyAnalytics}>
+            <span>📊</span>
+            <p>Аналитика появится после первых посещений меню</p>
+            <small>Данные обновляются ежедневно</small>
           </div>
         ) : !data?.top_items?.length ? (
           <EmptyState icon="📊" title="Нет данных" description="Пока нет просмотров за этот период" />
@@ -125,7 +222,7 @@ export default function DashboardPage() {
               {data.top_items.slice(0, TOP_ITEMS_LIMIT).map((item, idx) => (
                 <tr key={item.item_id} className={common.tr}>
                   <td className={common.td}>{idx + 1}</td>
-                  <td className={common.tdPrimary}>{item.item_id}</td>
+                  <td className={common.tdPrimary}>{item.name ?? `Блюдо ${item.rank}`}</td>
                   <td className={common.tdRight}>{item.views}</td>
                 </tr>
               ))}

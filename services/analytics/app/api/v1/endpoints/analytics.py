@@ -19,6 +19,29 @@ MAX_DAYS_HARD = 90
 MAX_LIMIT = 20
 
 
+async def _enrich_names(
+    items: list[TopItemSchema],
+    restaurant_id: UUID,
+    db: AsyncSession,
+) -> None:
+    if not items:
+        return
+    ids = [str(item.item_id) for item in items]
+    result = await db.execute(
+        text("""
+            SELECT id::text, name
+            FROM items
+            WHERE id::text = ANY(:ids)
+              AND restaurant_id = :rid
+              AND deleted_at IS NULL
+        """),
+        {"ids": ids, "rid": restaurant_id},
+    )
+    name_map = {row.id: row.name for row in result.fetchall()}
+    for item in items:
+        item.name = name_map.get(str(item.item_id))
+
+
 def _enforce_plan(plan: str, requested_days: int) -> None:
     allowed = PLAN_HISTORY_DAYS.get(plan, 7)
     if requested_days > allowed:
@@ -80,6 +103,8 @@ async def overview(
         TopItemSchema(item_id=UUID(iid), views=v, rank=idx + 1)
         for idx, (iid, v) in enumerate(top_items_sorted)
     ]
+
+    await _enrich_names(top_items, restaurant_id, db)
 
     peak_counter: Counter = Counter(r.peak_hour for r in rows if r.peak_hour is not None)
     most_common_peak = peak_counter.most_common(1)[0][0] if peak_counter else None
@@ -170,10 +195,12 @@ async def top_items(
             merged[iid] = merged.get(iid, 0) + int(entry.get("views", 0))
 
     sorted_items = sorted(merged.items(), key=lambda x: x[1], reverse=True)[:limit]
-    return [
+    result_list = [
         TopItemSchema(item_id=UUID(iid), views=v, rank=idx + 1)
         for idx, (iid, v) in enumerate(sorted_items)
     ]
+    await _enrich_names(result_list, restaurant_id, db)
+    return result_list
 
 
 @router.get("/peak-hours", response_model=list[PeakHourRow])

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useMenu } from '../hooks/useMenu';
 import { useSearch } from '../hooks/useSearch';
+import { trackItemView } from '../api/menu';
 import type { MenuItem } from '@qrmenu/ui';
 import MenuHeader from '../components/MenuHeader';
 import SearchBar from '../components/SearchBar';
@@ -87,8 +88,13 @@ export default function MenuPage() {
   const currentCategory = visibleCategories.find((c) => c.id === activeCategory);
   const displayItems = filteredItems ?? currentCategory?.items ?? [];
 
+  const handleItemClick = (item: MenuItem) => {
+    setSelectedItem(item);
+    if (slug) trackItemView(slug, item.id);
+  };
+
   const renderItems = () => {
-    const props = { items: displayItems, onItemClick: setSelectedItem };
+    const props = { items: displayItems, onItemClick: handleItemClick };
     switch (viewMode) {
       case 'card':    return <ItemGrid {...props} />;
       case 'gallery': return <ItemGallery {...props} />;

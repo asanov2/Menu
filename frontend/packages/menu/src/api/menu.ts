@@ -15,3 +15,7 @@ export const getMenu = async (
 export const callWaiter = async (slug: string, table: number): Promise<void> => {
   await menuApi.post(`/api/v1/menu/${slug}/call-waiter`, { table });
 };
+
+export const trackItemView = (slug: string, itemId: string): void => {
+  menuApi.post(`/api/v1/menu/${slug}/items/${itemId}/view`).catch(() => {});
+};

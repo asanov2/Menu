@@ -1,13 +1,21 @@
-// === FILE: frontend/packages/admin/src/api/analytics.ts ===
 import { adminApi } from '@qrmenu/ui';
-import type { OverviewStats, TopItem } from '@qrmenu/ui';
+import type { OverviewStats, DailyStats, PeakHourData } from '@qrmenu/ui';
 
 export async function getOverview(periodDays: number): Promise<OverviewStats> {
   const { data } = await adminApi.get('/api/v1/analytics/overview', { params: { days: periodDays } });
   return data;
 }
 
-export async function getTopItems(periodDays: number, limit = 10): Promise<TopItem[]> {
-  const { data } = await adminApi.get('/api/v1/analytics/items/top', { params: { days: periodDays, limit } });
+export async function getDailyStats(startDate: string, endDate: string): Promise<DailyStats[]> {
+  const { data } = await adminApi.get('/api/v1/analytics/daily', {
+    params: { start: startDate, end: endDate },
+  });
+  return data;
+}
+
+export async function getPeakHours(periodDays: number): Promise<PeakHourData[]> {
+  const { data } = await adminApi.get('/api/v1/analytics/peak-hours', {
+    params: { days: periodDays },
+  });
   return data;
 }
