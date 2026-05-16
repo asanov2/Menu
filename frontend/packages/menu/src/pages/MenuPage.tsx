@@ -15,6 +15,7 @@ import SkeletonLoader from '../components/SkeletonLoader';
 import ViewToggle, { ViewMode } from '../components/ViewToggle';
 import MenuNotFound from './MenuNotFound';
 import MenuInactive from './MenuInactive';
+import styles from './MenuPage.module.css';
 
 type Language = 'ru' | 'kz' | 'en';
 const VIEW_PREF_KEY = 'menu_view_preference';
@@ -42,7 +43,6 @@ export default function MenuPage() {
     }
   }, [visibleCategories, activeCategory]);
 
-  // Show search when user starts typing; hide when they clear it
   useEffect(() => {
     if (query.length > 0) setShowSearch(true);
     else if (query.length === 0) setShowSearch(false);
@@ -65,20 +65,18 @@ export default function MenuPage() {
     window.scrollTo({ top: 0 });
   };
 
-  // Error states
   if (error) {
     const status = (error as { response?: { status?: number } })?.response?.status;
     if (status === 403) return <MenuInactive />;
     return <MenuNotFound />;
   }
 
-  // Loading
   if (isLoading) {
     return (
       <div>
-        <div style={{ background: 'var(--sidebar-bg)', height: 62 }} />
-        <div style={{ background: 'var(--ink-primary)', height: 44 }} />
-        <div style={{ background: 'var(--ink-primary)', height: 38 }} />
+        <div className={styles.loadingHeaderBg} />
+        <div className={styles.loadingTabsBg} />
+        <div className={styles.loadingToggleBg} />
         <SkeletonLoader viewMode={viewMode} />
       </div>
     );
@@ -99,19 +97,8 @@ export default function MenuPage() {
   };
 
   return (
-    <div
-      style={{
-        width: '100%',
-        maxWidth: 600,
-        margin: '0 auto',
-        minHeight: '100dvh',
-        paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
-        background: 'var(--cream-bg)',
-        position: 'relative',
-      }}
-    >
-      {/* Sticky header + search */}
-      <div data-sticky-header style={{ position: 'sticky', top: 0, zIndex: 30 }}>
+    <div className={styles.page}>
+      <div data-sticky-header className={styles.stickyHeader}>
         <MenuHeader
           restaurantName={data.restaurant.name}
           tableNumber={table}
@@ -132,7 +119,7 @@ export default function MenuPage() {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.18 }}
-              style={{ overflow: 'hidden' }}
+              className={styles.searchOverflow}
             >
               <SearchBar
                 value={query}
@@ -144,7 +131,6 @@ export default function MenuPage() {
         </AnimatePresence>
       </div>
 
-      {/* Items */}
       <AnimatePresence mode="wait">
         <motion.div
           key={`${activeCategory}-${viewMode}`}
@@ -157,32 +143,11 @@ export default function MenuPage() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Empty search */}
       {filteredItems !== null && filteredItems.length === 0 && (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '60px 20px',
-            gap: 12,
-            textAlign: 'center',
-          }}
-        >
-          <span style={{ fontSize: 48 }}>🍽️</span>
-          <div
-            style={{
-              fontSize: 18,
-              fontFamily: 'var(--font-display)',
-              fontWeight: 600,
-              color: 'var(--ink-primary)',
-            }}
-          >
-            Ничего не найдено
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--ink-secondary)' }}>
-            Попробуйте другой запрос
-          </div>
+        <div className={styles.emptySearch}>
+          <span className={styles.emptyIcon}>🍽️</span>
+          <div className={styles.emptyTitle}>Ничего не найдено</div>
+          <div className={styles.emptyDesc}>Попробуйте другой запрос</div>
         </div>
       )}
 

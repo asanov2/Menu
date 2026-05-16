@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { callWaiter } from '../api/menu';
 import { TOAST_DURATION_MS } from '@qrmenu/ui';
+import styles from './WaiterButton.module.css';
 
 interface WaiterButtonProps {
   slug: string;
@@ -32,30 +33,13 @@ export default function WaiterButton({ slug, table }: WaiterButtonProps) {
       whileTap={{ scale: 0.88 }}
       animate={{ scale: called ? [1, 1.15, 1] : 1 }}
       transition={{ duration: 0.3 }}
-      style={{
-        position: 'fixed',
-        bottom: 'calc(24px + env(safe-area-inset-bottom, 0px))',
-        right: 20,
-        width: 56,
-        height: 56,
-        borderRadius: '50%',
-        background: called ? 'var(--tag-green-text)' : 'var(--ink-primary)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: '0 4px 20px rgba(26,18,8,0.35)',
-        cursor: loading ? 'default' : 'pointer',
-        border: 'none',
-        zIndex: 50,
-        transition: 'background 0.3s',
-        WebkitTapHighlightColor: 'transparent',
-      }}
+      className={`${styles.btn} ${called ? styles.btnCalled : ''} ${loading ? styles.btnLoading : ''}`}
     >
       {called ? (
         <motion.span
           initial={{ scale: 0, rotate: -10 }}
           animate={{ scale: 1, rotate: 0 }}
-          style={{ fontSize: 22, lineHeight: 1 }}
+          className={styles.checkmark}
         >
           ✓
         </motion.span>

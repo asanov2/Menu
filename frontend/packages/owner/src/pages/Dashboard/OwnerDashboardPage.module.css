@@ -1,0 +1,59 @@
+.monthText {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.chartsRow {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 16px;
+}
+
+.planList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.planRowHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+}
+
+.planLabel {
+  color: var(--ink-primary);
+}
+
+.planCount {
+  color: var(--ink-secondary);
+}
+
+.planBarTrack {
+  height: 8px;
+  background: var(--cream-muted);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.planBarFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+/* StatusBadge for payments */
+.statusBadge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 500;
+  border-width: 1px;
+  border-style: solid;
+}

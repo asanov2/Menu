@@ -1,6 +1,6 @@
-// === FILE: frontend/packages/owner/src/components/DataTable.tsx ===
 import { ReactNode } from 'react'
 import { Skeleton, EmptyState } from '@qrmenu/ui'
+import styles from './DataTable.module.css'
 
 interface Column {
   key: string
@@ -24,25 +24,15 @@ export default function DataTable({
   emptyMessage,
 }: DataTableProps) {
   return (
-    <div style={{ width: '100%', overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+    <div className={styles.wrapper}>
+      <table className={styles.table}>
         <thead>
-          <tr style={{ borderBottom: '1px solid var(--cream-border)' }}>
+          <tr className={styles.theadRow}>
             {columns.map(col => (
               <th
                 key={col.key}
-                style={{
-                  width: col.width,
-                  padding: '8px 12px',
-                  textAlign: 'left',
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 10,
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  color: 'var(--ink-secondary)',
-                  whiteSpace: 'nowrap',
-                }}
+                className={styles.th}
+                style={{ width: col.width }}
               >
                 {col.label}
               </th>
@@ -54,7 +44,7 @@ export default function DataTable({
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={i}>
                 {columns.map(col => (
-                  <td key={col.key} style={{ padding: '6px 12px', height: 36 }}>
+                  <td key={col.key} className={styles.tdLoading}>
                     <Skeleton height="18px" width="80%" borderRadius="4px" />
                   </td>
                 ))}
@@ -62,7 +52,7 @@ export default function DataTable({
             ))
           ) : rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} style={{ padding: '32px 0' }}>
+              <td colSpan={columns.length} className={styles.tdEmpty}>
                 <EmptyState icon="📋" title={emptyMessage ?? 'Нет данных'} />
               </td>
             </tr>
@@ -71,32 +61,10 @@ export default function DataTable({
               <tr
                 key={i}
                 onClick={() => onRowClick?.(row)}
-                style={{
-                  height: 36,
-                  borderBottom: '1px solid var(--cream-border)',
-                  cursor: onRowClick ? 'pointer' : 'default',
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={e => {
-                  if (onRowClick)
-                    (e.currentTarget as HTMLTableRowElement).style.background =
-                      'var(--cream-muted)'
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLTableRowElement).style.background = ''
-                }}
+                className={`${styles.tr} ${onRowClick ? styles.trClickable : ''}`}
               >
                 {columns.map(col => (
-                  <td
-                    key={col.key}
-                    style={{
-                      padding: '0 12px',
-                      fontFamily: 'var(--font-ui)',
-                      fontSize: 12,
-                      color: 'var(--ink-primary)',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
+                  <td key={col.key} className={styles.td}>
                     {row[col.key]}
                   </td>
                 ))}

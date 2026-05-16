@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import styles from './ViewToggle.module.css';
 
 export type ViewMode = 'list' | 'card' | 'gallery';
 
@@ -17,42 +18,17 @@ export default function ViewToggle({ viewMode, onViewModeChange }: ViewTogglePro
   const { t } = useTranslation();
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 4,
-        padding: '6px 16px 8px',
-        background: 'var(--ink-primary)',
-      }}
-    >
-      {VIEWS.map(({ mode, icon, key }) => {
-        const active = viewMode === mode;
-        return (
-          <button
-            key={mode}
-            onClick={() => onViewModeChange(mode)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              padding: '4px 10px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: 10,
-              fontFamily: 'var(--font-ui)',
-              fontWeight: 500,
-              background: active ? 'var(--sidebar-bg)' : 'transparent',
-              color: active ? 'var(--sidebar-text)' : 'var(--sidebar-muted)',
-              border: active ? 'none' : '0.5px solid rgba(255,255,255,0.15)',
-              cursor: 'pointer',
-              minHeight: 28,
-              transition: 'all 0.15s',
-            }}
-          >
-            <span style={{ fontSize: 11 }}>{icon}</span>
-            <span>{t(key)}</span>
-          </button>
-        );
-      })}
+    <div className={styles.bar}>
+      {VIEWS.map(({ mode, icon, key }) => (
+        <button
+          key={mode}
+          onClick={() => onViewModeChange(mode)}
+          className={`${styles.viewBtn} ${viewMode === mode ? styles.viewBtnActive : ''}`}
+        >
+          <span className={styles.viewIcon}>{icon}</span>
+          <span>{t(key)}</span>
+        </button>
+      ))}
     </div>
   );
 }

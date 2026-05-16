@@ -1,8 +1,9 @@
-// === FILE: frontend/packages/owner/src/pages/System/SystemPage.tsx ===
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@qrmenu/ui'
 import { getSystemHealth } from '../../api/owner'
 import StatusDot from '../../components/StatusDot'
+import common from '../../styles/common.module.css'
+import styles from './SystemPage.module.css'
 
 export default function SystemPage() {
   const { data: health, dataUpdatedAt } = useQuery({
@@ -22,75 +23,22 @@ export default function SystemPage() {
     : '—'
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 22,
-              fontWeight: 600,
-              color: 'var(--ink-primary)',
-              margin: 0,
-            }}
-          >
-            Статус системы
-          </h2>
-          <p
-            style={{
-              fontFamily: 'var(--font-ui)',
-              fontSize: 11,
-              color: 'var(--ink-secondary)',
-              margin: '4px 0 0',
-            }}
-          >
-            Обновляется каждые 30 секунд
-          </p>
+    <div className={common.pageStack} style={{ gap: 20 }}>
+      <div className={styles.pageHeader}>
+        <div className={styles.titleBlock}>
+          <h2 className={styles.systemTitle}>Статус системы</h2>
+          <p className={styles.systemSubtitle}>Обновляется каждые 30 секунд</p>
         </div>
-        <span
-          style={{
-            fontFamily: 'var(--font-ui)',
-            fontSize: 11,
-            color: 'var(--ink-secondary)',
-            marginTop: 4,
-          }}
-        >
-          Последняя проверка: {lastUpdated}
-        </span>
+        <span className={styles.lastChecked}>Последняя проверка: {lastUpdated}</span>
       </div>
 
       {hasOffline && (
-        <div
-          style={{
-            padding: '12px 16px',
-            background: 'var(--error-bg)',
-            border: '1px solid var(--error-border)',
-            borderRadius: 'var(--radius-sm)',
-            fontFamily: 'var(--font-ui)',
-            fontSize: 13,
-            color: 'var(--error-text)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
+        <div className={styles.errorAlert}>
           ⚠️ Обнаружены проблемы с сервисами
         </div>
       )}
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: 12,
-        }}
-      >
+      <div className={styles.servicesGrid}>
         {health
           ? health.services.map(svc => {
               const isOffline = svc.status === 'offline'
@@ -101,58 +49,15 @@ export default function SystemPage() {
               return (
                 <div
                   key={svc.name}
-                  style={{
-                    background: isOffline ? 'var(--error-bg)' : 'var(--cream-surface)',
-                    border: `0.5px solid ${isOffline ? 'var(--error-border)' : 'var(--cream-border)'}`,
-                    borderRadius: 'var(--radius-md)',
-                    padding: '16px 20px',
-                    boxShadow: 'var(--shadow-card)',
-                  }}
+                  className={`${styles.serviceCard} ${isOffline ? styles.serviceCardOffline : ''}`}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: 10,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-ui)',
-                        fontSize: 13,
-                        fontWeight: 500,
-                        color: 'var(--ink-primary)',
-                      }}
-                    >
-                      {svc.name}
-                    </span>
+                  <div className={styles.serviceTop}>
+                    <span className={styles.serviceName}>{svc.name}</span>
                     <StatusDot status={svc.status} showLabel />
                   </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-ui)',
-                        fontSize: 11,
-                        color: 'var(--ink-secondary)',
-                      }}
-                    >
-                      Последняя проверка: {checkedAt}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-ui)',
-                        fontSize: 11,
-                        color: 'var(--ink-secondary)',
-                        fontWeight: 500,
-                      }}
-                    >
+                  <div className={styles.serviceBottom}>
+                    <span className={styles.serviceTime}>Последняя проверка: {checkedAt}</span>
+                    <span className={styles.serviceMs}>
                       {svc.response_ms != null ? `${svc.response_ms}ms` : '—'}
                     </span>
                   </div>

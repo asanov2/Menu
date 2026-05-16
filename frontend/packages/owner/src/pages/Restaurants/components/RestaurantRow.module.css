@@ -1,0 +1,68 @@
+.tr {
+  height: 44px;
+  border-bottom: 1px solid var(--cream-border);
+}
+
+.tdName {
+  padding: 8px 12px;
+}
+
+.nameContent {
+  display: block;
+}
+
+.nameContentInactive {
+  opacity: 0.6;
+}
+
+.nameTitle {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-primary);
+}
+
+.nameSlug {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--ink-secondary);
+}
+
+.planSelect {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  background: var(--cream-bg);
+  color: var(--ink-primary);
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.toggleBtn {
+  padding: 4px 10px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.toggleBtnDeactivate {
+  border-color: var(--error-border);
+  background: var(--tag-red-bg);
+  color: var(--tag-red-text);
+  cursor: pointer;
+}
+
+.toggleBtnActivate {
+  border-color: var(--tag-green-border);
+  background: var(--tag-green-bg);
+  color: var(--tag-green-text);
+  cursor: pointer;
+}
+
+.toggleBtnPending {
+  cursor: not-allowed;
+}

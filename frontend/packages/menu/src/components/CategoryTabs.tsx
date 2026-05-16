@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import type { Category } from '@qrmenu/ui';
+import styles from './CategoryTabs.module.css';
 
 interface CategoryTabsProps {
   categories: Category[];
@@ -19,17 +20,7 @@ export default function CategoryTabs({ categories, activeId, onSelect }: Categor
   }, [activeId]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        display: 'flex',
-        overflowX: 'auto',
-        overflowY: 'hidden',
-        background: 'var(--ink-primary)',
-        padding: '0 16px',
-        WebkitOverflowScrolling: 'touch',
-      }}
-    >
+    <div ref={containerRef} className={styles.container}>
       {categories
         .filter((c) => c.is_visible)
         .map((cat) => {
@@ -39,22 +30,7 @@ export default function CategoryTabs({ categories, activeId, onSelect }: Categor
               key={cat.id}
               data-active={active}
               onClick={() => onSelect(cat.id)}
-              style={{
-                flexShrink: 0,
-                padding: '0 12px',
-                height: 44,
-                fontSize: 11,
-                fontFamily: 'var(--font-ui)',
-                fontWeight: active ? 500 : 400,
-                color: active ? 'var(--sidebar-text)' : 'var(--sidebar-muted)',
-                background: 'none',
-                border: 'none',
-                borderBottom: active ? '2px solid var(--accent-gold)' : '2px solid transparent',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'color 0.15s',
-                WebkitTapHighlightColor: 'transparent',
-              }}
+              className={`${styles.tab} ${active ? styles.tabActive : ''}`}
             >
               {cat.name}
             </button>

@@ -1,0 +1,30 @@
+.emoji {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+.restaurantName {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  margin-bottom: 6px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.desc {
+  font-size: 15px;
+  color: var(--ink-secondary);
+  line-height: 1.65;
+  max-width: 280px;
+  font-family: var(--font-ui);
+}

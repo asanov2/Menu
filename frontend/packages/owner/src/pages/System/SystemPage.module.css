@@ -1,0 +1,96 @@
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.titleBlock {
+  /* children stack naturally */
+}
+
+.systemTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  margin: 0;
+}
+
+.systemSubtitle {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-secondary);
+  margin: 4px 0 0;
+}
+
+.lastChecked {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-secondary);
+  margin-top: 4px;
+}
+
+.errorAlert {
+  padding: 12px 16px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--error-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.serviceCard {
+  background: var(--cream-surface);
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.serviceCardOffline {
+  background: var(--error-bg);
+  border-color: var(--error-border);
+}
+
+.serviceTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.serviceName {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-primary);
+}
+
+.serviceBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.serviceTime {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-secondary);
+}
+
+.serviceMs {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-secondary);
+  font-weight: 500;
+}

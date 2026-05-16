@@ -1,0 +1,31 @@
+.container {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: var(--ink-primary);
+  padding: 0 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab {
+  flex-shrink: 0;
+  padding: 0 12px;
+  height: 44px;
+  font-size: 11px;
+  font-family: var(--font-ui);
+  font-weight: 400;
+  color: var(--sidebar-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabActive {
+  font-weight: 500;
+  color: var(--sidebar-text);
+  border-bottom-color: var(--accent-gold);
+}

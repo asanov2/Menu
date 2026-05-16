@@ -1,0 +1,79 @@
+.statusBadge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 500;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.paymentsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.exportBtn {
+  padding: 6px 14px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.retryBtn {
+  margin-top: 8px;
+  padding: 6px 14px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--cream-border);
+}
+
+.paginInfo {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.paginBtns {
+  display: flex;
+  gap: 8px;
+}
+
+.paginBtn {
+  padding: 5px 12px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+
+.paginBtnDisabled {
+  color: var(--ink-tertiary);
+  cursor: default;
+}

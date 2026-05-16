@@ -1,5 +1,4 @@
-// === FILE: frontend/packages/owner/src/pages/Revenue/RevenuePage.tsx ===
-import { useState } from 'react'
+import { CSSProperties, useState } from 'react'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import {
   BarChart,
@@ -12,6 +11,8 @@ import {
 import { formatPrice, formatDate, EmptyState, KPICard, SectionHeading } from '@qrmenu/ui'
 import { getRevenue, getPayments, getPlatformStats } from '../../api/owner'
 import DataTable from '../../components/DataTable'
+import common from '../../styles/common.module.css'
+import styles from './RevenuePage.module.css'
 
 const MONTH_SHORT = [
   'Янв','Фев','Мар','Апр','Май','Июн',
@@ -91,16 +92,8 @@ export default function RevenuePage() {
       amount: formatPrice(p.amount),
       status: (
         <span
-          style={{
-            padding: '2px 8px',
-            background: s.bg,
-            color: s.color,
-            border: `1px solid ${s.border}`,
-            borderRadius: 'var(--radius-full)',
-            fontFamily: 'var(--font-ui)',
-            fontSize: 10,
-            fontWeight: 500,
-          }}
+          className={styles.statusBadge}
+          style={{ background: s.bg, color: s.color, borderColor: s.border } as CSSProperties}
         >
           {s.label}
         </span>
@@ -132,62 +125,31 @@ export default function RevenuePage() {
   const to = Math.min(page * LIMIT, total)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className={common.pageStack}>
       <SectionHeading size="lg" style={{ marginBottom: 0 }}>Выручка</SectionHeading>
 
-      {/* Summary KPI */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 16,
-        }}
-      >
+      <div className={common.kpiGrid3}>
         <KPICard label="МРР (текущий)" value={stats ? formatPrice(stats.mrr) : '—'} subtitleColor="gold" icon="📈" />
         <KPICard label="Всего за год" value={formatPrice(yearTotal)} subtitleColor="default" icon="💎" />
         <KPICard label="Средний чек" value={avgCheck ? formatPrice(avgCheck) : '—'} subtitleColor="default" icon="🧾" />
       </div>
 
-      {/* Revenue chart */}
-      <div
-        style={{
-          background: 'var(--cream-surface)',
-          borderRadius: 'var(--radius-md)',
-          boxShadow: 'var(--shadow-card)',
-          padding: 20,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: 'var(--font-ui)',
-            fontSize: 12,
-            fontWeight: 600,
-            color: 'var(--ink-primary)',
-            marginBottom: 16,
-          }}
-        >
-          Выручка по месяцам (12 мес.)
-        </div>
+      <div className={common.card}>
+        <div className={common.cardTitle}>Выручка по месяцам (12 мес.)</div>
         {revenueError ? (
           <EmptyState
             icon="⚠️"
             title="Ошибка загрузки"
             description="Не удалось загрузить данные выручки"
             action={
-              <button
-                onClick={() => refetchRevenue()}
-                style={{ marginTop: 8, padding: '6px 14px', fontFamily: 'var(--font-ui)', fontSize: 12, border: '1px solid var(--cream-border)', borderRadius: 'var(--radius-sm)', background: 'transparent', color: 'var(--ink-secondary)', cursor: 'pointer' }}
-              >
+              <button onClick={() => refetchRevenue()} className={styles.retryBtn}>
                 Повторить
               </button>
             }
           />
         ) : (
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart
-              data={revenueData}
-              margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-            >
+            <BarChart data={revenueData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
               <XAxis
                 dataKey="name"
                 tick={{ fontFamily: 'var(--font-ui)', fontSize: 11, fill: 'var(--ink-secondary)' }}
@@ -202,12 +164,7 @@ export default function RevenuePage() {
               />
               <Tooltip
                 formatter={(v: number) => [formatPrice(v), 'Выручка']}
-                contentStyle={{
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 12,
-                  borderRadius: 8,
-                  border: '1px solid var(--cream-border)',
-                }}
+                contentStyle={{ fontFamily: 'var(--font-ui)', fontSize: 12, borderRadius: 8, border: '1px solid var(--cream-border)' }}
               />
               <Bar dataKey="value" fill="var(--accent-gold)" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -215,50 +172,10 @@ export default function RevenuePage() {
         )}
       </div>
 
-      {/* Payments table */}
-      <div
-        style={{
-          background: 'var(--cream-surface)',
-          borderRadius: 'var(--radius-md)',
-          boxShadow: 'var(--shadow-card)',
-          padding: 20,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 16,
-          }}
-        >
-          <div
-            style={{
-              fontFamily: 'var(--font-ui)',
-              fontSize: 12,
-              fontWeight: 600,
-              color: 'var(--ink-primary)',
-            }}
-          >
-            Платежи
-          </div>
-          <button
-            onClick={handleExport}
-            style={{
-              padding: '6px 14px',
-              fontFamily: 'var(--font-ui)',
-              fontSize: 11,
-              fontWeight: 500,
-              border: '1px solid var(--cream-border)',
-              borderRadius: 'var(--radius-sm)',
-              background: 'transparent',
-              color: 'var(--ink-secondary)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
+      <div className={common.card}>
+        <div className={styles.paymentsHeader}>
+          <div className={common.cardTitle} style={{ marginBottom: 0 }}>Платежи</div>
+          <button onClick={handleExport} className={styles.exportBtn}>
             ⬇ Экспорт CSV
           </button>
         </div>
@@ -277,55 +194,20 @@ export default function RevenuePage() {
         />
 
         {total > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: 16,
-              paddingTop: 12,
-              borderTop: '1px solid var(--cream-border)',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: 'var(--font-ui)',
-                fontSize: 12,
-                color: 'var(--ink-secondary)',
-              }}
-            >
-              {from}–{to} из {total}
-            </span>
-            <div style={{ display: 'flex', gap: 8 }}>
+          <div className={styles.pagination}>
+            <span className={styles.paginInfo}>{from}–{to} из {total}</span>
+            <div className={styles.paginBtns}>
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                style={{
-                  padding: '5px 12px',
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 12,
-                  border: '1px solid var(--cream-border)',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'transparent',
-                  color: page === 1 ? 'var(--ink-tertiary)' : 'var(--ink-primary)',
-                  cursor: page === 1 ? 'default' : 'pointer',
-                }}
+                className={`${styles.paginBtn} ${page === 1 ? styles.paginBtnDisabled : ''}`}
               >
                 ← Назад
               </button>
               <button
                 onClick={() => setPage(p => Math.min(pages, p + 1))}
                 disabled={page >= pages}
-                style={{
-                  padding: '5px 12px',
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 12,
-                  border: '1px solid var(--cream-border)',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'transparent',
-                  color: page >= pages ? 'var(--ink-tertiary)' : 'var(--ink-primary)',
-                  cursor: page >= pages ? 'default' : 'pointer',
-                }}
+                className={`${styles.paginBtn} ${page >= pages ? styles.paginBtnDisabled : ''}`}
               >
                 Вперёд →
               </button>

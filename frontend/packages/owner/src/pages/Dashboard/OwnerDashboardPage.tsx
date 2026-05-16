@@ -1,4 +1,4 @@
-// === FILE: frontend/packages/owner/src/pages/Dashboard/OwnerDashboardPage.tsx ===
+import { CSSProperties } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   BarChart,
@@ -11,6 +11,8 @@ import {
 import { formatPrice, formatDate, Skeleton, KPICard, SectionHeading } from '@qrmenu/ui'
 import { getPlatformStats, getRevenue, getPayments } from '../../api/owner'
 import DataTable from '../../components/DataTable'
+import common from '../../styles/common.module.css'
+import styles from './OwnerDashboardPage.module.css'
 
 const MONTH_SHORT = [
   'Янв','Фев','Мар','Апр','Май','Июн',
@@ -47,22 +49,13 @@ function StatusBadge({ status }: { status: string }) {
   const s = STATUS_STYLE[status] ?? STATUS_STYLE.pending
   return (
     <span
-      style={{
-        padding: '2px 8px',
-        background: s.bg,
-        color: s.color,
-        border: `1px solid ${s.border}`,
-        borderRadius: 'var(--radius-full)',
-        fontFamily: 'var(--font-ui)',
-        fontSize: 10,
-        fontWeight: 500,
-      }}
+      className={styles.statusBadge}
+      style={{ background: s.bg, color: s.color, borderColor: s.border } as CSSProperties}
     >
       {s.label}
     </span>
   )
 }
-
 
 export default function OwnerDashboardPage() {
   const now = new Date()
@@ -97,9 +90,9 @@ export default function OwnerDashboardPage() {
   const businessCount = stats?.business_count ?? 0
   const proCount = stats?.pro_count ?? 0
   const planDist = [
-    { label: 'Старт', count: starterCount, pct: total > 0 ? Math.round((starterCount / total) * 100) : 0, color: 'var(--ink-tertiary)' },
+    { label: 'Старт',  count: starterCount,  pct: total > 0 ? Math.round((starterCount  / total) * 100) : 0, color: 'var(--ink-tertiary)' },
     { label: 'Бизнес', count: businessCount, pct: total > 0 ? Math.round((businessCount / total) * 100) : 0, color: 'var(--tag-green-text)' },
-    { label: 'Про', count: proCount, pct: total > 0 ? Math.round((proCount / total) * 100) : 0, color: 'var(--accent-gold)' },
+    { label: 'Про',    count: proCount,      pct: total > 0 ? Math.round((proCount      / total) * 100) : 0, color: 'var(--accent-gold)' },
   ]
 
   const paymentRows = (payments?.items ?? []).slice(0, 10).map(p => ({
@@ -111,84 +104,32 @@ export default function OwnerDashboardPage() {
   }))
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className={common.pageStack}>
       <div>
         <SectionHeading size="lg" style={{ marginBottom: 4 }}>Дашборд</SectionHeading>
-        <p style={{ fontFamily: 'var(--font-ui)', fontSize: 12, color: 'var(--ink-secondary)', margin: 0, textTransform: 'capitalize' }}>
-          {monthYear}
-        </p>
+        <p className={styles.monthText}>{monthYear}</p>
       </div>
 
-      {/* KPI row */}
       {isLoadingStats ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+        <div className={common.kpiGrid4}>
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} height="80px" borderRadius="var(--radius-md)" />
           ))}
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 16,
-          }}
-        >
-          <KPICard
-            label="Ресторанов"
-            value={stats?.total_restaurants ?? '—'}
-            icon="🏪"
-          />
-          <KPICard
-            label="MRR"
-            value={stats ? formatPrice(stats.mrr) : '—'}
-            subtitleColor="gold"
-            icon="💰"
-          />
-          <KPICard
-            label="Триал"
-            value={stats?.trial_count ?? '—'}
-            subtitleColor="gold"
-            icon="⏱️"
-          />
-          <KPICard
-            label="Активных"
-            value={stats?.active_restaurants ?? '—'}
-            subtitleColor="green"
-            icon="✅"
-          />
+        <div className={common.kpiGrid4}>
+          <KPICard label="Ресторанов" value={stats?.total_restaurants ?? '—'} icon="🏪" />
+          <KPICard label="MRR" value={stats ? formatPrice(stats.mrr) : '—'} subtitleColor="gold" icon="💰" />
+          <KPICard label="Триал" value={stats?.trial_count ?? '—'} subtitleColor="gold" icon="⏱️" />
+          <KPICard label="Активных" value={stats?.active_restaurants ?? '—'} subtitleColor="green" icon="✅" />
         </div>
       )}
 
-      {/* Charts row */}
-      <div
-        style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}
-      >
-        {/* Revenue bar chart */}
-        <div
-          style={{
-            background: 'var(--cream-surface)',
-            borderRadius: 'var(--radius-md)',
-            boxShadow: 'var(--shadow-card)',
-            padding: 20,
-          }}
-        >
-          <div
-            style={{
-              fontFamily: 'var(--font-ui)',
-              fontSize: 12,
-              fontWeight: 600,
-              color: 'var(--ink-primary)',
-              marginBottom: 16,
-            }}
-          >
-            Выручка по месяцам
-          </div>
+      <div className={styles.chartsRow}>
+        <div className={common.card}>
+          <div className={common.cardTitle}>Выручка по месяцам</div>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart
-              data={revenueData}
-              margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-            >
+            <BarChart data={revenueData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
               <XAxis
                 dataKey="name"
                 tick={{ fontFamily: 'var(--font-ui)', fontSize: 11, fill: 'var(--ink-secondary)' }}
@@ -203,71 +144,26 @@ export default function OwnerDashboardPage() {
               />
               <Tooltip
                 formatter={(v: number) => [formatPrice(v), 'Выручка']}
-                contentStyle={{
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 12,
-                  borderRadius: 8,
-                  border: '1px solid var(--cream-border)',
-                }}
+                contentStyle={{ fontFamily: 'var(--font-ui)', fontSize: 12, borderRadius: 8, border: '1px solid var(--cream-border)' }}
               />
               <Bar dataKey="value" fill="var(--accent-gold)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Plan distribution */}
-        <div
-          style={{
-            background: 'var(--cream-surface)',
-            borderRadius: 'var(--radius-md)',
-            boxShadow: 'var(--shadow-card)',
-            padding: 20,
-          }}
-        >
-          <div
-            style={{
-              fontFamily: 'var(--font-ui)',
-              fontSize: 12,
-              fontWeight: 600,
-              color: 'var(--ink-primary)',
-              marginBottom: 16,
-            }}
-          >
-            Распределение по тарифам
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div className={common.card}>
+          <div className={common.cardTitle}>Распределение по тарифам</div>
+          <div className={styles.planList}>
             {planDist.map(p => (
               <div key={p.label}>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: 4,
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 12,
-                  }}
-                >
-                  <span style={{ color: 'var(--ink-primary)' }}>{p.label}</span>
-                  <span style={{ color: 'var(--ink-secondary)' }}>
-                    {p.pct}% · {p.count} рест.
-                  </span>
+                <div className={styles.planRowHeader}>
+                  <span className={styles.planLabel}>{p.label}</span>
+                  <span className={styles.planCount}>{p.pct}% · {p.count} рест.</span>
                 </div>
-                <div
-                  style={{
-                    height: 8,
-                    background: 'var(--cream-muted)',
-                    borderRadius: 4,
-                    overflow: 'hidden',
-                  }}
-                >
+                <div className={styles.planBarTrack}>
                   <div
-                    style={{
-                      height: '100%',
-                      width: `${p.pct}%`,
-                      background: p.color,
-                      borderRadius: 4,
-                      transition: 'width 0.6s ease',
-                    }}
+                    className={styles.planBarFill}
+                    style={{ width: `${p.pct}%`, background: p.color }}
                   />
                 </div>
               </div>
@@ -276,26 +172,8 @@ export default function OwnerDashboardPage() {
         </div>
       </div>
 
-      {/* Recent payments */}
-      <div
-        style={{
-          background: 'var(--cream-surface)',
-          borderRadius: 'var(--radius-md)',
-          boxShadow: 'var(--shadow-card)',
-          padding: 20,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: 'var(--font-ui)',
-            fontSize: 12,
-            fontWeight: 600,
-            color: 'var(--ink-primary)',
-            marginBottom: 16,
-          }}
-        >
-          Последние платежи
-        </div>
+      <div className={common.card}>
+        <div className={common.cardTitle}>Последние платежи</div>
         <DataTable
           columns={[
             { key: 'restaurant', label: 'Ресторан' },

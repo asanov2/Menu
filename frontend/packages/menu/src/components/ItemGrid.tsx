@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import type { MenuItem } from '@qrmenu/ui';
 import ItemCard from './ItemCard';
+import styles from './ItemGrid.module.css';
 
 interface ItemGridProps {
   items: MenuItem[];
@@ -9,14 +10,7 @@ interface ItemGridProps {
 
 export default function ItemGrid({ items, onItemClick }: ItemGridProps) {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 10,
-        padding: '12px 16px',
-      }}
-    >
+    <div className={styles.grid}>
       {items.map((item, i) => (
         <motion.div
           key={item.id}

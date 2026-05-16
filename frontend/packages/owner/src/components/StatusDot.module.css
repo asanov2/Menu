@@ -1,0 +1,41 @@
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dotOnline {
+  background: var(--tag-green-text);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+.dotOffline {
+  background: var(--error-text);
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.labelOnline {
+  color: var(--tag-green-text);
+}
+
+.labelOffline {
+  color: var(--error-text);
+}

@@ -1,6 +1,8 @@
 import { memo } from 'react';
 import { StatusBadge, formatDate } from '@qrmenu/ui';
 import type { OwnerRestaurant } from '../../../api/owner';
+import common from '../../../styles/common.module.css';
+import styles from './RestaurantRow.module.css';
 
 interface RestaurantRowProps {
   restaurant: OwnerRestaurant;
@@ -9,49 +11,37 @@ interface RestaurantRowProps {
   isPending: boolean;
 }
 
-const TD: React.CSSProperties = { padding: '0 12px', fontFamily: 'var(--font-ui)', fontSize: 12, color: 'var(--ink-secondary)' };
-
 function RestaurantRow({ restaurant: r, onPlanChange, onToggleActive, isPending }: RestaurantRowProps) {
   return (
-    <tr style={{ height: 44, borderBottom: '1px solid var(--cream-border)' }}>
-      <td style={{ padding: '8px 12px' }}>
-        <span style={{ opacity: r.is_active ? 1 : 0.6 }}>
-          <div style={{ fontFamily: 'var(--font-ui)', fontSize: 12, fontWeight: 500, color: 'var(--ink-primary)' }}>{r.name}</div>
-          <div style={{ fontFamily: 'var(--font-ui)', fontSize: 10, color: 'var(--ink-secondary)' }}>{r.slug}</div>
+    <tr className={styles.tr}>
+      <td className={styles.tdName}>
+        <span className={`${styles.nameContent} ${!r.is_active ? styles.nameContentInactive : ''}`}>
+          <div className={styles.nameTitle}>{r.name}</div>
+          <div className={styles.nameSlug}>{r.slug}</div>
         </span>
       </td>
-      <td style={TD}>
+      <td className={common.td}>
         <select
           defaultValue={r.plan}
           onChange={e => onPlanChange(r.id, e.target.value)}
           onClick={e => e.stopPropagation()}
-          style={{ fontFamily: 'var(--font-ui)', fontSize: 11, border: '1px solid var(--cream-border)', borderRadius: 'var(--radius-sm)', background: 'var(--cream-bg)', color: 'var(--ink-primary)', padding: '2px 6px', cursor: 'pointer' }}
+          className={styles.planSelect}
         >
           <option value="starter">Старт</option>
           <option value="business">Бизнес</option>
           <option value="pro">Про</option>
         </select>
       </td>
-      <td style={TD}>
+      <td className={common.td}>
         <StatusBadge status={r.status as 'active' | 'trial' | 'expired'} />
       </td>
-      <td style={TD}>{formatDate(r.created_at)}</td>
-      <td style={TD}>{r.trial_ends_at ? formatDate(r.trial_ends_at) : '—'}</td>
-      <td style={TD}>
+      <td className={common.td}>{formatDate(r.created_at)}</td>
+      <td className={common.td}>{r.trial_ends_at ? formatDate(r.trial_ends_at) : '—'}</td>
+      <td className={common.td}>
         <button
           onClick={e => { e.stopPropagation(); onToggleActive(r); }}
           disabled={isPending}
-          style={{
-            padding: '4px 10px',
-            fontFamily: 'var(--font-ui)',
-            fontSize: 11,
-            border: `1px solid ${r.is_active ? 'var(--error-border)' : 'var(--tag-green-border)'}`,
-            background: r.is_active ? 'var(--tag-red-bg)' : 'var(--tag-green-bg)',
-            color: r.is_active ? 'var(--tag-red-text)' : 'var(--tag-green-text)',
-            borderRadius: 'var(--radius-sm)',
-            cursor: isPending ? 'not-allowed' : 'pointer',
-            whiteSpace: 'nowrap',
-          }}
+          className={`${styles.toggleBtn} ${r.is_active ? styles.toggleBtnDeactivate : styles.toggleBtnActivate} ${isPending ? styles.toggleBtnPending : ''}`}
         >
           {r.is_active ? 'Деактивировать' : 'Активировать'}
         </button>

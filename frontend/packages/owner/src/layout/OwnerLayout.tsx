@@ -1,28 +1,15 @@
-// === FILE: frontend/packages/owner/src/layout/OwnerLayout.tsx ===
 import { ReactNode } from 'react'
 import OwnerSidebar from './OwnerSidebar'
 import OwnerTopbar from './OwnerTopbar'
+import styles from './OwnerLayout.module.css'
 
 export default function OwnerLayout({ children }: { children: ReactNode }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        minHeight: '100vh',
-        background: 'var(--cream-bg)',
-      }}
-    >
+    <div className={styles.layout}>
       <OwnerSidebar />
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          minWidth: 0,
-        }}
-      >
+      <div className={styles.main}>
         <OwnerTopbar />
-        <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+        <main className={styles.content}>
           {children}
         </main>
       </div>

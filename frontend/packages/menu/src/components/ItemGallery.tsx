@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import type { MenuItem } from '@qrmenu/ui';
 import ItemCard from './ItemCard';
+import styles from './ItemGallery.module.css';
 
 interface ItemGalleryProps {
   items: MenuItem[];
@@ -9,15 +10,7 @@ interface ItemGalleryProps {
 
 export default function ItemGallery({ items, onItemClick }: ItemGalleryProps) {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr',
-        gap: 6,
-        padding: '12px 16px',
-        alignItems: 'start',
-      }}
-    >
+    <div className={styles.grid}>
       {items.map((item, i) => (
         <motion.div
           key={item.id}

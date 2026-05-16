@@ -1,0 +1,32 @@
+.btn {
+  position: fixed;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ink-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(26, 18, 8, 0.35);
+  border: none;
+  z-index: 50;
+  transition: background 0.3s;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+.btnCalled {
+  background: var(--tag-green-text);
+  cursor: default;
+}
+
+.btnLoading {
+  cursor: default;
+}
+
+.checkmark {
+  font-size: 22px;
+  line-height: 1;
+}

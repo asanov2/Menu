@@ -1,0 +1,80 @@
+.header {
+  width: 100%;
+  overflow: hidden;
+}
+
+.topBar {
+  background: var(--sidebar-bg);
+  padding: 12px 16px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.nameBlock {
+  min-width: 0;
+}
+
+.restaurantName {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--sidebar-text);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tableNumber {
+  font-size: 11px;
+  color: var(--sidebar-muted);
+  margin-top: 2px;
+  font-family: var(--font-ui);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.searchBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--sidebar-text);
+  font-size: 18px;
+  padding: 4px 6px;
+  opacity: 0.75;
+  flex-shrink: 0;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.langSwitcher {
+  display: flex;
+  gap: 2px;
+}
+
+.langBtn {
+  padding: 4px 7px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  background: transparent;
+  color: var(--sidebar-muted);
+  border: none;
+  cursor: pointer;
+  min-height: 28px;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.langBtnActive {
+  background: var(--accent-gold);
+  color: var(--sidebar-bg);
+}

@@ -5,6 +5,8 @@ import { getRestaurants, updateRestaurant, type OwnerRestaurant } from '../../ap
 import RestaurantsFilters from './components/RestaurantsFilters';
 import RestaurantRow from './components/RestaurantRow';
 import PaginationBar from './components/PaginationBar';
+import common from '../../styles/common.module.css';
+import styles from './RestaurantsPage.module.css';
 
 const LIMIT = 20;
 
@@ -54,7 +56,7 @@ export default function RestaurantsPage() {
   const pages = data?.pages ?? 1;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div className={common.pageStack} style={{ gap: 20 }}>
       <RestaurantsFilters
         search={search}
         onSearchChange={handleSearchChange}
@@ -63,18 +65,18 @@ export default function RestaurantsPage() {
         totalCount={total}
       />
 
-      <div style={{ background: 'var(--cream-surface)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-card)', padding: 20 }}>
+      <div className={common.card}>
         {isLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className={styles.loadingStack}>
             {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} height="40px" />)}
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className={common.tableWrapper}>
+            <table className={common.table}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--cream-border)' }}>
+                <tr className={common.theadRow}>
                   {COLUMNS.map((col, i) => (
-                    <th key={col} style={{ width: WIDTHS[i] || undefined, padding: '8px 12px', textAlign: 'left', fontFamily: 'var(--font-ui)', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--ink-secondary)', whiteSpace: 'nowrap' }}>
+                    <th key={col} className={common.th} style={{ width: WIDTHS[i] || undefined }}>
                       {col}
                     </th>
                   ))}

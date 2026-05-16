@@ -1,0 +1,66 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.countBadge {
+  padding: 3px 10px;
+  background: var(--cream-muted);
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-secondary);
+}
+
+.searchWrapper {
+  position: relative;
+  max-width: 340px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-secondary);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  background: var(--cream-surface);
+  color: var(--ink-primary);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.filtersRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  padding: 4px 12px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  border: 1px solid var(--cream-border);
+  background: transparent;
+  color: var(--ink-secondary);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filterBtnActive {
+  border-color: var(--ink-primary);
+  background: var(--ink-primary);
+  color: var(--cream-surface);
+}
