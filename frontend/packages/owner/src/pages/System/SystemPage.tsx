@@ -23,7 +23,7 @@ export default function SystemPage() {
     : '—'
 
   return (
-    <div className={common.pageStack} style={{ gap: 20 }}>
+    <div className={common.pageStackSm}>
       <div className={styles.pageHeader}>
         <div className={styles.titleBlock}>
           <h2 className={styles.systemTitle}>Статус системы</h2>

@@ -11,6 +11,7 @@ import {
 import { formatPrice, formatDate, EmptyState, KPICard, SectionHeading } from '@qrmenu/ui'
 import { getRevenue, getPayments, getPlatformStats } from '../../api/owner'
 import DataTable from '../../components/DataTable'
+import PaginationBar from '../Restaurants/components/PaginationBar'
 import common from '../../styles/common.module.css'
 import styles from './RevenuePage.module.css'
 
@@ -92,7 +93,7 @@ export default function RevenuePage() {
       amount: formatPrice(p.amount),
       status: (
         <span
-          className={styles.statusBadge}
+          className={common.statusBadge}
           style={{ background: s.bg, color: s.color, borderColor: s.border } as CSSProperties}
         >
           {s.label}
@@ -121,12 +122,10 @@ export default function RevenuePage() {
 
   const total = payments?.total ?? 0
   const pages = payments?.pages ?? 1
-  const from = total === 0 ? 0 : (page - 1) * LIMIT + 1
-  const to = Math.min(page * LIMIT, total)
 
   return (
     <div className={common.pageStack}>
-      <SectionHeading size="lg" style={{ marginBottom: 0 }}>Выручка</SectionHeading>
+      <SectionHeading size="lg" className={common.mb0}>Выручка</SectionHeading>
 
       <div className={common.kpiGrid3}>
         <KPICard label="МРР (текущий)" value={stats ? formatPrice(stats.mrr) : '—'} subtitleColor="gold" icon="📈" />
@@ -174,7 +173,7 @@ export default function RevenuePage() {
 
       <div className={common.card}>
         <div className={styles.paymentsHeader}>
-          <div className={common.cardTitle} style={{ marginBottom: 0 }}>Платежи</div>
+          <div className={`${common.cardTitle} ${common.mb0}`}>Платежи</div>
           <button onClick={handleExport} className={styles.exportBtn}>
             ⬇ Экспорт CSV
           </button>
@@ -193,27 +192,7 @@ export default function RevenuePage() {
           emptyMessage="Нет платежей"
         />
 
-        {total > 0 && (
-          <div className={styles.pagination}>
-            <span className={styles.paginInfo}>{from}–{to} из {total}</span>
-            <div className={styles.paginBtns}>
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className={`${styles.paginBtn} ${page === 1 ? styles.paginBtnDisabled : ''}`}
-              >
-                ← Назад
-              </button>
-              <button
-                onClick={() => setPage(p => Math.min(pages, p + 1))}
-                disabled={page >= pages}
-                className={`${styles.paginBtn} ${page >= pages ? styles.paginBtnDisabled : ''}`}
-              >
-                Вперёд →
-              </button>
-            </div>
-          </div>
-        )}
+        <PaginationBar page={page} totalPages={pages} totalCount={total} pageSize={LIMIT} onPageChange={setPage} />
       </div>
     </div>
   )

@@ -7,6 +7,9 @@ import { getMenu } from '../../api/menus';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './QRPage.module.css';
 
+const QR_BG = '#FFFFFF';
+const QR_FG = '#1A1208';
+
 export default function QRPage() {
   const { id } = useParams<{ id: string }>();
   const { restaurant } = useAuth();
@@ -74,8 +77,8 @@ export default function QRPage() {
               <QRCodeCanvas
                 value={qrValue || ' '}
                 size={220}
-                bgColor="#FFFFFF"
-                fgColor="#1A1208"
+                bgColor={QR_BG}
+                fgColor={QR_FG}
                 includeMargin
               />
             </div>
@@ -83,7 +86,7 @@ export default function QRPage() {
 
           {/* Hidden SVG for download */}
           <div id="qr-svg" className={styles.hiddenSvg}>
-            <QRCodeSVG value={qrValue || ' '} size={220} bgColor="#FFFFFF" fgColor="#1A1208" includeMargin />
+            <QRCodeSVG value={qrValue || ' '} size={220} bgColor={QR_BG} fgColor={QR_FG} includeMargin />
           </div>
 
           {/* Table QR section */}
@@ -109,7 +112,7 @@ export default function QRPage() {
               {tableQR && (
                 <div className={styles.tableQrResult}>
                   <div className={styles.tableQrBg}>
-                    <QRCodeCanvas value={tableQR} size={140} bgColor="#FFFFFF" fgColor="#1A1208" includeMargin />
+                    <QRCodeCanvas value={tableQR} size={140} bgColor={QR_BG} fgColor={QR_FG} includeMargin />
                   </div>
                 </div>
               )}

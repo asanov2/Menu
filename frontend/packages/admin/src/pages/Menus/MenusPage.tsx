@@ -100,8 +100,6 @@ export default function MenusPage() {
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="Основное меню"
                     className={styles.input}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--cream-border)'; }}
                     autoFocus
                     onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); }}
                   />
@@ -112,7 +110,6 @@ export default function MenusPage() {
                     value={newLang}
                     onChange={(e) => setNewLang(e.target.value)}
                     className={styles.input}
-                    style={{ appearance: 'none' }}
                   >
                     <option value="ru">Русский (RU)</option>
                     <option value="kz">Казахский (KZ)</option>

@@ -86,6 +86,12 @@
   font-family: var(--font-ui);
   outline: none;
   box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.input:focus {
+  border-color: var(--accent-gold);
 }
 
 .modalActions {

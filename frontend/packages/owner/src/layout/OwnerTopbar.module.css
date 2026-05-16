@@ -25,7 +25,7 @@
 
 .ownerBadge {
   padding: 3px 10px;
-  background: rgba(212, 168, 83, 0.12);
+  background: var(--accent-gold-dim);
   border: 1px solid var(--accent-gold-border);
   border-radius: var(--radius-full);
   font-family: var(--font-ui);

@@ -1,0 +1,14 @@
+.loadingPage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: var(--cream-warm);
+}
+
+.loadingInner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 280px;
+}

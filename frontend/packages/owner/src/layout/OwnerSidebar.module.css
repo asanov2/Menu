@@ -72,7 +72,7 @@
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background: rgba(212, 168, 83, 0.15);
+  background: var(--sidebar-active-bg);
   border: 1px solid var(--accent-gold);
   border-radius: var(--radius-full);
   align-self: flex-start;

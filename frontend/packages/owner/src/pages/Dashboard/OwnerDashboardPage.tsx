@@ -49,7 +49,7 @@ function StatusBadge({ status }: { status: string }) {
   const s = STATUS_STYLE[status] ?? STATUS_STYLE.pending
   return (
     <span
-      className={styles.statusBadge}
+      className={common.statusBadge}
       style={{ background: s.bg, color: s.color, borderColor: s.border } as CSSProperties}
     >
       {s.label}
@@ -106,7 +106,7 @@ export default function OwnerDashboardPage() {
   return (
     <div className={common.pageStack}>
       <div>
-        <SectionHeading size="lg" style={{ marginBottom: 4 }}>Дашборд</SectionHeading>
+        <SectionHeading size="lg" className={common.mb4}>Дашборд</SectionHeading>
         <p className={styles.monthText}>{monthYear}</p>
       </div>
 

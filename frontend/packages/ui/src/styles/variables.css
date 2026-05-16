@@ -5,6 +5,7 @@
   --cream-border: #E8E0D0;
   --cream-muted: #F0EBE3;
   --cream-warm: #F5F0E8;
+  --backdrop-bg: rgba(26, 18, 8, 0.5);
 
   /* Text */
   --ink-primary: #1A1208;
@@ -15,6 +16,7 @@
   --accent-gold: #D4A853;
   --accent-gold-bg: #F8F0D8;
   --accent-gold-border: #D4A853;
+  --accent-gold-dim: rgba(212, 168, 83, 0.12);
 
   /* Tags */
   --tag-green-bg: #EAF5E8;

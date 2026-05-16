@@ -19,6 +19,12 @@
   gap: 24px;
 }
 
+.pageStackSm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .kpiGrid4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -29,6 +35,58 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+}
+
+/* Margin utilities */
+.mb0 { margin-bottom: 0; }
+.mb4 { margin-bottom: 4px; }
+
+/* Status badge (payments) */
+.statusBadge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 500;
+  border-width: 1px;
+  border-style: solid;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--cream-border);
+}
+
+.paginInfo {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.paginBtns {
+  display: flex;
+  gap: 8px;
+}
+
+.paginBtn {
+  padding: 5px 12px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+
+.paginBtnDisabled {
+  color: var(--ink-tertiary);
+  cursor: default;
 }
 
 /* Table shared */

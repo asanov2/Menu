@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { Skeleton } from '@qrmenu/ui';
 import { useAuthStore } from '../store/authStore';
 import AdminLayout from '../layout/AdminLayout';
+import styles from './PrivateRoute.module.css';
 
 export default function PrivateRoute({ children }: { children: ReactNode }) {
   const { token, isLoading, initialize } = useAuthStore();
@@ -18,8 +19,8 @@ export default function PrivateRoute({ children }: { children: ReactNode }) {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--cream-warm)' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 280 }}>
+      <div className={styles.loadingPage}>
+        <div className={styles.loadingInner}>
           <Skeleton height="20px" />
           <Skeleton height="20px" width="80%" />
           <Skeleton height="20px" width="60%" />

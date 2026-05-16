@@ -252,9 +252,8 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                       {...register('description')}
                       placeholder="Описание (необязательно)"
                       rows={3}
-                      style={{ ...INPUT_STYLE, resize: 'vertical', minHeight: 72 }}
-                      onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
-                      onBlur={(e) => { e.target.style.borderColor = 'var(--cream-border)'; }}
+                      className={styles.textareaField}
+                      style={INPUT_STYLE}
                     />
                   </FormField>
 
@@ -281,9 +280,8 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                         min={1}
                         max={180}
                         placeholder="—"
+                        className={styles.focusField}
                         style={INPUT_STYLE}
-                        onFocus={(e) => { e.target.style.borderColor = 'var(--accent-gold)'; }}
-                        onBlur={(e) => { e.target.style.borderColor = 'var(--cream-border)'; }}
                       />
                     </FormField>
                   </div>
@@ -294,7 +292,8 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                       id="item-category"
                       {...register('category_id')}
                       {...categoryFocus}
-                      style={{ ...INPUT_STYLE, appearance: 'none' }}
+                      className={styles.selectField}
+                      style={INPUT_STYLE}
                     >
                       <option value="">Выберите категорию</option>
                       {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}

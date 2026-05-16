@@ -56,14 +56,14 @@
 }
 
 .navLinkActive {
-  background: rgba(212, 168, 83, 0.12);
+  background: var(--accent-gold-dim);
   border-left: 3px solid var(--accent-gold);
   color: var(--sidebar-text);
   padding: 9px 12px 9px 9px;
 }
 
 .navLinkActive:hover {
-  background: rgba(212, 168, 83, 0.12);
+  background: var(--accent-gold-dim);
 }
 
 .navIcon {

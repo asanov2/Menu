@@ -56,7 +56,7 @@ export default function RestaurantsPage() {
   const pages = data?.pages ?? 1;
 
   return (
-    <div className={common.pageStack} style={{ gap: 20 }}>
+    <div className={common.pageStackSm}>
       <RestaurantsFilters
         search={search}
         onSearchChange={handleSearchChange}
