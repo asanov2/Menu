@@ -21,3 +21,15 @@ export async function updateProfile(payload: { name?: string; email?: string }):
 export async function changePassword(payload: { old_password: string; new_password: string }): Promise<void> {
   await adminApi.put('/api/v1/auth/change-password', payload);
 }
+
+export async function register(data: {
+  email: string;
+  password: string;
+  name: string;
+  slug: string;
+  phone?: string;
+  city?: string;
+  type?: string;
+}): Promise<void> {
+  await adminApi.post('/api/v1/auth/register', data);
+}

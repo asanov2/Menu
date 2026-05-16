@@ -1,0 +1,158 @@
+.page {
+  min-height: 100vh;
+  background: var(--cream-warm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--cream-bg);
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: 36px 32px 32px;
+}
+
+.logoSection {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.logoText {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--ink-primary);
+  margin-bottom: 6px;
+}
+
+.logoSubtitle {
+  font-size: 13px;
+  color: var(--ink-secondary);
+  font-family: var(--font-ui);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.slugPreview {
+  margin-top: 4px;
+  font-size: 11px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  background: var(--cream-surface);
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+}
+
+.divider {
+  font-size: 11px;
+  font-family: var(--font-ui);
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  border-top: 1px solid var(--cream-border);
+  padding-top: 12px;
+  margin-top: 2px;
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.btnSubmit {
+  width: 100%;
+  padding: 11px 16px;
+  background: var(--ink-primary);
+  color: var(--cream-bg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  margin-top: 4px;
+  transition: opacity 0.15s;
+}
+
+.btnSubmit:hover:not(.btnSubmitLoading) {
+  opacity: 0.88;
+}
+
+.btnSubmitLoading {
+  background: var(--ink-secondary);
+  cursor: not-allowed;
+}
+
+.footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+}
+
+.loginLink {
+  color: var(--ink-primary);
+  text-decoration: underline;
+}
+
+/* ── Success screen ─────────────────────────────────────────────────────── */
+
+.successIcon {
+  font-size: 44px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.successTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--ink-primary);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.successText {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--ink-secondary);
+  text-align: center;
+  line-height: 1.65;
+  margin: 0 0 24px;
+}
+
+.backBtn {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  background: var(--ink-primary);
+  color: var(--cream-bg);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  text-align: center;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.backBtn:hover {
+  opacity: 0.88;
+}

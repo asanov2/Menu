@@ -1,16 +1,28 @@
 import { NavLink } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { useOwnerStore } from '../store/ownerStore'
+import { getApplications } from '../api/owner'
 import styles from './OwnerSidebar.module.css'
 
 const NAV = [
-  { label: 'Дашборд', icon: '📊', path: '/dashboard' },
+  { label: 'Дашборд',   icon: '📊', path: '/dashboard' },
   { label: 'Рестораны', icon: '🏪', path: '/restaurants' },
-  { label: 'Выручка', icon: '💰', path: '/revenue' },
-  { label: 'Система', icon: '🖥️', path: '/system' },
+  { label: 'Заявки',    icon: '📋', path: '/applications' },
+  { label: 'Выручка',   icon: '💰', path: '/revenue' },
+  { label: 'Система',   icon: '🖥️', path: '/system' },
 ]
 
 export default function OwnerSidebar() {
   const logout = useOwnerStore(s => s.logout)
+
+  const { data: applications } = useQuery({
+    queryKey: ['applications', 1],
+    queryFn: () => getApplications(1, 1),
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
+  })
+
+  const pendingCount = applications?.total ?? 0
 
   return (
     <aside className={styles.sidebar}>
@@ -29,7 +41,10 @@ export default function OwnerSidebar() {
             }
           >
             <span className={styles.navIcon}>{item.icon}</span>
-            {item.label}
+            <span className={styles.navLabel}>{item.label}</span>
+            {item.path === '/applications' && pendingCount > 0 && (
+              <span className={styles.navBadge}>{pendingCount}</span>
+            )}
           </NavLink>
         ))}
       </nav>

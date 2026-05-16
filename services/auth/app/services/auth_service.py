@@ -12,7 +12,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
-from app.models.restaurant import Restaurant
+from app.models.restaurant import Restaurant, RestaurantStatus
 from app.schemas.auth import RegisterRequest
 
 
@@ -39,14 +39,16 @@ class AuthService:
         return result.scalar_one_or_none()
 
     async def register(self, data: RegisterRequest) -> Restaurant:
-        # fix #3: removed pre-insert uniqueness checks (TOCTOU race condition).
-        # DB unique constraints are the single source of truth.
-        # IntegrityError is caught and mapped to 409 with a meaningful message.
         restaurant = Restaurant(
             email=data.email,
             hashed_password=hash_password(data.password),
             name=data.name,
             slug=data.slug,
+            status=RestaurantStatus.pending,
+            is_active=False,
+            phone=data.phone,
+            city=data.city,
+            venue_type=data.type,
         )
         self._db.add(restaurant)
         try:
@@ -78,10 +80,15 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
             )
-        if not restaurant.is_active:
+        if restaurant.status == RestaurantStatus.pending:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Restaurant account is disabled",
+                detail="Ваша заявка на рассмотрении. Ожидайте подтверждения.",
+            )
+        if restaurant.status == RestaurantStatus.inactive:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Аккаунт деактивирован. Обратитесь к администратору.",
             )
         return restaurant
 
@@ -153,8 +160,6 @@ class AuthService:
         await self._db.commit()
 
     async def verify_token_payload(self, token: str) -> dict:
-        # fix #12 + #16: now async — checks is_active in DB so deactivated
-        # restaurants cannot use their remaining token lifetime.
         try:
             payload = decode_token(token)
             if payload.get("type") != "access":

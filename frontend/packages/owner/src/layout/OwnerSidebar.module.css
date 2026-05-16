@@ -59,6 +59,25 @@
   font-size: 15px;
 }
 
+.navLabel {
+  flex: 1;
+}
+
+.navBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #E53E3E;
+  color: #fff;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+}
+
 .bottom {
   padding: 16px 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);

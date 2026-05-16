@@ -10,6 +10,9 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=8, max_length=100)
     name: str = Field(min_length=1, max_length=255)
     slug: str = Field(min_length=2, max_length=100)
+    phone: str | None = Field(default=None, max_length=20)
+    city: str | None = Field(default=None, max_length=100)
+    type: str | None = Field(default=None, max_length=50)
 
     @field_validator("slug")
     @classmethod
@@ -37,6 +40,7 @@ class RestaurantResponse(BaseModel):
     name: str
     slug: str
     plan: str
+    status: str
     is_active: bool
     is_verified: bool
     created_at: datetime

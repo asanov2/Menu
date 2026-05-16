@@ -2,12 +2,57 @@ import logging
 from math import ceil
 from uuid import UUID
 
+from fastapi import HTTPException, status as http_status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.restaurants import PlatformStats, RestaurantItem, RestaurantList, RestaurantPatch
+from app.schemas.restaurants import (
+    ApplicationItem,
+    ApplicationsResponse,
+    PlatformStats,
+    RestaurantItem,
+    RestaurantList,
+    RestaurantPatch,
+)
 
 logger = logging.getLogger(__name__)
+
+_RESTAURANT_SELECT = """
+    WITH latest_sub AS (
+        SELECT DISTINCT ON (restaurant_id)
+            restaurant_id, plan, status, trial_ends_at, created_at
+        FROM billing.subscriptions
+        ORDER BY restaurant_id, created_at DESC
+    )
+    SELECT
+        r.id,
+        r.name,
+        r.slug,
+        r.email,
+        r.plan,
+        r.is_active,
+        r.created_at,
+        r.status              AS registration_status,
+        COALESCE(s.status, 'active') AS status,
+        s.trial_ends_at
+    FROM restaurants r
+    LEFT JOIN latest_sub s ON s.restaurant_id = r.id
+"""
+
+
+def _row_to_item(row: dict) -> RestaurantItem:
+    return RestaurantItem(
+        id=row["id"],
+        name=row["name"],
+        slug=row["slug"],
+        email=row["email"],
+        plan=row["plan"],
+        status=row["status"],
+        registration_status=row["registration_status"],
+        is_active=row["is_active"],
+        created_at=row["created_at"],
+        trial_ends_at=row["trial_ends_at"],
+    )
 
 
 class RestaurantService:
@@ -38,28 +83,7 @@ class RestaurantService:
             params["status"] = status
 
         where = " AND ".join(filters)
-
-        base_sql = f"""
-            WITH latest_sub AS (
-                SELECT DISTINCT ON (restaurant_id)
-                    restaurant_id, plan, status, trial_ends_at, created_at
-                FROM billing.subscriptions
-                ORDER BY restaurant_id, created_at DESC
-            )
-            SELECT
-                r.id,
-                r.name,
-                r.slug,
-                r.email,
-                r.plan,
-                r.is_active,
-                r.created_at,
-                COALESCE(s.status, 'active') AS status,
-                s.trial_ends_at
-            FROM restaurants r
-            LEFT JOIN latest_sub s ON s.restaurant_id = r.id
-            WHERE {where}
-        """
+        base_sql = f"{_RESTAURANT_SELECT} WHERE {where}"
 
         count_result = await self._db.execute(
             text(f"SELECT COUNT(*) FROM ({base_sql}) AS sub"),
@@ -73,23 +97,8 @@ class RestaurantService:
         )
         rows = rows_result.mappings().all()
 
-        items = [
-            RestaurantItem(
-                id=row["id"],
-                name=row["name"],
-                slug=row["slug"],
-                email=row["email"],
-                plan=row["plan"],
-                status=row["status"],
-                is_active=row["is_active"],
-                created_at=row["created_at"],
-                trial_ends_at=row["trial_ends_at"],
-            )
-            for row in rows
-        ]
-
         return RestaurantList(
-            items=items,
+            items=[_row_to_item(row) for row in rows],
             total=total,
             page=page,
             pages=ceil(total / limit) if total else 1,
@@ -153,18 +162,18 @@ class RestaurantService:
     ) -> RestaurantItem:
         if patch.is_active is not None:
             await self._db.execute(
-                text("UPDATE restaurants SET is_active = :is_active WHERE id = :id"),
+                text("UPDATE restaurants SET is_active = :is_active, updated_at = NOW() WHERE id = :id"),
                 {"is_active": patch.is_active, "id": restaurant_id},
             )
 
         if patch.plan is not None:
             await self._db.execute(
-                text("UPDATE restaurants SET plan = :plan WHERE id = :id"),
+                text("UPDATE restaurants SET plan = :plan, updated_at = NOW() WHERE id = :id"),
                 {"plan": patch.plan, "id": restaurant_id},
             )
             await self._db.execute(
                 text("""
-                    UPDATE subscriptions
+                    UPDATE billing.subscriptions
                     SET plan = :plan
                     WHERE id = (
                         SELECT id FROM billing.subscriptions
@@ -176,40 +185,104 @@ class RestaurantService:
                 {"plan": patch.plan, "restaurant_id": restaurant_id},
             )
 
-        await self._db.commit()
+        if patch.status is not None:
+            is_active_val = patch.status == "active"
+            await self._db.execute(
+                text("""
+                    UPDATE restaurants
+                    SET status = :status, is_active = :is_active, updated_at = NOW()
+                    WHERE id = :id
+                """),
+                {"status": patch.status, "is_active": is_active_val, "id": restaurant_id},
+            )
 
-        row_result = await self._db.execute(
+        await self._db.commit()
+        return await self._fetch_one(restaurant_id)
+
+    async def get_applications(self, page: int, limit: int) -> ApplicationsResponse:
+        offset = (page - 1) * limit
+
+        count_result = await self._db.execute(
+            text("SELECT COUNT(*) FROM restaurants WHERE status = 'pending'")
+        )
+        total: int = count_result.scalar_one()
+
+        rows_result = await self._db.execute(
             text("""
-                WITH latest_sub AS (
-                    SELECT DISTINCT ON (restaurant_id)
-                        restaurant_id, status, trial_ends_at
-                    FROM billing.subscriptions
-                    ORDER BY restaurant_id, created_at DESC
-                )
-                SELECT
-                    r.id, r.name, r.slug, r.email, r.plan,
-                    r.is_active, r.created_at,
-                    COALESCE(s.status, 'active') AS status,
-                    s.trial_ends_at
-                FROM restaurants r
-                LEFT JOIN latest_sub s ON s.restaurant_id = r.id
-                WHERE r.id = :id
+                SELECT id, name, slug, email, phone, city, type, created_at
+                FROM restaurants
+                WHERE status = 'pending'
+                ORDER BY created_at ASC
+                LIMIT :limit OFFSET :offset
             """),
+            {"limit": limit, "offset": offset},
+        )
+        rows = rows_result.mappings().all()
+
+        items = [
+            ApplicationItem(
+                id=row["id"],
+                name=row["name"],
+                slug=row["slug"],
+                email=row["email"],
+                phone=row["phone"],
+                city=row["city"],
+                type=row["type"],
+                created_at=row["created_at"],
+            )
+            for row in rows
+        ]
+
+        return ApplicationsResponse(
+            items=items,
+            total=total,
+            page=page,
+            pages=ceil(total / limit) if total else 1,
+        )
+
+    async def approve_restaurant(self, restaurant_id: UUID) -> RestaurantItem:
+        result = await self._db.execute(
+            text("""
+                UPDATE restaurants
+                SET status = 'active', is_active = true, updated_at = NOW()
+                WHERE id = :id AND status = 'pending'
+            """),
+            {"id": restaurant_id},
+        )
+        if result.rowcount == 0:
+            raise HTTPException(
+                status_code=http_status.HTTP_404_NOT_FOUND,
+                detail="Application not found or already processed",
+            )
+        await self._db.commit()
+        return await self._fetch_one(restaurant_id)
+
+    async def reject_restaurant(self, restaurant_id: UUID) -> RestaurantItem:
+        result = await self._db.execute(
+            text("""
+                UPDATE restaurants
+                SET status = 'inactive', is_active = false, updated_at = NOW()
+                WHERE id = :id AND status = 'pending'
+            """),
+            {"id": restaurant_id},
+        )
+        if result.rowcount == 0:
+            raise HTTPException(
+                status_code=http_status.HTTP_404_NOT_FOUND,
+                detail="Application not found or already processed",
+            )
+        await self._db.commit()
+        return await self._fetch_one(restaurant_id)
+
+    async def _fetch_one(self, restaurant_id: UUID) -> RestaurantItem:
+        row_result = await self._db.execute(
+            text(f"{_RESTAURANT_SELECT} WHERE r.id = :id"),
             {"id": restaurant_id},
         )
         row = row_result.mappings().one_or_none()
         if row is None:
-            from fastapi import HTTPException, status as http_status
-            raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail="Restaurant not found")
-
-        return RestaurantItem(
-            id=row["id"],
-            name=row["name"],
-            slug=row["slug"],
-            email=row["email"],
-            plan=row["plan"],
-            status=row["status"],
-            is_active=row["is_active"],
-            created_at=row["created_at"],
-            trial_ends_at=row["trial_ends_at"],
-        )
+            raise HTTPException(
+                status_code=http_status.HTTP_404_NOT_FOUND,
+                detail="Restaurant not found",
+            )
+        return _row_to_item(row)

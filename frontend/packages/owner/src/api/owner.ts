@@ -8,9 +8,28 @@ export interface OwnerRestaurant {
   email: string
   plan: string
   status: string
+  registration_status: string
   is_active: boolean
   created_at: string
   trial_ends_at: string | null
+}
+
+export interface ApplicationItem {
+  id: string
+  name: string
+  slug: string
+  email: string
+  phone: string | null
+  city: string | null
+  type: string | null
+  created_at: string
+}
+
+export interface ApplicationsResponse {
+  items: ApplicationItem[]
+  total: number
+  page: number
+  pages: number
 }
 
 export interface RestaurantList {
@@ -108,4 +127,17 @@ export async function getPayments(page = 1): Promise<PaymentList> {
 export async function getSystemHealth(): Promise<SystemHealth> {
   const { data } = await ownerApi.get('/api/v1/owner/system/health')
   return data
+}
+
+export async function getApplications(page = 1, limit = 20): Promise<ApplicationsResponse> {
+  const { data } = await ownerApi.get('/api/v1/owner/applications', { params: { page, limit } })
+  return data
+}
+
+export async function approveApplication(id: string): Promise<void> {
+  await ownerApi.post(`/api/v1/owner/applications/${id}/approve`)
+}
+
+export async function rejectApplication(id: string): Promise<void> {
+  await ownerApi.post(`/api/v1/owner/applications/${id}/reject`)
 }

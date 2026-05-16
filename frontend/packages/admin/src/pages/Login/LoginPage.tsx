@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -99,9 +99,9 @@ export default function LoginPage() {
 
       <div className={styles.footer}>
         14 дней бесплатно —{' '}
-        <span className={styles.registerLink}>
+        <Link to="/register" className={styles.registerLink}>
           Зарегистрироваться
-        </span>
+        </Link>
       </div>
     </div>
   );
