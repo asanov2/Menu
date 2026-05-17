@@ -2,7 +2,19 @@
 import { adminApi } from '@qrmenu/ui';
 import type { Menu } from '@qrmenu/ui';
 
-export async function getMenus(): Promise<Menu[]> {
+export interface MenuUsage {
+  menus_used: number
+  menus_limit: number | null
+  items_used: number
+  items_limit: number | null
+}
+
+export interface MenusResponse {
+  menus: Menu[]
+  usage: MenuUsage
+}
+
+export async function getMenus(): Promise<MenusResponse> {
   const { data } = await adminApi.get('/api/v1/admin/menus');
   return data;
 }

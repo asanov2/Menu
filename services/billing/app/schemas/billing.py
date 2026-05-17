@@ -18,6 +18,7 @@ class PaymentOut(BaseModel):
     currency: str
     status: PaymentStatus
     provider: PaymentProvider
+    target_plan: PlanEnum | None = None
     provider_transaction_id: str | None
     paid_at: datetime | None
     created_at: datetime
@@ -41,6 +42,9 @@ class SubscriptionOut(BaseModel):
 
 class SubscriptionWithPaymentsOut(SubscriptionOut):
     payments: list[PaymentOut]
+    trial_remaining_days: int | None = None
+    warning_banner: bool = False
+    warning_message: str | None = None
 
 
 class UpgradeRequest(BaseModel):
@@ -52,6 +56,8 @@ class UpgradeRequest(BaseModel):
 class UpgradeResponse(BaseModel):
     payment_url: str
     payment_id: UUID
+    amount: int
+    plan: str
 
 
 class CancelResponse(BaseModel):

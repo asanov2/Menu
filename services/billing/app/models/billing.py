@@ -112,10 +112,9 @@ class Payment(Base):
 
 
 class Restaurant(Base):
-    """Minimal mirror of auth_service.restaurants for cross-schema updates."""
+    """Minimal mirror of public.restaurants for cross-service plan/status sync."""
 
     __tablename__ = "restaurants"
-    __table_args__ = {"schema": "auth_service"}
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)

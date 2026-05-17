@@ -1,7 +1,59 @@
-// === FILE: frontend/packages/admin/src/api/billing.ts ===
 import { adminApi } from '@qrmenu/ui';
 
-interface Subscription {
+export interface PlanInfo {
+  id: 'starter' | 'business' | 'pro'
+  name: string
+  price: number
+  features: string[]
+  isPopular?: boolean
+}
+
+export const PLANS: PlanInfo[] = [
+  {
+    id: 'starter',
+    name: 'Старт',
+    price: 3900,
+    features: [
+      '1 меню, до 50 блюд',
+      'QR-код для ресторана',
+      'Только русский язык',
+      'Пометки на блюдах',
+      'Кнопка «Позвать официанта»',
+      'Базовая аналитика — 7 дней',
+    ],
+  },
+  {
+    id: 'business',
+    name: 'Бизнес',
+    price: 7900,
+    isPopular: true,
+    features: [
+      'До 200 блюд',
+      '3 языка (KZ / RU / EN)',
+      'QR на каждый стол',
+      'Несколько меню',
+      'Поиск по меню',
+      'Аналитика — 30 дней',
+      'Telegram-сводка',
+    ],
+  },
+  {
+    id: 'pro',
+    name: 'Про',
+    price: 14900,
+    features: [
+      'Неограниченно блюд и меню',
+      'AI генерация описаний',
+      'Предзаказ со стола',
+      'Аллергены с фильтрацией',
+      'Брендированный домен',
+      'Аналитика — 90 дней',
+      'Приоритетная поддержка',
+    ],
+  },
+]
+
+export interface Subscription {
   id: string
   restaurant_id: string
   plan: 'starter' | 'business' | 'pro'
@@ -12,9 +64,12 @@ interface Subscription {
   auto_renew: boolean
   created_at: string
   updated_at: string
+  trial_remaining_days: number | null
+  warning_banner: boolean
+  warning_message: string | null
 }
 
-interface Payment {
+export interface Payment {
   id: string
   subscription_id: string
   restaurant_id: string
@@ -22,27 +77,47 @@ interface Payment {
   currency: string
   status: 'pending' | 'success' | 'failed' | 'refunded'
   provider: string
+  target_plan: 'starter' | 'business' | 'pro' | null
   provider_transaction_id: string | null
   paid_at: string | null
   created_at: string
 }
 
-interface BillingData {
-  subscription: Subscription
-  payments: Payment[]
+export interface UpgradeResult {
+  payment_url: string
+  payment_id: string
+  amount: number
+  plan: string
 }
 
-export async function getSubscription(): Promise<BillingData> {
+export interface MenuUsage {
+  menus_used: number
+  menus_limit: number | null
+  items_used: number
+  items_limit: number | null
+}
+
+export async function getSubscription(): Promise<{ subscription: Subscription; payments: Payment[] }> {
   const { data } = await adminApi.get('/api/v1/billing/subscription')
   const { payments, ...subscription } = data
   return { subscription, payments: payments ?? [] }
 }
 
-export async function upgradeSubscription(plan: string): Promise<{ payment_url: string; payment_id: string }> {
-  const { data } = await adminApi.post('/api/v1/billing/subscription/upgrade', { plan });
-  return data;
+export async function getMenuUsage(): Promise<MenuUsage> {
+  const { data } = await adminApi.get('/api/v1/admin/menus')
+  return data.usage as MenuUsage
+}
+
+export async function upgradePlan(plan: string): Promise<UpgradeResult> {
+  const { data } = await adminApi.post('/api/v1/billing/subscription/upgrade', { plan })
+  return data
+}
+
+export async function completeMockPayment(): Promise<{ message: string; plan: string; status: string }> {
+  const { data } = await adminApi.post('/api/v1/billing/subscription/mock-complete')
+  return data
 }
 
 export async function cancelSubscription(): Promise<void> {
-  await adminApi.post('/api/v1/billing/subscription/cancel');
+  await adminApi.post('/api/v1/billing/subscription/cancel')
 }

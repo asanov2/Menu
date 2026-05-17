@@ -6,7 +6,7 @@ import styles from './RestaurantRow.module.css';
 
 interface RestaurantRowProps {
   restaurant: OwnerRestaurant;
-  onPlanChange: (id: string, plan: string) => void;
+  onPlanChange: (id: string, plan: string, name: string) => void;
   onToggleActive: (restaurant: OwnerRestaurant) => void;
   isPending: boolean;
 }
@@ -22,8 +22,8 @@ function RestaurantRow({ restaurant: r, onPlanChange, onToggleActive, isPending 
       </td>
       <td className={common.td}>
         <select
-          defaultValue={r.plan}
-          onChange={e => onPlanChange(r.id, e.target.value)}
+          value={r.plan}
+          onChange={e => onPlanChange(r.id, e.target.value, r.name)}
           onClick={e => e.stopPropagation()}
           className={styles.planSelect}
         >

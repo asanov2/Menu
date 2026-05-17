@@ -49,10 +49,15 @@ def _enforce_plan(plan: str, requested_days: int) -> None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={
-                "message": "Upgrade required",
+                "code": "PLAN_LIMIT_REACHED",
+                "message": (
+                    f"Аналитика за {requested_days} дней недоступна на вашем тарифе. "
+                    f"Перейдите на тариф выше."
+                ),
                 "current_plan": plan,
                 "required_plan": required,
-                "upgrade_url": "/billing/upgrade",
+                "upgrade_to": required,
+                "upgrade_url": "/billing",
             },
         )
 

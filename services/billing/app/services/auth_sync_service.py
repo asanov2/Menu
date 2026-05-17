@@ -2,10 +2,8 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy import update
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.models.billing import Restaurant
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +15,11 @@ async def sync_restaurant_status(
     db: AsyncSession,
 ) -> None:
     await db.execute(
-        update(Restaurant)
-        .where(Restaurant.id == restaurant_id)
-        .values(is_active=is_active, plan=plan)
+        text(
+            "UPDATE restaurants SET is_active = :is_active, plan = CAST(:plan AS plantype), "
+            "updated_at = NOW() WHERE id = :id"
+        ),
+        {"is_active": is_active, "plan": plan, "id": restaurant_id},
     )
     await db.commit()
     logger.info(

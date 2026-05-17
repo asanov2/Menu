@@ -13,10 +13,22 @@ const LIMIT = 20;
 const COLUMNS = ['Название', 'План', 'Статус', 'Создан', 'Триал до', 'Действия'];
 const WIDTHS   = ['',        '110px', '80px', '100px', '100px',  '140px'];
 
+const PLAN_LABELS: Record<string, string> = {
+  starter: 'Старт',
+  business: 'Бизнес',
+  pro: 'Про',
+};
+
 function getFilterParams(filter: string) {
   if ([PLAN.STARTER, PLAN.BUSINESS, PLAN.PRO].includes(filter as never)) return { plan: filter };
   if ([PLAN_STATUS.TRIAL, PLAN_STATUS.EXPIRED].includes(filter as never)) return { status: filter };
   return {};
+}
+
+interface PlanConfirmTarget {
+  id: string;
+  name: string;
+  plan: string;
 }
 
 export default function RestaurantsPage() {
@@ -24,6 +36,7 @@ export default function RestaurantsPage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [confirmTarget, setConfirmTarget] = useState<OwnerRestaurant | null>(null);
+  const [planConfirmTarget, setPlanConfirmTarget] = useState<PlanConfirmTarget | null>(null);
   const qc = useQueryClient();
   const { showToast } = useToast();
 
@@ -42,11 +55,24 @@ export default function RestaurantsPage() {
 
   const handleSearchChange = useCallback((val: string) => { setSearch(val); setPage(1); }, []);
   const handleFilterChange = useCallback((filter: string) => { setActiveFilter(filter); setPage(1); }, []);
-  const handlePlanChange = useCallback((id: string, plan: string) => { updateMut.mutate({ id, patch: { plan } }); }, [updateMut]);
+
+  // Plan change shows confirm modal first — only mutate after user confirms
+  const handlePlanChange = useCallback((id: string, plan: string, name: string) => {
+    setPlanConfirmTarget({ id, plan, name });
+  }, []);
+
+  const handleConfirmPlanChange = useCallback(() => {
+    if (planConfirmTarget) {
+      updateMut.mutate({ id: planConfirmTarget.id, patch: { plan: planConfirmTarget.plan } });
+    }
+    setPlanConfirmTarget(null);
+  }, [planConfirmTarget, updateMut]);
+
   const handleToggleActive = useCallback((r: OwnerRestaurant) => {
     if (r.is_active) setConfirmTarget(r);
     else updateMut.mutate({ id: r.id, patch: { is_active: true } });
   }, [updateMut]);
+
   const handleConfirmDeactivate = useCallback(() => {
     if (confirmTarget) updateMut.mutate({ id: confirmTarget.id, patch: { is_active: false } });
     setConfirmTarget(null);
@@ -109,6 +135,17 @@ export default function RestaurantsPage() {
         danger
         onConfirm={handleConfirmDeactivate}
         onCancel={() => setConfirmTarget(null)}
+      />
+
+      <ConfirmModal
+        isOpen={!!planConfirmTarget}
+        title="Изменить тарифный план?"
+        message={`Вы меняете план ресторана «${planConfirmTarget?.name}» на «${PLAN_LABELS[planConfirmTarget?.plan ?? ''] ?? planConfirmTarget?.plan}». Это действие будет записано.`}
+        confirmText="Да, изменить"
+        cancelText="Отмена"
+        danger={false}
+        onConfirm={handleConfirmPlanChange}
+        onCancel={() => setPlanConfirmTarget(null)}
       />
     </div>
   );

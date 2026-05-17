@@ -6,20 +6,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.cache_invalidator import invalidate_menu_cache
 from app.core.database import get_db
 from app.core.dependencies import CurrentRestaurant, get_current_restaurant
-from app.schemas.menu import MenuCreate, MenuResponse, MenuUpdate
+from app.schemas.menu import MenuCreate, MenuListWithUsageResponse, MenuResponse, MenuUpdate
 from app.services.menu_service import MenuService
 
 router = APIRouter()
 
 
-@router.get("", response_model=list[MenuResponse])
+@router.get("", response_model=MenuListWithUsageResponse)
 async def list_menus(
     current: CurrentRestaurant = Depends(get_current_restaurant),
     db: AsyncSession = Depends(get_db),
-) -> list[MenuResponse]:
+) -> MenuListWithUsageResponse:
     service = MenuService(db)
     menus = await service.list_menus(current.id)
-    return [MenuResponse.model_validate(m) for m in menus]
+    usage = await service.get_plan_usage(current.id, current.plan)
+    return MenuListWithUsageResponse(
+        menus=[MenuResponse.model_validate(m) for m in menus],
+        usage=usage,
+    )
 
 
 @router.post("", response_model=MenuResponse, status_code=status.HTTP_201_CREATED)
@@ -29,7 +33,7 @@ async def create_menu(
     db: AsyncSession = Depends(get_db),
 ) -> MenuResponse:
     service = MenuService(db)
-    menu = await service.create_menu(current.id, data)
+    menu = await service.create_menu(current.id, current.plan, data)
     await invalidate_menu_cache(current.slug)
     return MenuResponse.model_validate(menu)
 
@@ -53,7 +57,7 @@ async def update_menu(
     db: AsyncSession = Depends(get_db),
 ) -> MenuResponse:
     service = MenuService(db)
-    menu = await service.update_menu(current.id, menu_id, data)
+    menu = await service.update_menu(current.id, menu_id, current.plan, data)
     await invalidate_menu_cache(current.slug)
     return MenuResponse.model_validate(menu)
 

@@ -4,138 +4,338 @@
   gap: 24px;
 }
 
-.planHeader {
+/* ── Section 1: Status card ──────────────────────────────────── */
+
+.statusHeader {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 16px;
 }
 
-.planInfo {
+.statusLeft {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.planName {
+.statusPlanName {
   font-family: var(--font-display);
   font-size: 22px;
   color: var(--ink-primary);
 }
 
-.renewalInfo {
+.statusPeriod {
   font-size: 12px;
   color: var(--ink-secondary);
   font-family: var(--font-ui);
   text-align: right;
 }
 
-.renewalDate {
+.periodLabel {
+  color: var(--ink-secondary);
+  font-size: 11px;
+}
+
+.periodDate {
   color: var(--ink-primary);
   font-weight: 500;
+  font-size: 13px;
   margin-top: 2px;
 }
 
-.trialSection {
-  margin-bottom: 16px;
-}
-
-.trialLabel {
+.trialInfo {
   font-size: 12px;
-  color: var(--ink-secondary);
   font-family: var(--font-ui);
-  margin-bottom: 8px;
+  color: var(--ink-secondary);
+  background: var(--cream-muted);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  margin-bottom: 12px;
 }
 
-.trialBar {
-  height: 6px;
+.expiredBanner {
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.usageRow {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.usageItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+}
+
+.usageLabel {
+  font-weight: 500;
+  color: var(--ink-primary);
+}
+
+.autoRenewRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--cream-border);
+}
+
+.autoRenewLabel {
+  font-size: 13px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+}
+
+.toggle {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggleOn {
+  background: var(--ink-primary);
+}
+
+.toggleOff {
   background: var(--cream-border);
-  border-radius: 3px;
-  overflow: hidden;
+  cursor: default;
 }
 
-.trialFill {
-  height: 100%;
-  background: var(--accent-gold);
-  border-radius: 3px;
-  transition: width 0.5s;
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  transition: left 0.2s;
 }
 
-.upgradeGrid {
+.toggleOn::after {
+  left: 19px;
+}
+
+.toggleOff::after {
+  left: 3px;
+}
+
+/* ── Section 2: Plan cards ───────────────────────────────────── */
+
+.plansGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-  margin-top: 8px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
-.upgradePlan {
+@media (max-width: 900px) {
+  .plansGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.planCard {
+  background: var(--cream-bg);
   border: 0.5px solid var(--cream-border);
   border-radius: var(--radius-lg);
-  padding: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
-.upgradePlanName {
+.planCardCurrent {
+  border-color: var(--ink-primary);
+  border-width: 1px;
+}
+
+.planCardPopular {
+  border-color: var(--accent-gold);
+  border-width: 1px;
+}
+
+.popularBadge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent-gold);
+  color: var(--ink-primary);
+  font-size: 10px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.planCardHeader {
+  margin-bottom: 14px;
+}
+
+.planName {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 18px;
   color: var(--ink-primary);
   margin-bottom: 4px;
 }
 
-.upgradePlanPrice {
-  font-size: 13px;
-  font-weight: 600;
+.planPrice {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-ui);
   color: var(--ink-primary);
-  font-family: var(--font-ui);
-  margin-bottom: 10px;
 }
 
-.upgradeFeatures {
-  margin: 0 0 14px;
-  padding: 0 0 0 16px;
+.planPricePeriod {
   font-size: 12px;
+  font-weight: 400;
   color: var(--ink-secondary);
-  font-family: var(--font-ui);
-  line-height: 1.8;
 }
 
-.upgradeBtn {
+.planFeatures {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  flex: 1;
+}
+
+.planFeatureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  line-height: 1.7;
+}
+
+.checkmark {
+  color: #16a34a;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.planBtn {
   width: 100%;
-  padding: 8px;
-  background: var(--ink-primary);
-  color: var(--cream-surface);
+  padding: 9px 12px;
   border: none;
   border-radius: var(--radius-md);
   font-size: 13px;
   font-family: var(--font-ui);
+  font-weight: 500;
   cursor: pointer;
+  transition: opacity 0.15s;
 }
 
-.upgradeBtnLoading {
-  cursor: not-allowed;
-  opacity: 0.7;
+.planBtn:hover:not(:disabled) {
+  opacity: 0.85;
 }
 
-.cancelRow {
-  margin-top: 16px;
-  text-align: right;
+.planBtnPrimary {
+  background: var(--ink-primary);
+  color: var(--cream-bg);
 }
 
-.cancelBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 12px;
+.planBtnCurrent {
+  background: var(--cream-muted);
   color: var(--ink-secondary);
-  font-family: var(--font-ui);
-  text-decoration: underline;
+  cursor: default;
 }
+
+.planBtnDisabled {
+  background: var(--cream-muted);
+  color: var(--cream-border);
+  cursor: not-allowed;
+}
+
+/* ── Section 3: White label teaser ──────────────────────────── */
+
+.whiteLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.whiteLabelTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--ink-primary);
+  margin-bottom: 4px;
+}
+
+.whiteLabelPrice {
+  font-size: 14px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--ink-primary);
+  margin-bottom: 6px;
+}
+
+.whiteLabelDesc {
+  font-size: 12px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  max-width: 480px;
+}
+
+.soonBadge {
+  background: var(--cream-muted);
+  color: var(--ink-secondary);
+  border: 0.5px solid var(--cream-border);
+  font-size: 11px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Section 4: Payment table ───────────────────────────────── */
 
 .tdAmount {
   padding: 10px 8px;
   color: var(--ink-primary);
   font-weight: 500;
+  font-family: var(--font-ui);
+  font-size: 13px;
 }
 
 .tdStatus {
   padding: 10px 8px;
+}
+
+.tdPlan {
+  padding: 10px 8px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-family: var(--font-ui);
+  text-transform: capitalize;
+}
+
+.tdProvider {
+  padding: 10px 8px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-family: var(--font-ui);
 }

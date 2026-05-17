@@ -21,6 +21,9 @@ import SortableItem from './SortableItem';
 import ItemFormModal from './ItemFormModal';
 import CategoryFormModal from './CategoryFormModal';
 import { updateCategory } from '../../../api/categories';
+import PlanLimitModal from '../../../components/PlanLimitModal';
+import { isPlanLimitError, getPlanLimitDetail } from '../../../utils/planLimitError';
+import type { PlanLimitDetail } from '../../../utils/planLimitError';
 import styles from './CategorySection.module.css';
 
 interface CategorySectionProps {
@@ -43,6 +46,7 @@ export default function CategorySection({ category, allCategories, menuId, dragH
   const [editCatOpen, setEditCatOpen] = useState(false);
   const [catSaving, setCatSaving] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
+  const [planLimitDetail, setPlanLimitDetail] = useState<PlanLimitDetail | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -79,7 +83,13 @@ export default function CategorySection({ category, allCategories, menuId, dragH
       setItemFormOpen(false);
       setEditingItem(undefined);
     } catch (err: unknown) {
-      showToast(`Ошибка: ${getApiErrorMessage(err)}`, 'error');
+      if (isPlanLimitError(err)) {
+        setItemFormOpen(false);
+        setEditingItem(undefined);
+        setPlanLimitDetail(getPlanLimitDetail(err));
+      } else {
+        showToast(`Ошибка: ${getApiErrorMessage(err)}`, 'error');
+      }
     } finally {
       setItemSaving(false);
     }
@@ -186,6 +196,8 @@ export default function CategorySection({ category, allCategories, menuId, dragH
         onCancel={() => setConfirmDel(false)}
         danger
       />
+
+      <PlanLimitModal detail={planLimitDetail} onClose={() => setPlanLimitDetail(null)} />
     </>
   );
 }

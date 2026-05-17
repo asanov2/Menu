@@ -173,7 +173,8 @@ class AuthService:
             return {
                 "valid": True,
                 "restaurant_id": restaurant_id,
-                "plan": payload.get("plan"),
+                # Always read plan from DB — JWT plan can be stale after billing upgrade
+                "plan": restaurant.plan.value,
                 "slug": payload.get("slug"),
             }
         except (ValueError, KeyError):

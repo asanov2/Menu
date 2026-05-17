@@ -36,6 +36,34 @@ async def get_subscription_with_payments(
     if sub is None:
         return None
     sub.payments = sorted(sub.payments, key=lambda p: p.created_at, reverse=True)[:6]
+
+    now = datetime.now(timezone.utc)
+    trial_remaining_days = None
+    warning_banner = False
+    warning_message = None
+
+    if sub.status == SubscriptionStatus.trial:
+        if sub.trial_ends_at:
+            delta = sub.trial_ends_at - now
+            trial_remaining_days = max(0, delta.days)
+            if trial_remaining_days <= 5:
+                warning_banner = True
+                warning_message = (
+                    f"Ваш пробный период заканчивается через "
+                    f"{trial_remaining_days} дн. "
+                    f"({sub.trial_ends_at.strftime('%d.%m.%Y')}). "
+                    f"Оформите подписку, чтобы продолжить работу."
+                )
+    elif sub.status == SubscriptionStatus.expired:
+        warning_banner = True
+        warning_message = (
+            "Ваша подписка истекла. "
+            "Оформите подписку для восстановления доступа."
+        )
+
+    sub.trial_remaining_days = trial_remaining_days
+    sub.warning_banner = warning_banner
+    sub.warning_message = warning_message
     return sub
 
 
@@ -43,7 +71,7 @@ async def upgrade_subscription(
     restaurant_id: UUID,
     new_plan: PlanEnum,
     db: AsyncSession,
-) -> tuple[str, UUID]:
+) -> dict:
     result = await db.execute(
         select(Subscription).where(Subscription.restaurant_id == restaurant_id)
     )
@@ -54,8 +82,8 @@ async def upgrade_subscription(
 
     current_index = PLAN_ORDER.index(sub.plan)
     new_index = PLAN_ORDER.index(new_plan)
-    if new_index <= current_index:
-        raise ValueError("Downgrade is not allowed. You can only upgrade to a higher plan.")
+    if new_index < current_index:
+        raise ValueError("Downgrade is not allowed.")
 
     amount = PLAN_PRICES[new_plan.value]
     payment = Payment(
@@ -85,7 +113,12 @@ async def upgrade_subscription(
         new_plan.value,
         payment.id,
     )
-    return payment_url, payment.id
+    return {
+        "payment_url": payment_url,
+        "payment_id": payment.id,
+        "amount": int(amount),
+        "plan": new_plan.value,
+    }
 
 
 async def cancel_subscription(
@@ -179,8 +212,13 @@ async def process_successful_payment(
 
     if payment.target_plan is not None:
         sub.plan = payment.target_plan
+
+    # Extend from current_period_end if subscription was active and not yet expired
+    was_active = sub.status == SubscriptionStatus.active and sub.current_period_end > now
     sub.status = SubscriptionStatus.active
-    sub.current_period_end = now + timedelta(days=30)
+    new_period_start = sub.current_period_end if was_active else now
+    sub.current_period_start = new_period_start
+    sub.current_period_end = new_period_start + timedelta(days=30)
 
     await db.commit()
 
@@ -206,3 +244,52 @@ async def process_successful_payment(
         provider_transaction_id,
         sub.plan.value,
     )
+
+
+async def complete_mock_payment(
+    restaurant_id: UUID,
+    db: AsyncSession,
+) -> dict:
+    from fastapi import HTTPException, status as http_status
+
+    from app.core.database import AuthAsyncSessionLocal
+
+    result = await db.execute(
+        select(Payment)
+        .where(
+            Payment.restaurant_id == restaurant_id,
+            Payment.status == PaymentStatus.pending,
+        )
+        .order_by(Payment.created_at.desc())
+    )
+    payment = result.scalars().first()
+
+    if payment is None:
+        raise HTTPException(
+            status_code=http_status.HTTP_404_NOT_FOUND,
+            detail="No pending payment found",
+        )
+
+    mock_transaction_id = f"mock-{payment.id}"
+
+    async with AuthAsyncSessionLocal() as auth_db:
+        await process_successful_payment(
+            provider_transaction_id=mock_transaction_id,
+            raw_payload={"mock": True},
+            restaurant_id=restaurant_id,
+            db=db,
+            auth_db=auth_db,
+        )
+
+    sub_result = await db.execute(
+        select(Subscription).where(Subscription.restaurant_id == restaurant_id)
+    )
+    sub = sub_result.scalar_one_or_none()
+
+    logger.info("mock_complete: restaurant=%s plan=%s", restaurant_id, sub.plan.value if sub else None)
+    return {
+        "message": "Платёж успешно обработан",
+        "plan": sub.plan.value if sub else None,
+        "status": sub.status.value if sub else None,
+        "current_period_end": sub.current_period_end.isoformat() if sub else None,
+    }

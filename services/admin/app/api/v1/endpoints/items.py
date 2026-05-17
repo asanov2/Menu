@@ -30,7 +30,7 @@ async def create_item(
     db: AsyncSession = Depends(get_db),
 ) -> ItemResponse:
     service = ItemService(db)
-    item = await service.create_item(current.id, data)
+    item = await service.create_item(current.id, current.plan, data)
     await invalidate_menu_cache(current.slug)
     return ItemResponse.model_validate(item)
 

@@ -17,6 +17,44 @@
   cursor: pointer;
 }
 
+.btnCreateDisabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.usageBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.usageText {
+  font-size: 12px;
+  color: var(--ink-secondary);
+  font-family: var(--font-ui);
+  white-space: nowrap;
+}
+
+.usageTrack {
+  flex: 1;
+  height: 6px;
+  background: var(--cream-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.usageFill {
+  height: 100%;
+  background: var(--accent-gold, #b45309);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.usageFillFull {
+  background: #dc2626;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

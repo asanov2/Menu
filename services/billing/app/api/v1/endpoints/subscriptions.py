@@ -15,6 +15,7 @@ from app.schemas.billing import (
 )
 from app.services.subscription_service import (
     cancel_subscription,
+    complete_mock_payment,
     get_subscription_with_payments,
     upgrade_subscription,
 )
@@ -43,14 +44,14 @@ async def upgrade(
 ) -> UpgradeResponse:
     restaurant_id: UUID = current["restaurant_id"]
     try:
-        payment_url, payment_id = await upgrade_subscription(
+        result = await upgrade_subscription(
             restaurant_id=restaurant_id,
             new_plan=PlanEnum(body.plan),
             db=db,
         )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
-    return UpgradeResponse(payment_url=payment_url, payment_id=payment_id)
+    return UpgradeResponse(**result)
 
 
 @router.post("/subscription/cancel", response_model=CancelResponse)
@@ -67,3 +68,13 @@ async def cancel(
         message="Auto-renewal disabled. Your subscription remains active until the end of the current period.",
         active_until=active_until,
     )
+
+
+@router.post("/subscription/mock-complete")
+async def mock_complete_payment(
+    current: dict = Depends(get_current_restaurant),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Development only — simulates successful payment webhook."""
+    restaurant_id: UUID = UUID(str(current["restaurant_id"]))
+    return await complete_mock_payment(restaurant_id=restaurant_id, db=db)

@@ -20,15 +20,20 @@ async def expire_unpaid_subscriptions() -> None:
     total = 0
     failed = 0
 
+    logger.info("expire_unpaid_subscriptions: cron job started at %s", now.isoformat())
+
     async with AsyncSessionLocal() as db:
         result = await db.execute(
             select(Subscription).where(
                 Subscription.current_period_end < now,
                 Subscription.status.in_([SubscriptionStatus.active, SubscriptionStatus.trial]),
-                Subscription.auto_renew.is_(False),
+                # auto_renew filter removed — no real payment processing yet,
+                # treat all overdue subscriptions the same regardless of auto_renew flag
             )
         )
         subscriptions = result.scalars().all()
+
+    logger.info("expire_unpaid_subscriptions: found %d candidates", len(subscriptions))
 
     for sub in subscriptions:
         try:
@@ -47,6 +52,10 @@ async def expire_unpaid_subscriptions() -> None:
                     )
                 await db.commit()
             total += 1
+            logger.info(
+                "expire: restaurant=%s period_end=%s expired successfully",
+                sub.restaurant_id, sub.current_period_end,
+            )
         except Exception as exc:
             failed += 1
             logger.error(
@@ -56,7 +65,7 @@ async def expire_unpaid_subscriptions() -> None:
             )
 
     logger.info(
-        "expire_unpaid_subscriptions: expired=%d failed=%d",
+        "expire_unpaid_subscriptions: finished expired=%d failed=%d",
         total,
         failed,
     )
@@ -68,6 +77,8 @@ async def attempt_auto_renewals() -> None:
     now = datetime.now(timezone.utc)
     total = 0
     failed = 0
+
+    logger.info("attempt_auto_renewals: cron job started at %s", now.isoformat())
 
     async with AsyncSessionLocal() as db:
         result = await db.execute(
@@ -124,4 +135,8 @@ def init_scheduler() -> None:
         minute=10,
         id="attempt_auto_renewals",
         replace_existing=True,
+    )
+    logger.info(
+        "scheduler: jobs registered — expire_unpaid_subscriptions @ 00:05 UTC, "
+        "attempt_auto_renewals @ 00:10 UTC"
     )

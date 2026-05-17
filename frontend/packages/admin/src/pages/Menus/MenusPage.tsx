@@ -4,6 +4,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { EmptyState, Skeleton, useToast } from '@qrmenu/ui';
 import { getMenus, createMenu } from '../../api/menus';
 import MenuCard from './components/MenuCard';
+import PlanLimitModal from '../../components/PlanLimitModal';
+import { isPlanLimitError, getPlanLimitDetail } from '../../utils/planLimitError';
+import type { PlanLimitDetail } from '../../utils/planLimitError';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './MenusPage.module.css';
 import common from '../../styles/common.module.css';
@@ -15,11 +18,16 @@ export default function MenusPage() {
   const [newName, setNewName] = useState('');
   const [newLang, setNewLang] = useState('ru');
   const [saving, setSaving] = useState(false);
+  const [planLimitDetail, setPlanLimitDetail] = useState<PlanLimitDetail | null>(null);
 
-  const { data: menus, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['menus'],
     queryFn: getMenus,
   });
+
+  const menus = data?.menus ?? [];
+  const usage = data?.usage;
+  const atMenusLimit = usage != null && usage.menus_limit != null && usage.menus_used >= usage.menus_limit;
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
@@ -31,8 +39,13 @@ export default function MenusPage() {
       setCreateOpen(false);
       setNewName('');
       setNewLang('ru');
-    } catch {
-      showToast('Ошибка: не удалось создать меню', 'error');
+    } catch (err: unknown) {
+      if (isPlanLimitError(err)) {
+        setCreateOpen(false);
+        setPlanLimitDetail(getPlanLimitDetail(err));
+      } else {
+        showToast('Ошибка: не удалось создать меню', 'error');
+      }
     } finally {
       setSaving(false);
     }
@@ -43,17 +56,37 @@ export default function MenusPage() {
       {/* Header */}
       <div className={common.pageHeader}>
         <h1 className={styles.pageTitle}>Мои меню</h1>
-        <button onClick={() => setCreateOpen(true)} className={styles.btnCreate}>
+        <button
+          onClick={() => !atMenusLimit && setCreateOpen(true)}
+          className={`${styles.btnCreate} ${atMenusLimit ? styles.btnCreateDisabled : ''}`}
+          disabled={atMenusLimit}
+          title={atMenusLimit ? `Лимит: ${usage?.menus_used}/${usage?.menus_limit} меню` : undefined}
+        >
           + Создать меню
         </button>
       </div>
+
+      {/* Usage bar */}
+      {usage && usage.menus_limit != null && (
+        <div className={styles.usageBar}>
+          <div className={styles.usageText}>
+            Меню: {usage.menus_used} из {usage.menus_limit}
+          </div>
+          <div className={styles.usageTrack}>
+            <div
+              className={`${styles.usageFill} ${atMenusLimit ? styles.usageFillFull : ''}`}
+              style={{ width: `${Math.min((usage.menus_used / usage.menus_limit) * 100, 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Grid */}
       {isLoading ? (
         <div className={styles.grid}>
           {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} height="180px" borderRadius="var(--radius-lg)" />)}
         </div>
-      ) : !menus?.length ? (
+      ) : !menus.length ? (
         <EmptyState
           icon="🍽️"
           title="Нет меню"
@@ -131,6 +164,8 @@ export default function MenusPage() {
           </>
         )}
       </AnimatePresence>
+
+      <PlanLimitModal detail={planLimitDetail} onClose={() => setPlanLimitDetail(null)} />
     </div>
   );
 }

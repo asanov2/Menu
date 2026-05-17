@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -30,6 +31,18 @@ class MenuResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class PlanUsageResponse(BaseModel):
+    menus_used: int
+    menus_limit: Optional[int]
+    items_used: int
+    items_limit: Optional[int]
+
+
+class MenuListWithUsageResponse(BaseModel):
+    menus: list[MenuResponse]
+    usage: PlanUsageResponse
 
 
 # ─── Category ─────────────────────────────────────────────────────────────────

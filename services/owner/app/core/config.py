@@ -19,5 +19,8 @@ class Settings(BaseSettings):
     owner_email: str = "owner@qrmenu.kz"
     owner_password_hash: str = "$2b$12$defaulthashthatshouldbechangedinproduction00000000000"
 
+    billing_service_url: str = "http://billing-service:8005"
+    internal_secret: str = "changeme"
+
 
 settings = Settings()

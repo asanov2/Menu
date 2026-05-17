@@ -2,11 +2,13 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import Integer, and_, bindparam, select, text
+from sqlalchemy import Integer, and_, bindparam, func, select, text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.dialects.postgresql import UUID as pgUUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.plan_errors import items_limit_error
+from app.core.plan_limits import get_limits
 from app.models.menu import Category, Item
 from app.schemas.menu import ItemCreate, ItemReorderItem, ItemUpdate
 
@@ -62,7 +64,19 @@ class ItemService:
                 detail="Category does not belong to your restaurant",
             )
 
-    async def create_item(self, restaurant_id: UUID, data: ItemCreate) -> Item:
+    async def create_item(self, restaurant_id: UUID, plan: str, data: ItemCreate) -> Item:
+        limits = get_limits(plan)
+        if limits.max_items is not None:
+            count_result = await self._db.execute(
+                select(func.count(Item.id)).where(
+                    Item.restaurant_id == restaurant_id,
+                    Item.deleted_at.is_(None),
+                )
+            )
+            current_count: int = count_result.scalar_one()
+            if current_count >= limits.max_items:
+                raise items_limit_error(plan)
+
         await self._validate_category_ownership(restaurant_id, data.category_id)
         item = Item(
             restaurant_id=restaurant_id,

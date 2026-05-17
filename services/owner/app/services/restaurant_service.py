@@ -2,10 +2,12 @@ import logging
 from math import ceil
 from uuid import UUID
 
+import httpx
 from fastapi import HTTPException, status as http_status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.schemas.restaurants import (
     ApplicationItem,
     ApplicationsResponse,
@@ -16,6 +18,9 @@ from app.schemas.restaurants import (
 )
 
 logger = logging.getLogger(__name__)
+
+_PLAN_PRICES = {"starter": 3900, "business": 7900, "pro": 14900}
+_VALID_PLANS = {"starter", "business", "pro"}
 
 _RESTAURANT_SELECT = """
     WITH latest_sub AS (
@@ -128,10 +133,17 @@ class RestaurantService:
                     FROM latest_sub
                   ),
                   mrr AS (
-                    SELECT COALESCE(SUM(amount), 0) AS amount
-                    FROM billing.payments
-                    WHERE status = 'success'
-                      AND created_at >= date_trunc('month', now())
+                    SELECT COALESCE(SUM(
+                      CASE s.plan
+                        WHEN 'starter'  THEN 3900
+                        WHEN 'business' THEN 7900
+                        WHEN 'pro'      THEN 14900
+                        ELSE 0
+                      END
+                    ), 0) AS amount
+                    FROM billing.subscriptions s
+                    WHERE s.status = 'active'
+                      AND s.current_period_end > NOW()
                   )
                 SELECT
                   rs.total            AS total_restaurants,
@@ -167,22 +179,53 @@ class RestaurantService:
             )
 
         if patch.plan is not None:
+            if patch.plan not in _VALID_PLANS:
+                raise HTTPException(status_code=http_status.HTTP_400_BAD_REQUEST, detail="Invalid plan")
+
             await self._db.execute(
                 text("UPDATE restaurants SET plan = :plan, updated_at = NOW() WHERE id = :id"),
                 {"plan": patch.plan, "id": restaurant_id},
             )
+
+            # UPSERT subscription — create if missing, update plan+period if exists
             await self._db.execute(
                 text("""
-                    UPDATE billing.subscriptions
-                    SET plan = :plan
-                    WHERE id = (
-                        SELECT id FROM billing.subscriptions
-                        WHERE restaurant_id = :restaurant_id
-                        ORDER BY created_at DESC
-                        LIMIT 1
-                    )
+                    INSERT INTO billing.subscriptions
+                      (restaurant_id, plan, status, current_period_start,
+                       current_period_end, auto_renew)
+                    VALUES
+                      (:rid, :plan, 'active',
+                       NOW(), NOW() + INTERVAL '30 days', true)
+                    ON CONFLICT (restaurant_id) DO UPDATE SET
+                      plan                 = EXCLUDED.plan,
+                      status               = 'active',
+                      current_period_start = NOW(),
+                      current_period_end   = NOW() + INTERVAL '30 days',
+                      updated_at           = NOW()
                 """),
-                {"plan": patch.plan, "restaurant_id": restaurant_id},
+                {"rid": restaurant_id, "plan": patch.plan},
+            )
+
+            # Audit payment record — manual admin action
+            await self._db.execute(
+                text("""
+                    INSERT INTO billing.payments
+                      (subscription_id, restaurant_id, amount, currency,
+                       status, provider, paid_at, target_plan)
+                    SELECT s.id, :rid, :amount, 'KZT',
+                           'success', 'manual', NOW(), :plan
+                    FROM billing.subscriptions s
+                    WHERE s.restaurant_id = :rid
+                """),
+                {
+                    "rid": restaurant_id,
+                    "amount": _PLAN_PRICES.get(patch.plan, 0),
+                    "plan": patch.plan,
+                },
+            )
+            logger.info(
+                "plan_change: restaurant=%s new_plan=%s amount=%s (manual admin)",
+                restaurant_id, patch.plan, _PLAN_PRICES.get(patch.plan, 0),
             )
 
         if patch.status is not None:
@@ -255,6 +298,28 @@ class RestaurantService:
                 detail="Application not found or already processed",
             )
         await self._db.commit()
+
+        # Activate trial subscription in billing service (fire-and-forget — don't fail approval)
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                resp = await client.post(
+                    f"{settings.billing_service_url}/api/v1/billing/internal/activate-trial",
+                    json={"restaurant_id": str(restaurant_id)},
+                    headers={"X-Internal-Secret": settings.internal_secret},
+                )
+                if resp.status_code not in (200, 201):
+                    logger.error(
+                        "approve: billing trial activation failed restaurant=%s status=%d body=%s",
+                        restaurant_id, resp.status_code, resp.text,
+                    )
+                else:
+                    logger.info("approve: trial activated for restaurant=%s", restaurant_id)
+        except Exception as exc:
+            logger.error(
+                "approve: billing service unreachable for restaurant=%s error=%s",
+                restaurant_id, exc,
+            )
+
         return await self._fetch_one(restaurant_id)
 
     async def reject_restaurant(self, restaurant_id: UUID) -> RestaurantItem:

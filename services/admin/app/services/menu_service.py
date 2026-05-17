@@ -5,8 +5,10 @@ from fastapi import HTTPException, status
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.plan_errors import items_limit_error, language_limit_error, menus_limit_error
+from app.core.plan_limits import get_allowed_languages, get_limits
 from app.models.menu import Category, Item, Menu
-from app.schemas.menu import MenuCreate, MenuUpdate
+from app.schemas.menu import MenuCreate, MenuUpdate, PlanUsageResponse
 
 
 class MenuService:
@@ -64,7 +66,25 @@ class MenuService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu not found")
         return menu
 
-    async def create_menu(self, restaurant_id: UUID, data: MenuCreate) -> Menu:
+    async def create_menu(self, restaurant_id: UUID, plan: str, data: MenuCreate) -> Menu:
+        limits = get_limits(plan)
+
+        # Check language first — more specific error, shown regardless of menu count
+        allowed_langs = get_allowed_languages(plan)
+        if data.language not in allowed_langs:
+            raise language_limit_error(plan, data.language)
+
+        if limits.max_menus is not None:
+            count_result = await self._db.execute(
+                select(func.count(Menu.id)).where(
+                    Menu.restaurant_id == restaurant_id,
+                    Menu.deleted_at.is_(None),
+                )
+            )
+            current_count: int = count_result.scalar_one()
+            if current_count >= limits.max_menus:
+                raise menus_limit_error(plan)
+
         if data.is_default:
             await self._unset_default(restaurant_id)
 
@@ -79,8 +99,13 @@ class MenuService:
         await self._db.refresh(menu)
         return menu
 
-    async def update_menu(self, restaurant_id: UUID, menu_id: UUID, data: MenuUpdate) -> Menu:
+    async def update_menu(self, restaurant_id: UUID, menu_id: UUID, plan: str, data: MenuUpdate) -> Menu:
         menu = await self.get_menu(restaurant_id, menu_id)
+
+        if data.language is not None:
+            allowed_langs = get_allowed_languages(plan)
+            if data.language not in allowed_langs:
+                raise language_limit_error(plan, data.language)
 
         if data.is_default is True:
             await self._unset_default(restaurant_id)
@@ -92,6 +117,32 @@ class MenuService:
         await self._db.commit()
         await self._db.refresh(menu)
         return menu
+
+    async def get_plan_usage(self, restaurant_id: UUID, plan: str) -> PlanUsageResponse:
+        limits = get_limits(plan)
+
+        menus_result = await self._db.execute(
+            select(func.count(Menu.id)).where(
+                Menu.restaurant_id == restaurant_id,
+                Menu.deleted_at.is_(None),
+            )
+        )
+        menus_used: int = menus_result.scalar_one()
+
+        items_result = await self._db.execute(
+            select(func.count(Item.id)).where(
+                Item.restaurant_id == restaurant_id,
+                Item.deleted_at.is_(None),
+            )
+        )
+        items_used: int = items_result.scalar_one()
+
+        return PlanUsageResponse(
+            menus_used=menus_used,
+            menus_limit=limits.max_menus,
+            items_used=items_used,
+            items_limit=limits.max_items,
+        )
 
     async def delete_menu(self, restaurant_id: UUID, menu_id: UUID) -> None:
         menu = await self.get_menu(restaurant_id, menu_id)
