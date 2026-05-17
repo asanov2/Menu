@@ -34,7 +34,8 @@ class RestaurantPatch(BaseModel):
 
 class PlatformStats(BaseModel):
     total_restaurants: int
-    active_restaurants: int
+    paying_count: int
+    inactive_count: int = 0
     trial_count: int
     mrr: float
     starter_count: int

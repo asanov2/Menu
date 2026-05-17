@@ -113,53 +113,59 @@ class RestaurantService:
         result = await self._db.execute(
             text("""
                 WITH
-                  restaurant_stats AS (
-                    SELECT
-                      COUNT(*)                                          AS total,
-                      COUNT(*) FILTER (WHERE is_active = TRUE)         AS active,
-                      COUNT(*) FILTER (WHERE plan = 'starter')         AS starter_count,
-                      COUNT(*) FILTER (WHERE plan = 'business')        AS business_count,
-                      COUNT(*) FILTER (WHERE plan = 'pro')             AS pro_count
-                    FROM restaurants
-                  ),
                   latest_sub AS (
-                    SELECT DISTINCT ON (restaurant_id) *
+                    SELECT DISTINCT ON (restaurant_id)
+                        restaurant_id, plan, status, trial_ends_at, current_period_end, created_at
                     FROM billing.subscriptions
                     ORDER BY restaurant_id, created_at DESC
                   ),
+                  restaurant_stats AS (
+                    SELECT
+                      COUNT(*)                                             AS total,
+                      COUNT(*) FILTER (WHERE is_active = FALSE)           AS inactive_count,
+                      COUNT(*) FILTER (WHERE plan = 'starter')            AS starter_count,
+                      COUNT(*) FILTER (WHERE plan = 'business')           AS business_count,
+                      COUNT(*) FILTER (WHERE plan = 'pro')                AS pro_count
+                    FROM restaurants
+                  ),
                   sub_stats AS (
                     SELECT
-                      COUNT(*) FILTER (WHERE status = 'trial') AS trial_count
+                      COUNT(*) FILTER (WHERE status = 'active'
+                        AND current_period_end > NOW())                   AS paying_count,
+                      COUNT(*) FILTER (WHERE status = 'trial'
+                        AND trial_ends_at > NOW())                        AS trial_count
                     FROM latest_sub
                   ),
                   mrr AS (
                     SELECT COALESCE(SUM(
-                      CASE s.plan
+                      CASE plan
                         WHEN 'starter'  THEN 3900
                         WHEN 'business' THEN 7900
                         WHEN 'pro'      THEN 14900
                         ELSE 0
                       END
                     ), 0) AS amount
-                    FROM billing.subscriptions s
-                    WHERE s.status = 'active'
-                      AND s.current_period_end > NOW()
+                    FROM latest_sub
+                    WHERE status = 'active'
+                      AND current_period_end > NOW()
                   )
                 SELECT
                   rs.total            AS total_restaurants,
-                  rs.active           AS active_restaurants,
+                  ss.paying_count,
                   ss.trial_count,
                   m.amount            AS mrr,
                   rs.starter_count,
                   rs.business_count,
-                  rs.pro_count
+                  rs.pro_count,
+                  rs.inactive_count
                 FROM restaurant_stats rs, sub_stats ss, mrr m
             """)
         )
         row = result.mappings().one()
         return PlatformStats(
             total_restaurants=row["total_restaurants"],
-            active_restaurants=row["active_restaurants"],
+            paying_count=row["paying_count"],
+            inactive_count=row["inactive_count"],
             trial_count=row["trial_count"],
             mrr=float(row["mrr"]),
             starter_count=row["starter_count"],

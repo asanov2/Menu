@@ -46,3 +46,57 @@
   border-radius: 4px;
   transition: width 0.6s ease;
 }
+
+.chartCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.yearPicker {
+  display: flex;
+  gap: 4px;
+}
+
+.yearBtn {
+  padding: 3px 10px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+.yearBtnActive {
+  background: var(--ink-primary);
+  color: var(--cream-bg);
+  border-color: var(--ink-primary);
+}
+
+.paymentsCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.viewAllLink {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-secondary);
+  text-decoration: none;
+}
+
+.viewAllLink:hover {
+  color: var(--ink-primary);
+}
+
+.trialNote {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  margin: 8px 0 0;
+}

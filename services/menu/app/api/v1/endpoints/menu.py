@@ -1,21 +1,11 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request, status
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.rabbitmq import publish_menu_event
-
-
-_MOBILE_KEYWORDS = (
-    "mobile", "android", "iphone", "ipad",
-    "ipod", "blackberry", "windows phone",
-)
-
-
-def detect_device_type(user_agent: str) -> str:
-    ua = user_agent.lower()
-    return "mobile" if any(kw in ua for kw in _MOBILE_KEYWORDS) else "desktop"
 from app.schemas.menu import (
     CategoriesOnlyResponse,
     CategoryResponse,
@@ -36,22 +26,36 @@ from app.services.menu_service import MenuService
 
 router = APIRouter()
 
+_MOBILE_KEYWORDS = (
+    "mobile", "android", "iphone", "ipad",
+    "ipod", "blackberry", "windows phone",
+)
+
+
+def detect_device_type(user_agent: str) -> str:
+    ua = user_agent.lower()
+    return "mobile" if any(kw in ua for kw in _MOBILE_KEYWORDS) else "desktop"
+
+
+class WaiterCallRequest(BaseModel):
+    table: int
+
 
 @router.get("/{slug}", response_model=MenuPageResponse)
 async def get_menu(
     request: Request,
     slug: str,
+    lang: str = Query(default="ru"),
     menu_id: UUID | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ) -> MenuPageResponse:
-    # Only use cache for the default menu (no specific menu_id requested)
     if menu_id is None:
-        cached = await get_cached_menu(slug)
+        cached = await get_cached_menu(slug, language=lang)
         if cached:
             return MenuPageResponse.model_validate(cached)
 
     service = MenuService(db)
-    restaurant, menu = await service.get_full_menu(slug, menu_id=menu_id)
+    restaurant, menu = await service.get_full_menu(slug, menu_id=menu_id, lang=lang)
 
     visible_cats = [c for c in menu.categories if c.is_visible]
 
@@ -61,14 +65,21 @@ async def get_menu(
         categories=[CategoryResponse.model_validate(c) for c in visible_cats],
     )
 
-    # Only cache the default menu response
     if menu_id is None:
-        await set_cached_menu(slug, response.model_dump(mode="json"))
+        await set_cached_menu(slug, response.model_dump(mode="json"), language=lang)
 
     device_type = detect_device_type(request.headers.get("User-Agent", ""))
     publish_menu_event("menu_view", str(restaurant.id), device_type=device_type)
 
     return response
+
+
+@router.post("/{slug}/call-waiter", status_code=status.HTTP_204_NO_CONTENT)
+async def call_waiter(
+    slug: str,
+    body: WaiterCallRequest,
+) -> None:
+    pass
 
 
 @router.post("/{slug}/items/{item_id}/view", status_code=status.HTTP_204_NO_CONTENT)

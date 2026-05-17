@@ -186,6 +186,12 @@
   flex-shrink: 0;
 }
 
+.deletedItem {
+  color: var(--ink-tertiary);
+  font-style: italic;
+  font-size: 12px;
+}
+
 /* ── Skeleton ── */
 
 .itemRowSkeleton {

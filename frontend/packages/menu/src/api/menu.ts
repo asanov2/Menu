@@ -1,4 +1,4 @@
-import { menuApi } from '@qrmenu/ui/src/utils/axios';
+import { menuApi } from '@qrmenu/ui';
 import type { MenuPageResponse } from '@qrmenu/ui';
 
 export const getMenu = async (

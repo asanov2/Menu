@@ -7,9 +7,10 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  Cell,
 } from 'recharts'
-import { formatPrice, formatDate, EmptyState, KPICard, SectionHeading } from '@qrmenu/ui'
-import { getRevenue, getPayments, getPlatformStats } from '../../api/owner'
+import { formatPrice, EmptyState, KPICard, SectionHeading } from '@qrmenu/ui'
+import { getRevenue, getPayments, getPlatformStats, getAllPayments } from '../../api/owner'
 import DataTable from '../../components/DataTable'
 import PaginationBar from '../Restaurants/components/PaginationBar'
 import common from '../../styles/common.module.css'
@@ -25,8 +26,17 @@ function monthShort(m: string) {
   return MONTH_SHORT[idx] ?? m
 }
 
-function escapeCSV(value: string | number): string {
-  const str = String(value)
+function formatKZDate(isoStr: string): string {
+  return new Date(isoStr).toLocaleDateString('ru-RU', {
+    timeZone: 'Asia/Almaty',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
+function escapeCSV(value: string | number | null | undefined): string {
+  const str = String(value ?? '')
   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`
   }
@@ -34,11 +44,17 @@ function escapeCSV(value: string | number): string {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; border: string; label: string }> = {
-  paid: {
+  success: {
     bg: 'var(--tag-green-bg)',
     color: 'var(--tag-green-text)',
     border: 'var(--tag-green-border)',
-    label: 'Оплачен',
+    label: 'Успешен',
+  },
+  refunded: {
+    bg: 'var(--cream-muted)',
+    color: 'var(--ink-secondary)',
+    border: 'var(--cream-border)',
+    label: 'Возврат',
   },
   pending: {
     bg: 'var(--accent-gold-bg)',
@@ -54,42 +70,58 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; border: string; 
   },
 }
 
+const PROVIDER_LABEL: Record<string, string> = {
+  kaspi: 'Kaspi Pay',
+  stripe: 'Stripe',
+  manual: 'Вручную',
+  cloudpayments: 'Cloud Pay',
+}
+
+const PLAN_LABEL: Record<string, string> = {
+  starter: 'Старт',
+  business: 'Бизнес',
+  pro: 'Про',
+}
+
 const LIMIT = 20
 
 export default function RevenuePage() {
   const [page, setPage] = useState(1)
-  const now = new Date()
+  const [exporting, setExporting] = useState(false)
+  const currentYear = new Date().getFullYear()
+  const [year, setYear] = useState(currentYear)
+  const currentMonthStr = `${year}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
 
   const { data: stats } = useQuery({
     queryKey: ['platform-stats'],
     queryFn: getPlatformStats,
   })
   const { data: revenue, error: revenueError, refetch: refetchRevenue } = useQuery({
-    queryKey: ['revenue', now.getFullYear()],
-    queryFn: () => getRevenue(now.getFullYear()),
+    queryKey: ['revenue', year],
+    queryFn: () => getRevenue(year),
   })
   const { data: payments } = useQuery({
     queryKey: ['payments', page],
-    queryFn: () => getPayments(page),
+    queryFn: () => getPayments(page, LIMIT),
     placeholderData: keepPreviousData,
   })
 
   const revenueData = (revenue ?? []).map(r => ({
     name: monthShort(r.month),
     value: r.amount,
+    isCurrentMonth: r.month === currentMonthStr,
   }))
 
   const yearTotal = (revenue ?? []).reduce((s, r) => s + r.amount, 0)
-  const avgCheck =
-    payments?.total && yearTotal > 0
-      ? Math.round(yearTotal / payments.total)
-      : 0
+  const paying = stats?.paying_count ?? 0
+  const avgCheck = paying > 0 && yearTotal > 0 ? Math.round(yearTotal / paying) : 0
 
   const rows = (payments?.items ?? []).map(p => {
     const s = STATUS_STYLE[p.status] ?? STATUS_STYLE.pending
     return {
-      date: formatDate(p.created_at),
+      date: formatKZDate(p.created_at),
       restaurant: p.restaurant_name,
+      plan: PLAN_LABEL[p.target_plan ?? ''] ?? (p.target_plan ?? '—'),
       amount: formatPrice(p.amount),
       status: (
         <span
@@ -99,25 +131,38 @@ export default function RevenuePage() {
           {s.label}
         </span>
       ),
-      provider: p.provider,
+      provider: PROVIDER_LABEL[p.provider] ?? p.provider,
     }
   })
 
-  const handleExport = () => {
-    const headers = ['Дата', 'Ресторан', 'Сумма', 'Статус', 'Провайдер']
-    const csvRows = (payments?.items ?? []).map(p =>
-      [p.created_at, p.restaurant_name, p.amount, p.status, p.provider]
-        .map(escapeCSV)
-        .join(','),
-    )
-    const csv = [headers.map(escapeCSV).join(','), ...csvRows].join('\n')
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'revenue-export.csv'
-    a.click()
-    URL.revokeObjectURL(url)
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      const all = await getAllPayments()
+      const headers = ['Дата', 'Ресторан', 'Тариф', 'Сумма', 'Статус', 'Провайдер']
+      const csvRows = all.map(p =>
+        [
+          formatKZDate(p.created_at),
+          p.restaurant_name,
+          PLAN_LABEL[p.target_plan ?? ''] ?? (p.target_plan ?? ''),
+          p.amount,
+          STATUS_STYLE[p.status]?.label ?? p.status,
+          PROVIDER_LABEL[p.provider] ?? p.provider,
+        ]
+          .map(escapeCSV)
+          .join(','),
+      )
+      const csv = [headers.map(escapeCSV).join(','), ...csvRows].join('\n')
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `payments-${year}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setExporting(false)
+    }
   }
 
   const total = payments?.total ?? 0
@@ -129,12 +174,25 @@ export default function RevenuePage() {
 
       <div className={common.kpiGrid3}>
         <KPICard label="МРР (текущий)" value={stats ? formatPrice(stats.mrr) : '—'} subtitleColor="gold" icon="📈" />
-        <KPICard label="Всего за год" value={formatPrice(yearTotal)} subtitleColor="default" icon="💎" />
-        <KPICard label="Средний чек" value={avgCheck ? formatPrice(avgCheck) : '—'} subtitleColor="default" icon="🧾" />
+        <KPICard label={`Всего за ${year}`} value={formatPrice(yearTotal)} subtitleColor="default" icon="💎" />
+        <KPICard label="ARPU" value={avgCheck ? formatPrice(avgCheck) : '—'} subtitleColor="default" icon="🧾" />
       </div>
 
       <div className={common.card}>
-        <div className={common.cardTitle}>Выручка по месяцам (12 мес.)</div>
+        <div className={styles.paymentsHeader}>
+          <div className={common.cardTitle}>Выручка по месяцам</div>
+          <div className={styles.yearPicker}>
+            {[currentYear - 1, currentYear].map(y => (
+              <button
+                key={y}
+                onClick={() => setYear(y)}
+                className={`${styles.yearBtn} ${year === y ? styles.yearBtnActive : ''}`}
+              >
+                {y}
+              </button>
+            ))}
+          </div>
+        </div>
         {revenueError ? (
           <EmptyState
             icon="⚠️"
@@ -165,7 +223,16 @@ export default function RevenuePage() {
                 formatter={(v: number) => [formatPrice(v), 'Выручка']}
                 contentStyle={{ fontFamily: 'var(--font-ui)', fontSize: 12, borderRadius: 8, border: '1px solid var(--cream-border)' }}
               />
-              <Bar dataKey="value" fill="var(--accent-gold)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                {revenueData.map((entry, idx) => (
+                  <Cell
+                    key={idx}
+                    fill={entry.value > 0
+                      ? (entry.isCurrentMonth ? 'var(--accent-gold)' : '#c8963e')
+                      : 'var(--cream-muted)'}
+                  />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -174,8 +241,8 @@ export default function RevenuePage() {
       <div className={common.card}>
         <div className={styles.paymentsHeader}>
           <div className={`${common.cardTitle} ${common.mb0}`}>Платежи</div>
-          <button onClick={handleExport} className={styles.exportBtn}>
-            ⬇ Экспорт CSV
+          <button onClick={handleExport} disabled={exporting} className={styles.exportBtn}>
+            {exporting ? '...' : '⬇ Экспорт CSV'}
           </button>
         </div>
 
@@ -183,9 +250,10 @@ export default function RevenuePage() {
           columns={[
             { key: 'date', label: 'Дата', width: '100px' },
             { key: 'restaurant', label: 'Ресторан' },
+            { key: 'plan', label: 'Тариф', width: '80px' },
             { key: 'amount', label: 'Сумма', width: '110px' },
             { key: 'status', label: 'Статус', width: '90px' },
-            { key: 'provider', label: 'Провайдер', width: '90px' },
+            { key: 'provider', label: 'Провайдер', width: '100px' },
           ]}
           rows={rows}
           loading={!payments}

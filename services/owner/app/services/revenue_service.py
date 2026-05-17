@@ -17,20 +17,30 @@ class RevenueService:
         result = await self._db.execute(
             text("""
                 SELECT
-                    to_char(created_at, 'YYYY-MM') AS month,
-                    SUM(amount)::float             AS amount,
-                    COUNT(*)::int                  AS count
+                    to_char(
+                        (created_at AT TIME ZONE 'UTC' + INTERVAL '5 hours'),
+                        'YYYY-MM'
+                    )                                  AS month,
+                    COALESCE(SUM(amount), 0)::float    AS amount,
+                    COUNT(*)::int                      AS count
                 FROM billing.payments
                 WHERE status = 'success'
-                  AND EXTRACT(YEAR FROM created_at) = :year
+                  AND EXTRACT(YEAR FROM (created_at AT TIME ZONE 'UTC' + INTERVAL '5 hours')) = :year
                 GROUP BY month
                 ORDER BY month
             """),
             {"year": year},
         )
+        rows_by_month = {row["month"]: row for row in result.mappings().all()}
+
+        # Fill all 12 months with zeros for missing months
         return [
-            RevenueMonth(month=row["month"], amount=row["amount"], count=row["count"])
-            for row in result.mappings().all()
+            RevenueMonth(
+                month=f"{year}-{m:02d}",
+                amount=rows_by_month.get(f"{year}-{m:02d}", {}).get("amount", 0.0),
+                count=rows_by_month.get(f"{year}-{m:02d}", {}).get("count", 0),
+            )
+            for m in range(1, 13)
         ]
 
     async def get_payments(self, page: int, limit: int) -> PaymentList:
@@ -48,6 +58,7 @@ class RevenueService:
                     p.amount,
                     p.status,
                     p.provider,
+                    p.target_plan,
                     p.created_at,
                     r.name AS restaurant_name
                 FROM billing.payments p
@@ -66,6 +77,7 @@ class RevenueService:
                 amount=float(row["amount"]),
                 status=row["status"],
                 provider=row["provider"],
+                target_plan=row["target_plan"],
                 created_at=row["created_at"],
             )
             for row in rows

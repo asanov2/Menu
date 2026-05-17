@@ -18,6 +18,7 @@ class PaymentRecord(BaseModel):
     amount: float
     status: str
     provider: str
+    target_plan: str | None = None
     created_at: datetime
 
 

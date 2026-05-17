@@ -71,12 +71,28 @@ class MenuService:
             )
         return menu
 
+    async def get_menu_by_language(self, restaurant_id: UUID, language: str) -> Menu | None:
+        result = await self._db.execute(
+            select(Menu).where(
+                and_(
+                    Menu.restaurant_id == restaurant_id,
+                    Menu.language == language,
+                    Menu.deleted_at == None,  # noqa: E711
+                )
+            ).order_by(Menu.is_default.desc(), Menu.created_at)
+        )
+        return result.scalar_one_or_none()
+
     async def get_full_menu(
-        self, slug: str, menu_id: UUID | None = None
+        self, slug: str, menu_id: UUID | None = None, lang: str | None = None
     ) -> tuple[Restaurant, Menu]:
         restaurant = await self.get_restaurant_by_slug(slug)
         if menu_id:
             menu = await self.get_menu_by_id(restaurant.id, menu_id)
+        elif lang:
+            menu = await self.get_menu_by_language(restaurant.id, lang)
+            if not menu:
+                menu = await self.get_default_menu(restaurant.id)
         else:
             menu = await self.get_default_menu(restaurant.id)
         return restaurant, menu

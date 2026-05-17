@@ -7,30 +7,59 @@ import {
   getMenuUsage,
   upgradePlan,
   completeMockPayment,
-  cancelSubscription,
   type Subscription,
   type UpgradeResult,
 } from '../../api/billing';
 import styles from './BillingPage.module.css';
 import common from '../../styles/common.module.css';
 
-const PLAN_ORDER = ['starter', 'business', 'pro'] as const;
 const PLAN_NAMES: Record<string, string> = { starter: 'Старт', business: 'Бизнес', pro: 'Про' };
+const planOrder: Record<string, number> = { starter: 0, business: 1, pro: 2 };
 
-function getPlanButton(planId: string, sub: Subscription) {
-  const subIdx = PLAN_ORDER.indexOf(sub.plan as typeof PLAN_ORDER[number]);
-  const planIdx = PLAN_ORDER.indexOf(planId as typeof PLAN_ORDER[number]);
+type BtnStyle = 'Primary' | 'Secondary' | 'Current' | 'Disabled';
+
+function getDaysRemaining(sub: Subscription): number {
+  return Math.max(
+    0,
+    Math.ceil((new Date(sub.current_period_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  );
+}
+
+function getPlanButton(
+  planId: string,
+  sub: Subscription,
+  daysRemaining: number,
+): { label: string; disabled: boolean; style: BtnStyle } {
   const name = PLAN_NAMES[planId] ?? planId;
+  const currentPlan = sub.plan;
+  const isNearEnd = daysRemaining <= 7;
+  const isTrial = sub.status === 'trial';
+  const isExpired = sub.status === 'expired';
 
-  if (sub.status === 'expired') {
-    if (planIdx < subIdx) return { label: 'Недоступен', disabled: true, style: 'Disabled' as const };
-    if (planIdx === subIdx) return { label: 'Продлить', disabled: false, style: 'Primary' as const };
-    return { label: `Перейти на ${name}`, disabled: false, style: 'Primary' as const };
+  if (isExpired) {
+    return { label: 'Оформить подписку', disabled: false, style: 'Primary' };
   }
 
-  if (planId === sub.plan) return { label: 'Текущий план', disabled: true, style: 'Current' as const };
-  if (planIdx < subIdx) return { label: 'Недоступен', disabled: true, style: 'Disabled' as const };
-  return { label: `Перейти на ${name}`, disabled: false, style: 'Primary' as const };
+  if (isTrial) {
+    return { label: 'Выбрать план', disabled: false, style: 'Primary' };
+  }
+
+  if (planId === currentPlan) {
+    if (isNearEnd) {
+      return { label: 'Продлить план', disabled: false, style: 'Primary' };
+    }
+    return { label: 'Текущий план', disabled: true, style: 'Current' };
+  }
+
+  if (planOrder[planId] > planOrder[currentPlan]) {
+    return { label: `Перейти на ${name}`, disabled: false, style: 'Primary' };
+  }
+
+  if (isNearEnd) {
+    return { label: `Перейти на ${name}`, disabled: false, style: 'Secondary' };
+  }
+
+  return { label: 'Недоступен', disabled: true, style: 'Disabled' };
 }
 
 export default function BillingPage() {
@@ -41,8 +70,6 @@ export default function BillingPage() {
   const [mockPaymentData, setMockPaymentData] = useState<UpgradeResult | null>(null);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['subscription'],
@@ -86,20 +113,6 @@ export default function BillingPage() {
     }
   };
 
-  const handleCancelAutoRenew = async () => {
-    setIsCancelling(true);
-    try {
-      await cancelSubscription();
-      qc.invalidateQueries({ queryKey: ['subscription'] });
-      showToast('Автопродление отключено', 'success');
-    } catch {
-      showToast('Ошибка при отключении автопродления', 'error');
-    } finally {
-      setIsCancelling(false);
-      setShowCancelModal(false);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className={common.skeletonStackMd}>
@@ -111,6 +124,7 @@ export default function BillingPage() {
   }
 
   const targetPlan = PLANS.find(p => p.id === upgradeTarget);
+  const daysRemaining = sub ? getDaysRemaining(sub) : 0;
 
   return (
     <div className={styles.page}>
@@ -157,14 +171,8 @@ export default function BillingPage() {
             </div>
           )}
 
-          <div className={styles.autoRenewRow}>
-            <span className={styles.autoRenewLabel}>Автопродление</span>
-            <div
-              className={`${styles.toggle} ${sub.auto_renew ? styles.toggleOn : styles.toggleOff}`}
-              onClick={() => sub.auto_renew && setShowCancelModal(true)}
-              role="switch"
-              aria-checked={sub.auto_renew}
-            />
+          <div className={styles.renewalInfo}>
+            Подписка не продлевается автоматически. Мы напомним вам за 5 дней до окончания.
           </div>
         </div>
       )}
@@ -173,7 +181,7 @@ export default function BillingPage() {
       {sub && (
         <div className={styles.plansGrid}>
           {PLANS.map(plan => {
-            const btn = getPlanButton(plan.id, sub);
+            const btn = getPlanButton(plan.id, sub, daysRemaining);
             return (
               <div
                 key={plan.id}
@@ -198,6 +206,19 @@ export default function BillingPage() {
                       {f}
                     </li>
                   ))}
+                  {plan.features_soon && plan.features_soon.length > 0 && (
+                    <>
+                      <li className={styles.soonDivider}>
+                        <span className={styles.soonDividerLabel}>Скоро</span>
+                      </li>
+                      {plan.features_soon.map(f => (
+                        <li key={f} className={`${styles.planFeatureItem} ${styles.planFeatureItemSoon}`}>
+                          <span className={styles.soonIcon}>🔜</span>
+                          {f}
+                        </li>
+                      ))}
+                    </>
+                  )}
                 </ul>
                 <button
                   className={`${styles.planBtn} ${styles[`planBtn${btn.style}`]}`}
@@ -292,18 +313,6 @@ export default function BillingPage() {
         danger={false}
         onConfirm={handleSimulate}
         onCancel={() => setMockPaymentData(null)}
-      />
-
-      {/* Cancel auto-renew confirm modal */}
-      <ConfirmModal
-        isOpen={showCancelModal}
-        title="Отключить автопродление?"
-        message="После окончания текущего периода подписка не продлится автоматически."
-        confirmText={isCancelling ? 'Отключение...' : 'Отключить'}
-        cancelText="Отмена"
-        danger
-        onConfirm={handleCancelAutoRenew}
-        onCancel={() => setShowCancelModal(false)}
       />
     </div>
   );

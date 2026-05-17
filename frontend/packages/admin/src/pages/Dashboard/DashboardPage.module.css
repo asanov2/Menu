@@ -104,16 +104,35 @@
   color: var(--ink-tertiary);
 }
 
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.chartHeader .chartLabel {
+  margin-bottom: 0;
+}
+
 .peakBadge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 3px 10px;
-  margin-bottom: 12px;
   background: var(--accent-gold-bg);
   border: 1px solid var(--accent-gold-border);
   border-radius: var(--radius-full);
   font-family: var(--font-ui);
   font-size: 11px;
   color: var(--accent-gold);
+  white-space: nowrap;
+}
+
+.deletedItem {
+  color: var(--ink-tertiary);
+  font-style: italic;
+  font-size: 12px;
 }

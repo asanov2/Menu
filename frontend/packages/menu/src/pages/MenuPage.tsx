@@ -46,7 +46,6 @@ export default function MenuPage() {
 
   useEffect(() => {
     if (query.length > 0) setShowSearch(true);
-    else if (query.length === 0) setShowSearch(false);
   }, [query]);
 
   const handleViewModeChange = (mode: ViewMode) => {

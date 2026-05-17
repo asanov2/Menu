@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Cell, ReferenceLine,
 } from 'recharts';
 import { Skeleton, PLAN, ANALYTICS_DAYS, SectionHeading } from '@qrmenu/ui';
 import { getOverview, getDailyStats, getPeakHours, getTopByCategory } from '../../api/analytics';
@@ -16,6 +17,11 @@ const DAYS_OPTIONS = [
   { label: '90д', value: ANALYTICS_DAYS[PLAN.PRO] },
 ];
 
+const MONTHS_SHORT = [
+  'янв','фев','мар','апр','май','июн',
+  'июл','авг','сен','окт','ноя','дек',
+];
+
 const TOOLTIP_STYLE = {
   background: 'var(--cream-bg)',
   border: '0.5px solid var(--cream-border)',
@@ -26,19 +32,28 @@ const TOOLTIP_STYLE = {
 
 const TICK = { fontSize: 10, fontFamily: 'var(--font-ui)', fill: 'var(--ink-tertiary)' };
 
+function formatChartDate(dateStr: string): string {
+  const [, m, d] = dateStr.split('-');
+  return `${parseInt(d, 10)} ${MONTHS_SHORT[parseInt(m, 10) - 1]}`;
+}
+
+function formatHour(hour: number | string): string {
+  return `${hour}:00`;
+}
+
+function toKZDateString(date: Date): string {
+  // Format date in Kazakhstan timezone (UTC+5) as YYYY-MM-DD
+  return date.toLocaleDateString('en-CA', { timeZone: 'Asia/Almaty' });
+}
+
 function getDateRange(days: number): { startDate: string; endDate: string } {
   const end = new Date();
   const start = new Date();
   start.setDate(start.getDate() - (days - 1));
   return {
-    endDate: end.toISOString().split('T')[0],
-    startDate: start.toISOString().split('T')[0],
+    endDate: toKZDateString(end),
+    startDate: toKZDateString(start),
   };
-}
-
-function fmtDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return `${d.getDate()}.${d.getMonth() + 1}`;
 }
 
 export default function DashboardPage() {
@@ -50,28 +65,34 @@ export default function DashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['overview', days],
     queryFn: () => getOverview(days),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
+    refetchInterval: 30_000,
   });
 
   const { data: dailyData, isLoading: isDailyLoading } = useQuery({
     queryKey: ['analytics-daily', days],
     queryFn: () => getDailyStats(startDate, endDate),
+    staleTime: 0,
+    refetchInterval: 30_000,
     retry: false,
   });
 
   const { data: peakData, isLoading: isPeakLoading } = useQuery({
     queryKey: ['analytics-peak', days],
     queryFn: () => getPeakHours(days),
+    staleTime: 0,
+    refetchInterval: 30_000,
     retry: false,
   });
 
   const { data: categoryData, isLoading: isCategoryLoading } = useQuery({
     queryKey: ['analytics-top-by-category', days],
     queryFn: () => getTopByCategory(days),
+    staleTime: 0,
+    refetchInterval: 60_000,
     retry: false,
   });
 
-  const hasData = (data?.total_menu_views ?? 0) > 0 || (data?.total_item_views ?? 0) > 0;
   const hasDailyData = (dailyData ?? []).some(d => d.menu_views > 0 || d.item_views > 0);
   const hasPeakData = (peakData ?? []).some(h => h.views > 0);
 
@@ -80,18 +101,22 @@ export default function DashboardPage() {
     null,
   );
 
+  const avgViews = hasPeakData
+    ? (peakData ?? []).reduce((s, h) => s + h.views, 0) / 24
+    : 0;
+
   const peakHourStr = data?.most_common_peak_hour != null
-    ? `${String(data.most_common_peak_hour).padStart(2, '0')}:00`
+    ? `${String(data.most_common_peak_hour).padStart(2, '0')}:00 – ${String(data.most_common_peak_hour + 1).padStart(2, '0')}:00`
     : '—';
 
   const dailyChartData = (dailyData ?? []).map(d => ({
-    date: fmtDate(d.date),
+    date: d.date,
     menu: d.menu_views,
     items: d.item_views,
   }));
 
   const peakChartData = (peakData ?? []).map(h => ({
-    hour: `${String(h.hour).padStart(2, '0')}:00`,
+    hour: h.hour,
     views: h.views,
     isPeak: peakHour !== null && h.hour === peakHour.hour && peakHour.views > 0,
   }));
@@ -116,6 +141,7 @@ export default function DashboardPage() {
                 key={opt.value}
                 onClick={() => !isLocked && setDays(opt.value)}
                 className={`${styles.dayBtn} ${isActive ? styles.dayBtnActive : ''} ${isLocked ? styles.dayBtnLocked : ''}`}
+                title={isLocked ? 'Доступно на тарифе Бизнес/Про' : undefined}
               >
                 {isLocked && <span className={styles.lockIcon}>🔒</span>}
                 {opt.label}
@@ -152,18 +178,32 @@ export default function DashboardPage() {
         ) : !hasDailyData ? (
           <div className={styles.emptyAnalytics}>
             <span>📊</span>
-            <p>Аналитика появится после первых посещений меню</p>
-            <small>Данные обновляются ежедневно</small>
+            <p>Нет данных за выбранный период</p>
+            <small>Данные обновляются ежедневно в 01:00</small>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={dailyChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="var(--cream-border)" />
-              <XAxis dataKey="date" tick={TICK} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="date"
+                tickFormatter={formatChartDate}
+                tick={TICK}
+                axisLine={false}
+                tickLine={false}
+              />
               <YAxis tick={TICK} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'var(--cream-muted)' }} />
-              <Bar dataKey="menu" name="Просмотры меню" fill="var(--accent-gold)" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="items" name="Просмотры блюд" fill="var(--ink-tertiary)" radius={[3, 3, 0, 0]} />
+              <Tooltip
+                contentStyle={TOOLTIP_STYLE}
+                cursor={{ fill: 'var(--cream-muted)' }}
+                formatter={(value: number, name: string) => [
+                  value,
+                  name === 'menu' ? 'Просмотры меню' : 'Просмотры блюд',
+                ]}
+                labelFormatter={(label: string) => formatChartDate(label)}
+              />
+              <Bar dataKey="menu" name="menu" fill="var(--accent-gold)" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="items" name="items" fill="var(--ink-tertiary)" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -171,27 +211,55 @@ export default function DashboardPage() {
 
       {/* Peak hours chart */}
       <div className={`${common.card} ${styles.cardChart}`}>
-        {peakHour && peakHour.views > 0 && (
-          <div className={styles.peakBadge}>
-            🕐 Пиковый час: {String(peakHour.hour).padStart(2, '0')}:00 — {peakHour.views} просмотров
-          </div>
-        )}
-        <div className={styles.chartLabel}>Пиковые часы</div>
+        <div className={styles.chartHeader}>
+          <div className={styles.chartLabel}>Активность по часам</div>
+          {peakHour && peakHour.views > 0 && (
+            <div className={styles.peakBadge}>
+              🕐 Самый активный час: {String(peakHour.hour).padStart(2, '0')}:00–{String(peakHour.hour + 1).padStart(2, '0')}:00 · {peakHour.views} просмотров
+            </div>
+          )}
+        </div>
         {isPeakLoading ? (
           <Skeleton height="160px" />
         ) : !hasPeakData ? (
           <div className={styles.emptyAnalytics}>
             <span>🕐</span>
-            <p>Нет данных о пиковых часах за этот период</p>
+            <p>Нет данных о пиковых часах</p>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={160}>
-            <BarChart data={peakChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+            <BarChart data={peakChartData} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="var(--cream-border)" />
-              <XAxis dataKey="hour" tick={{ ...TICK, fontSize: 9 }} axisLine={false} tickLine={false} interval={2} />
+              <XAxis
+                dataKey="hour"
+                tickFormatter={formatHour}
+                interval={2}
+                tick={TICK}
+                axisLine={false}
+                tickLine={false}
+              />
               <YAxis tick={TICK} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'var(--cream-muted)' }} />
-              <Bar dataKey="views" name="Просмотров" radius={[3, 3, 0, 0]}>
+              <Tooltip
+                contentStyle={TOOLTIP_STYLE}
+                cursor={{ fill: 'var(--cream-muted)' }}
+                formatter={(value: number) => [value, 'просмотров']}
+                labelFormatter={(hour: number) => `${String(hour).padStart(2, '0')}:00 – ${String(hour + 1).padStart(2, '0')}:00`}
+              />
+              {avgViews > 0 && (
+                <ReferenceLine
+                  y={avgViews}
+                  stroke="var(--ink-tertiary)"
+                  strokeDasharray="3 3"
+                  label={{
+                    value: 'среднее',
+                    position: 'insideTopRight',
+                    fontSize: 9,
+                    fontFamily: 'var(--font-ui)',
+                    fill: 'var(--ink-tertiary)',
+                  }}
+                />
+              )}
+              <Bar dataKey="views" radius={[3, 3, 0, 0]}>
                 {peakChartData.map((entry, idx) => (
                   <Cell key={idx} fill={entry.isPeak ? 'var(--accent-gold)' : 'var(--cream-border)'} />
                 ))}
@@ -203,7 +271,7 @@ export default function DashboardPage() {
 
       {/* Top items by category */}
       <div className={common.card}>
-        <SectionHeading size="sm">Топ блюда по категориям</SectionHeading>
+        <SectionHeading size="sm">Топ блюда · за {days} дней</SectionHeading>
         <TopItemsByCategory
           categories={categoryData ?? []}
           isLoading={isCategoryLoading}

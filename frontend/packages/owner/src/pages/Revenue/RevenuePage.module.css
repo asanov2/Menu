@@ -31,3 +31,25 @@
   color: var(--ink-secondary);
   cursor: pointer;
 }
+
+.yearPicker {
+  display: flex;
+  gap: 4px;
+}
+
+.yearBtn {
+  padding: 3px 10px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+.yearBtnActive {
+  background: var(--ink-primary);
+  color: var(--cream-bg);
+  border-color: var(--ink-primary);
+}

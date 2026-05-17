@@ -51,6 +51,7 @@ export interface PaymentRecord {
   amount: number
   status: string
   provider: string
+  target_plan: string | null
   created_at: string
 }
 
@@ -75,7 +76,8 @@ export interface SystemHealth {
 
 export interface PlatformStats {
   total_restaurants: number
-  active_restaurants: number
+  paying_count: number
+  inactive_count: number
   trial_count: number
   mrr: number
   starter_count: number
@@ -119,9 +121,20 @@ export async function getRevenue(year: number): Promise<RevenueMonth[]> {
   return data
 }
 
-export async function getPayments(page = 1): Promise<PaymentList> {
-  const { data } = await ownerApi.get('/api/v1/owner/payments', { params: { page } })
+export async function getPayments(page = 1, limit = 20): Promise<PaymentList> {
+  const { data } = await ownerApi.get('/api/v1/owner/payments', { params: { page, limit } })
   return data
+}
+
+export async function getAllPayments(): Promise<PaymentRecord[]> {
+  const first = await getPayments(1, 100)
+  const pages = first.pages
+  if (pages <= 1) return first.items
+
+  const rest = await Promise.all(
+    Array.from({ length: pages - 1 }, (_, i) => getPayments(i + 2, 100)),
+  )
+  return [first.items, ...rest.map(p => p.items)].flat()
 }
 
 export async function getSystemHealth(): Promise<SystemHealth> {

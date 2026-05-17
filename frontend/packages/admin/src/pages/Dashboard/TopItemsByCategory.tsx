@@ -29,26 +29,32 @@ function ItemImage({ name, imageUrl }: { name: string | null; imageUrl: string |
   );
 }
 
+const RANK_EMOJI = ['🥇', '🥈', '🥉'];
+
 function ItemRow({ item }: { item: TopItem }) {
-  const rankClass =
-    item.rank === 1 ? styles.rank1
-    : item.rank === 2 ? styles.rank2
-    : item.rank === 3 ? styles.rank3
+  const isTopThree = item.rank <= 3;
+  const rankDisplay = isTopThree ? RANK_EMOJI[item.rank - 1] : String(item.rank);
+  const rankClass = isTopThree
+    ? styles[`rank${item.rank}` as keyof typeof styles]
     : styles.rankDefault;
 
   return (
     <div className={styles.itemRow}>
-      <span className={`${styles.rank} ${rankClass}`}>{item.rank}</span>
+      <span className={`${styles.rank} ${rankClass}`}>{rankDisplay}</span>
       <div className={styles.imgWrap}>
         <ItemImage name={item.name} imageUrl={item.image_url} />
       </div>
-      <span className={styles.itemName}>{item.name ?? 'Блюдо'}</span>
+      {item.name ? (
+        <span className={styles.itemName}>{item.name}</span>
+      ) : (
+        <span className={`${styles.itemName} ${styles.deletedItem}`}>(блюдо удалено)</span>
+      )}
       <span className={styles.viewsBadge}>
         <svg className={styles.eyeIcon} viewBox="0 0 16 16" fill="none">
           <path d="M8 3C4.5 3 1.5 8 1.5 8s3 5 6.5 5 6.5-5 6.5-5-3-5-6.5-5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
           <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.2"/>
         </svg>
-        {item.views}
+        {item.views.toLocaleString('ru-RU')}
       </span>
     </div>
   );
@@ -90,8 +96,8 @@ export default function TopItemsByCategory({ categories, isLoading }: Props) {
     return (
       <div className={styles.empty}>
         <span className={styles.emptyIcon}>📊</span>
-        <p>Пока нет данных по просмотрам блюд за этот период</p>
-        <small>Данные обновляются ежедневно</small>
+        <p>Нет данных о просмотрах блюд</p>
+        <small>Открывайте карточки блюд в меню — статистика появится завтра</small>
       </div>
     );
   }

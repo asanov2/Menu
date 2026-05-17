@@ -1,8 +1,10 @@
 # === FILE: services/analytics/app/api/v1/endpoints/analytics.py ===
 import logging
-from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
+
+# Kazakhstan is UTC+5, no daylight saving time
+KZ_TZ = timezone(timedelta(hours=5))
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy import text
@@ -79,25 +81,32 @@ async def overview(
     restaurant_id: UUID = current["restaurant_id"]
     _enforce_plan(plan, days)
 
-    end_date = datetime.now(timezone.utc).date()
+    today = datetime.now(KZ_TZ).date()
+    yesterday = today - timedelta(days=1)
+    end_date = today
     start_date = end_date - timedelta(days=days - 1)
 
-    rows_result = await db.execute(
-        text("""
-            SELECT
-                total_menu_views,
-                total_item_views,
-                (device_breakdown->>'mobile')::int AS mobile,
-                (device_breakdown->>'desktop')::int AS desktop,
-                top_items,
-                peak_hour
-            FROM analytics.daily_aggregates
-            WHERE restaurant_id = :rid
-              AND date BETWEEN :start_date AND :end_date
-        """),
-        {"rid": restaurant_id, "start_date": start_date, "end_date": end_date},
-    )
-    rows = rows_result.fetchall()
+    # Read pre-aggregated data only up to yesterday (today's row never exists yet)
+    agg_end = min(end_date, yesterday)
+    if agg_end >= start_date:
+        rows_result = await db.execute(
+            text("""
+                SELECT
+                    total_menu_views,
+                    total_item_views,
+                    (device_breakdown->>'mobile')::int AS mobile,
+                    (device_breakdown->>'desktop')::int AS desktop,
+                    top_items,
+                    peak_hour
+                FROM analytics.daily_aggregates
+                WHERE restaurant_id = :rid
+                  AND date BETWEEN :start_date AND :end_date
+            """),
+            {"rid": restaurant_id, "start_date": start_date, "end_date": agg_end},
+        )
+        rows = rows_result.fetchall()
+    else:
+        rows = []
 
     total_menu = sum(r.total_menu_views or 0 for r in rows)
     total_item = sum(r.total_item_views or 0 for r in rows)
@@ -110,6 +119,42 @@ async def overview(
             iid = str(entry.get("item_id", ""))
             item_views_merged[iid] = item_views_merged.get(iid, 0) + int(entry.get("views", 0))
 
+    # Always add today's live events directly from analytics_events
+    live_result = await db.execute(
+        text("""
+            SELECT
+                COUNT(*) FILTER (WHERE event_type = 'menu_view')  AS menu_views,
+                COUNT(*) FILTER (WHERE event_type = 'item_view')  AS item_views,
+                COUNT(*) FILTER (WHERE device_type = 'mobile')    AS mobile_cnt,
+                COUNT(*) FILTER (WHERE device_type = 'desktop')   AS desktop_cnt
+            FROM analytics.analytics_events
+            WHERE restaurant_id = :rid
+              AND (occurred_at AT TIME ZONE 'UTC' + INTERVAL '5 hours')::date = :today
+        """),
+        {"rid": restaurant_id, "today": today},
+    )
+    live = live_result.fetchone()
+    total_menu += int(live.menu_views or 0)
+    total_item += int(live.item_views or 0)
+    mobile += int(live.mobile_cnt or 0)
+    desktop += int(live.desktop_cnt or 0)
+
+    today_items_result = await db.execute(
+        text("""
+            SELECT item_id::text, COUNT(*) AS views
+            FROM analytics.analytics_events
+            WHERE restaurant_id = :rid
+              AND (occurred_at AT TIME ZONE 'UTC' + INTERVAL '5 hours')::date = :today
+              AND item_id IS NOT NULL
+              AND event_type = 'item_view'
+            GROUP BY item_id
+        """),
+        {"rid": restaurant_id, "today": today},
+    )
+    for row in today_items_result.fetchall():
+        iid = str(row.item_id)
+        item_views_merged[iid] = item_views_merged.get(iid, 0) + int(row.views)
+
     top_items_sorted = sorted(item_views_merged.items(), key=lambda x: x[1], reverse=True)[:10]
     top_items = [
         TopItemSchema(item_id=UUID(iid), views=v, rank=idx + 1)
@@ -118,8 +163,22 @@ async def overview(
 
     await _enrich_names(top_items, restaurant_id, db)
 
-    peak_counter: Counter = Counter(r.peak_hour for r in rows if r.peak_hour is not None)
-    most_common_peak = peak_counter.most_common(1)[0][0] if peak_counter else None
+    peak_result = await db.execute(
+        text("""
+            SELECT EXTRACT(HOUR FROM (occurred_at AT TIME ZONE 'UTC' + INTERVAL '5 hours'))::int AS hour,
+                   COUNT(*) AS cnt
+            FROM analytics.analytics_events
+            WHERE restaurant_id = :rid
+              AND (occurred_at AT TIME ZONE 'UTC' + INTERVAL '5 hours')::date
+                  BETWEEN :start_date AND :end_date
+            GROUP BY hour
+            ORDER BY cnt DESC
+            LIMIT 1
+        """),
+        {"rid": restaurant_id, "start_date": start_date, "end_date": end_date},
+    )
+    peak_row = peak_result.fetchone()
+    most_common_peak = int(peak_row.hour) if peak_row else None
 
     return OverviewResponse(
         period_days=days,
@@ -153,25 +212,31 @@ async def daily(
 
     _enforce_plan(plan, days)
 
+    # Query analytics_events directly for real-time accuracy across all days
     result = await db.execute(
         text("""
-            SELECT date, total_menu_views, total_item_views, peak_hour
-            FROM analytics.daily_aggregates
+            SELECT
+                (occurred_at AT TIME ZONE 'UTC' + INTERVAL '5 hours')::date AS day,
+                COUNT(*) FILTER (WHERE event_type = 'menu_view') AS menu_views,
+                COUNT(*) FILTER (WHERE event_type = 'item_view') AS item_views
+            FROM analytics.analytics_events
             WHERE restaurant_id = :rid
-              AND date BETWEEN :start_date AND :end_date
-            ORDER BY date ASC
+              AND (occurred_at AT TIME ZONE 'UTC' + INTERVAL '5 hours')::date BETWEEN :start_date AND :end_date
+            GROUP BY day
+            ORDER BY day
         """),
         {"rid": restaurant_id, "start_date": start, "end_date": end},
     )
     rows = result.fetchall()
+
+    # Build a lookup and fill every date in range — missing days get zeros
+    daily_dict = {r.day: DailyResponse(date=r.day, menu_views=int(r.menu_views), item_views=int(r.item_views), peak_hour=None) for r in rows}
     return [
-        DailyResponse(
-            date=r.date,
-            menu_views=r.total_menu_views,
-            item_views=r.total_item_views,
-            peak_hour=r.peak_hour,
+        daily_dict.get(
+            start + timedelta(days=i),
+            DailyResponse(date=start + timedelta(days=i), menu_views=0, item_views=0, peak_hour=None),
         )
-        for r in rows
+        for i in range((end - start).days + 1)
     ]
 
 
@@ -186,7 +251,7 @@ async def top_items(
     restaurant_id: UUID = current["restaurant_id"]
     _enforce_plan(plan, days)
 
-    end_date = datetime.now(timezone.utc).date()
+    end_date = datetime.now(KZ_TZ).date()
     start_date = end_date - timedelta(days=days - 1)
 
     result = await db.execute(
@@ -229,7 +294,8 @@ async def peak_hours(
 
     result = await db.execute(
         text("""
-            SELECT EXTRACT(HOUR FROM occurred_at)::int AS hour, COUNT(*) AS views
+            SELECT EXTRACT(HOUR FROM (occurred_at AT TIME ZONE 'UTC' + INTERVAL '5 hours'))::int AS hour,
+                   COUNT(*) AS views
             FROM analytics.analytics_events
             WHERE restaurant_id = :rid
               AND occurred_at >= :since
