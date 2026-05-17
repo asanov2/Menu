@@ -48,8 +48,8 @@
   --warning-text: #7A5A08;
 
   /* Typography */
-  --font-display: 'Cormorant Garamond', serif;
-  --font-ui: 'DM Sans', sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-ui: 'Golos Text', system-ui, sans-serif;
 
   /* Spacing */
   --radius-sm: 6px;
