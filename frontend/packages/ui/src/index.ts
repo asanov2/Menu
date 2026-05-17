@@ -8,6 +8,7 @@ export type {
   RestaurantAuth,
   OverviewStats,
   TopItem,
+  CategoryTopItems,
   DailyStats,
   PeakHourData,
   Subscription,

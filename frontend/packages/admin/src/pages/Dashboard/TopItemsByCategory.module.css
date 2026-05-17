@@ -1,0 +1,231 @@
+.scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cream-border) transparent;
+}
+
+.scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background: var(--cream-border);
+  border-radius: 2px;
+}
+
+/* ── Category card ── */
+
+.catCard {
+  flex: 0 0 268px;
+  background: var(--cream-bg);
+  border: 0.5px solid var(--cream-border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.catHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 13px 16px 11px;
+  background: var(--cream-surface);
+  border-bottom: 0.5px solid var(--cream-border);
+  gap: 8px;
+}
+
+.catName {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.catTotal {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Item list ── */
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+  flex: 1;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  transition: background 0.12s;
+}
+
+.itemRow:hover {
+  background: var(--cream-surface);
+}
+
+/* ── Rank badge ── */
+
+.rank {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.rank1 {
+  background: var(--accent-gold-bg);
+  color: var(--accent-gold);
+  border: 1px solid var(--accent-gold-border);
+}
+
+.rank2 {
+  background: #f2f2f2;
+  color: #7a7a7a;
+  border: 1px solid #e4e4e4;
+}
+
+.rank3 {
+  background: #fef4ec;
+  color: #c8773c;
+  border: 1px solid #f5d9c0;
+}
+
+.rankDefault {
+  background: var(--cream-surface);
+  color: var(--ink-tertiary);
+  border: 0.5px solid var(--cream-border);
+}
+
+/* ── Item image ── */
+
+.imgWrap {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.itemImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.imgPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--cream-border) 0%, var(--cream-surface) 100%);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-tertiary);
+}
+
+/* ── Item name & views ── */
+
+.itemName {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--ink-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.viewsBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-tertiary);
+  background: var(--cream-surface);
+  border: 0.5px solid var(--cream-border);
+  padding: 2px 8px 2px 6px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.eyeIcon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+/* ── Skeleton ── */
+
+.itemRowSkeleton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+}
+
+.skeletonText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Empty state ── */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 36px 0;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 28px;
+}
+
+.empty p {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+
+.empty small {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-tertiary);
+}

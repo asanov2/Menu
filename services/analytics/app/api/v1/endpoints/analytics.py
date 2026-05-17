@@ -4,13 +4,13 @@ from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import PLAN_HISTORY_DAYS, PLAN_UPGRADE_MAP
+from app.core.config import PLAN_HISTORY_DAYS, PLAN_UPGRADE_MAP, settings
 from app.core.dependencies import get_current_restaurant, get_db
-from app.schemas.analytics import DailyResponse, OverviewResponse, PeakHourRow, TopItemSchema
+from app.schemas.analytics import CategoryTopItemsSchema, DailyResponse, OverviewResponse, PeakHourRow, TopItemSchema
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -29,17 +29,24 @@ async def _enrich_names(
     ids = [str(item.item_id) for item in items]
     result = await db.execute(
         text("""
-            SELECT id::text, name
-            FROM items
-            WHERE id::text = ANY(:ids)
-              AND restaurant_id = :rid
-              AND deleted_at IS NULL
+            SELECT i.id::text, i.name, i.image_url,
+                   i.category_id::text, c.name AS category_name
+            FROM items i
+            LEFT JOIN categories c ON c.id = i.category_id AND c.deleted_at IS NULL
+            WHERE i.id::text = ANY(:ids)
+              AND i.restaurant_id = :rid
+              AND i.deleted_at IS NULL
         """),
         {"ids": ids, "rid": restaurant_id},
     )
-    name_map = {row.id: row.name for row in result.fetchall()}
+    info_map = {row.id: row for row in result.fetchall()}
     for item in items:
-        item.name = name_map.get(str(item.item_id))
+        row = info_map.get(str(item.item_id))
+        if row:
+            item.name = row.name
+            item.image_url = row.image_url
+            item.category_id = UUID(row.category_id) if row.category_id else None
+            item.category_name = row.category_name
 
 
 def _enforce_plan(plan: str, requested_days: int) -> None:
@@ -235,3 +242,100 @@ async def peak_hours(
 
     hours_map = {r.hour: int(r.views) for r in rows}
     return [PeakHourRow(hour=h, views=hours_map.get(h, 0)) for h in range(24)]
+
+
+@router.get("/items/top-by-category", response_model=list[CategoryTopItemsSchema])
+async def top_items_by_category(
+    days: int = Query(default=7, ge=1, le=MAX_DAYS_HARD),
+    current: dict = Depends(get_current_restaurant),
+    db: AsyncSession = Depends(get_db),
+) -> list[CategoryTopItemsSchema]:
+    plan: str = current.get("plan", "starter")
+    restaurant_id: UUID = current["restaurant_id"]
+    _enforce_plan(plan, days)
+
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+
+    result = await db.execute(
+        text("""
+            WITH ranked AS (
+                SELECT
+                    ae.item_id,
+                    COUNT(*) AS views,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY i.category_id
+                        ORDER BY COUNT(*) DESC
+                    ) AS cat_rank,
+                    i.name AS item_name,
+                    i.image_url,
+                    i.category_id,
+                    c.name AS category_name
+                FROM analytics.analytics_events ae
+                JOIN items i ON i.id = ae.item_id
+                    AND i.deleted_at IS NULL
+                    AND i.restaurant_id = :rid
+                LEFT JOIN categories c ON c.id = i.category_id
+                    AND c.deleted_at IS NULL
+                WHERE ae.restaurant_id = :rid
+                  AND ae.occurred_at >= :since
+                  AND ae.event_type = 'item_view'
+                  AND ae.item_id IS NOT NULL
+                GROUP BY ae.item_id, i.name, i.image_url, i.category_id, c.name
+            )
+            SELECT item_id, views, cat_rank, item_name, image_url,
+                   category_id, category_name
+            FROM ranked
+            WHERE cat_rank <= 5
+            ORDER BY category_name NULLS LAST, cat_rank
+        """),
+        {"rid": restaurant_id, "since": since},
+    )
+    rows = result.fetchall()
+
+    groups: dict[str, dict] = {}
+    for row in rows:
+        cat_key = str(row.category_id) if row.category_id else "__none__"
+        if cat_key not in groups:
+            groups[cat_key] = {
+                "category_id": row.category_id,
+                "category_name": row.category_name,
+                "total_views": 0,
+                "items": [],
+            }
+        groups[cat_key]["total_views"] += int(row.views)
+        groups[cat_key]["items"].append(
+            TopItemSchema(
+                item_id=row.item_id,
+                views=int(row.views),
+                rank=int(row.cat_rank),
+                name=row.item_name,
+                image_url=row.image_url,
+                category_id=row.category_id,
+                category_name=row.category_name,
+            )
+        )
+
+    return sorted(
+        [
+            CategoryTopItemsSchema(
+                category_id=g["category_id"],
+                category_name=g["category_name"],
+                total_views=g["total_views"],
+                items=g["items"],
+            )
+            for g in groups.values()
+        ],
+        key=lambda c: c.total_views,
+        reverse=True,
+    )
+
+
+@router.post("/internal/backfill", include_in_schema=False)
+async def trigger_backfill(
+    x_internal_secret: str = Header(alias="X-Internal-Secret"),
+) -> dict:
+    if x_internal_secret != settings.INTERNAL_SECRET:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    from app.services.aggregate_service import backfill_all
+    await backfill_all()
+    return {"status": "ok"}

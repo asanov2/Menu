@@ -63,6 +63,16 @@ export interface TopItem {
   views: number;
   rank: number;
   name: string | null;
+  image_url: string | null;
+  category_id: string | null;
+  category_name: string | null;
+}
+
+export interface CategoryTopItems {
+  category_id: string | null;
+  category_name: string | null;
+  total_views: number;
+  items: TopItem[];
 }
 
 export interface DailyStats {

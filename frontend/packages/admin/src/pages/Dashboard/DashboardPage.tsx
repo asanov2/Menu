@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
-import { EmptyState, Skeleton, PLAN, ANALYTICS_DAYS, TOP_ITEMS_LIMIT, SectionHeading } from '@qrmenu/ui';
-import { getOverview, getDailyStats, getPeakHours } from '../../api/analytics';
+import { Skeleton, PLAN, ANALYTICS_DAYS, SectionHeading } from '@qrmenu/ui';
+import { getOverview, getDailyStats, getPeakHours, getTopByCategory } from '../../api/analytics';
+import TopItemsByCategory from './TopItemsByCategory';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './DashboardPage.module.css';
 import common from '../../styles/common.module.css';
@@ -61,6 +62,12 @@ export default function DashboardPage() {
   const { data: peakData, isLoading: isPeakLoading } = useQuery({
     queryKey: ['analytics-peak', days],
     queryFn: () => getPeakHours(days),
+    retry: false,
+  });
+
+  const { data: categoryData, isLoading: isCategoryLoading } = useQuery({
+    queryKey: ['analytics-top-by-category', days],
+    queryFn: () => getTopByCategory(days),
     retry: false,
   });
 
@@ -194,41 +201,13 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Top items */}
+      {/* Top items by category */}
       <div className={common.card}>
-        <SectionHeading size="sm">Топ блюда</SectionHeading>
-        {isLoading ? (
-          <div className={styles.skeletonList}>
-            {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} height="36px" />)}
-          </div>
-        ) : !hasData ? (
-          <div className={styles.emptyAnalytics}>
-            <span>📊</span>
-            <p>Аналитика появится после первых посещений меню</p>
-            <small>Данные обновляются ежедневно</small>
-          </div>
-        ) : !data?.top_items?.length ? (
-          <EmptyState icon="📊" title="Нет данных" description="Пока нет просмотров за этот период" />
-        ) : (
-          <table className={common.table}>
-            <thead>
-              <tr className={common.theadRow}>
-                <th className={`${common.th} ${styles.thNum}`}>#</th>
-                <th className={common.th}>Название</th>
-                <th className={`${common.th} ${common.thRight}`}>Просмотров</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.top_items.slice(0, TOP_ITEMS_LIMIT).map((item, idx) => (
-                <tr key={item.item_id} className={common.tr}>
-                  <td className={common.td}>{idx + 1}</td>
-                  <td className={common.tdPrimary}>{item.name ?? `Блюдо ${item.rank}`}</td>
-                  <td className={common.tdRight}>{item.views}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <SectionHeading size="sm">Топ блюда по категориям</SectionHeading>
+        <TopItemsByCategory
+          categories={categoryData ?? []}
+          isLoading={isCategoryLoading}
+        />
       </div>
     </div>
   );

@@ -5,6 +5,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.rabbitmq import publish_menu_event
+
+
+_MOBILE_KEYWORDS = (
+    "mobile", "android", "iphone", "ipad",
+    "ipod", "blackberry", "windows phone",
+)
+
+
+def detect_device_type(user_agent: str) -> str:
+    ua = user_agent.lower()
+    return "mobile" if any(kw in ua for kw in _MOBILE_KEYWORDS) else "desktop"
 from app.schemas.menu import (
     CategoriesOnlyResponse,
     CategoryResponse,
@@ -54,7 +65,7 @@ async def get_menu(
     if menu_id is None:
         await set_cached_menu(slug, response.model_dump(mode="json"))
 
-    device_type = request.headers.get("User-Agent", "unknown")[:50]
+    device_type = detect_device_type(request.headers.get("User-Agent", ""))
     publish_menu_event("menu_view", str(restaurant.id), device_type=device_type)
 
     return response
@@ -77,7 +88,7 @@ async def track_item_view(
             restaurant_id = str(restaurant.id)
         except Exception:
             return
-    device_type = request.headers.get("User-Agent", "unknown")[:50]
+    device_type = detect_device_type(request.headers.get("User-Agent", ""))
     publish_menu_event("item_view", str(restaurant_id), item_id=str(item_id), device_type=device_type)
 
 

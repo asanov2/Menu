@@ -28,6 +28,16 @@ class TopItemSchema(BaseModel):
     views: int
     rank: int
     name: str | None = None
+    image_url: str | None = None
+    category_id: UUID | None = None
+    category_name: str | None = None
+
+
+class CategoryTopItemsSchema(BaseModel):
+    category_id: UUID | None
+    category_name: str | None
+    total_views: int
+    items: list["TopItemSchema"]
 
 
 class DailyRowSchema(BaseModel):
