@@ -38,7 +38,7 @@ export default function RestaurantsFilters({
       </SectionHeading>
 
       <div className={styles.searchWrapper}>
-        <span className={styles.searchIcon}>🔍</span>
+        <i className="ti ti-search" style={{ fontSize: 16, lineHeight: 1 }} />
         <input
           value={search}
           onChange={e => onSearchChange(e.target.value)}

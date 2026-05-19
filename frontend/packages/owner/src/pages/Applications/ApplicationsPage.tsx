@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ConfirmModal, Skeleton, useToast } from '@qrmenu/ui'
+import { ConfirmModal, Skeleton, useToast, Icon } from '@qrmenu/ui'
 import {
   getApplications,
   approveApplication,
@@ -30,7 +30,7 @@ export default function ApplicationsPage() {
     mutationFn: (id: string) => approveApplication(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['applications'] })
-      showToast(`✅ Ресторан одобрен`, 'success')
+      showToast('Ресторан одобрен', 'success')
       setConfirmAction(null)
     },
     onError: () => showToast('Ошибка при одобрении', 'error'),
@@ -75,7 +75,7 @@ export default function ApplicationsPage() {
           </div>
         ) : !data?.items.length ? (
           <div className={styles.empty}>
-            <span className={styles.emptyIcon}>🎉</span>
+            <i className="ti ti-circle-check" style={{ fontSize: 48 }} />
             <div className={styles.emptyText}>Новых заявок нет</div>
           </div>
         ) : (
@@ -115,14 +115,14 @@ export default function ApplicationsPage() {
                         onClick={() => setConfirmAction({ restaurant: item, action: 'approve' })}
                         disabled={isPending}
                       >
-                        ✅ Одобрить
+                        <Icon name="check" size={14} /> Одобрить
                       </button>
                       <button
                         className={styles.btnReject}
                         onClick={() => setConfirmAction({ restaurant: item, action: 'reject' })}
                         disabled={isPending}
                       >
-                        ❌ Отклонить
+                        <Icon name="x" size={14} /> Отклонить
                       </button>
                     </td>
                   </tr>

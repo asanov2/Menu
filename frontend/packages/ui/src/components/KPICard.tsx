@@ -23,7 +23,9 @@ export function KPICard({ label, value, subtitle, subtitleColor = 'default', ico
   return (
     <div className={styles.card}>
       {icon && (
-        <span className={styles.iconBg}>{icon}</span>
+        <span className={styles.iconBg}>
+          <i className={`ti ti-${icon}`} style={{ fontSize: 24, lineHeight: 1 }} />
+        </span>
       )}
       <div className={styles.label}>{label}</div>
       <div

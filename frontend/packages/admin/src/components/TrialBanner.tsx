@@ -16,7 +16,7 @@ function formatDate(iso: string): string {
 function getBannerContent(sub: Subscription): { icon: string; text: string } | null {
   if (sub.status === 'expired') {
     return {
-      icon: '❌',
+      icon: 'circle-x',
       text: 'Пробный период завершён. Оформите подписку для восстановления доступа.',
     };
   }
@@ -32,14 +32,14 @@ function getBannerContent(sub: Subscription): { icon: string; text: string } | n
 
   if (daysLeft <= 1) {
     return {
-      icon: '⚠️',
+      icon: 'alert-triangle',
       text: 'Завтра заканчивается пробный период. Оформите подписку сегодня!',
     };
   }
 
   const dateStr = formatDate(endDate);
   return {
-    icon: '⚠️',
+    icon: 'alert-triangle',
     text: `До окончания пробного периода ${daysLeft} дней (до ${dateStr}). Оформите подписку.`,
   };
 }
@@ -70,7 +70,7 @@ export default function TrialBanner() {
   return (
     <div className={styles.banner}>
       <div className={styles.message}>
-        <span>{bannerContent.icon}</span>
+        <i className={`ti ti-${bannerContent.icon}`} style={{ fontSize: 16, lineHeight: 1, flexShrink: 0 }} />
         <span>{bannerContent.text}</span>
       </div>
       <div className={styles.actions}>
@@ -78,7 +78,7 @@ export default function TrialBanner() {
           Оформить подписку →
         </button>
         <button className={styles.dismissBtn} onClick={handleDismiss} aria-label="Закрыть">
-          ✕
+          <i className="ti ti-x" style={{ fontSize: 14, lineHeight: 1 }} />
         </button>
       </div>
     </div>

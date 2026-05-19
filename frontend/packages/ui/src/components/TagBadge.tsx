@@ -9,12 +9,12 @@ const RU_TO_EN: Record<string, string> = {
   'Шеф':    'chef',
 };
 
-const TAG_MAP: Record<string, { emoji: string; label: string; style: CSSProperties }> = {
-  popular: { emoji: '⭐',    label: 'Хит',    style: { background: 'var(--accent-gold-bg)', color: 'var(--accent-gold)', border: '0.5px solid var(--accent-gold-border)' } },
-  vegan:   { emoji: '🌱',    label: 'Веган',  style: { background: 'var(--tag-green-bg)',   color: 'var(--tag-green-text)', border: '0.5px solid var(--tag-green-border)' } },
-  spicy:   { emoji: '🌶',    label: 'Острое', style: { background: 'var(--tag-red-bg)',     color: 'var(--tag-red-text)', border: '0.5px solid var(--tag-red-border)' } },
-  new:     { emoji: '✨',    label: 'Новое',  style: { background: 'var(--tag-blue-bg)',    color: 'var(--tag-blue-text)', border: '0.5px solid var(--tag-blue-border)' } },
-  chef:    { emoji: '👨‍🍳', label: 'Шеф',   style: { background: 'var(--accent-gold-bg)', color: 'var(--accent-gold)', border: '0.5px solid var(--accent-gold-border)' } },
+const TAG_MAP: Record<string, { icon: string; label: string; style: CSSProperties }> = {
+  popular: { icon: 'star',      label: 'Хит',    style: { background: 'var(--accent-gold-bg)', color: 'var(--accent-gold)', border: '0.5px solid var(--accent-gold-border)' } },
+  vegan:   { icon: 'leaf',      label: 'Веган',  style: { background: 'var(--tag-green-bg)',   color: 'var(--tag-green-text)', border: '0.5px solid var(--tag-green-border)' } },
+  spicy:   { icon: 'flame',     label: 'Острое', style: { background: 'var(--tag-red-bg)',     color: 'var(--tag-red-text)', border: '0.5px solid var(--tag-red-border)' } },
+  new:     { icon: 'sparkles',  label: 'Новое',  style: { background: 'var(--tag-blue-bg)',    color: 'var(--tag-blue-text)', border: '0.5px solid var(--tag-blue-border)' } },
+  chef:    { icon: 'chef-hat',  label: 'Шеф',   style: { background: 'var(--accent-gold-bg)', color: 'var(--accent-gold)', border: '0.5px solid var(--accent-gold-border)' } },
 };
 
 interface TagBadgeProps {
@@ -28,7 +28,7 @@ export default function TagBadge({ tag }: TagBadgeProps) {
 
   return (
     <span className={styles.badge} style={config.style}>
-      <span className={styles.emoji}>{config.emoji}</span>
+      <i className={`ti ti-${config.icon}`} style={{ fontSize: 10, lineHeight: 1 }} />
       {config.label}
     </span>
   );

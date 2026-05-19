@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ConfirmModal, EmptyState, Skeleton, StatusBadge, SectionHeading, useToast, formatDate, getApiErrorMessage } from '@qrmenu/ui';
+import { ConfirmModal, EmptyState, Skeleton, StatusBadge, SectionHeading, useToast, formatDate, getApiErrorMessage, Icon } from '@qrmenu/ui';
 import {
   PLANS,
   getSubscription,
@@ -202,7 +202,7 @@ export default function BillingPage() {
                 <ul className={styles.planFeatures}>
                   {plan.features.map(f => (
                     <li key={f} className={styles.planFeatureItem}>
-                      <span className={styles.checkmark}>✓</span>
+                      <Icon name="check" size={14} className={styles.checkmark} />
                       {f}
                     </li>
                   ))}
@@ -213,7 +213,7 @@ export default function BillingPage() {
                       </li>
                       {plan.features_soon.map(f => (
                         <li key={f} className={`${styles.planFeatureItem} ${styles.planFeatureItemSoon}`}>
-                          <span className={styles.soonIcon}>🔜</span>
+                          <Icon name="clock-hour-3" size={12} className={styles.soonIcon} />
                           {f}
                         </li>
                       ))}
@@ -236,7 +236,7 @@ export default function BillingPage() {
       {/* Section 3: White label teaser */}
       <div className={`${common.card} ${styles.whiteLabel}`}>
         <div>
-          <div className={styles.whiteLabelTitle}>💎 White Label</div>
+          <div className={styles.whiteLabelTitle}><Icon name="diamond" size={20} /> White Label</div>
           <div className={styles.whiteLabelPrice}>от 150 000 ₸/мес</div>
           <div className={styles.whiteLabelDesc}>
             Полностью брендированное решение с вашим доменом, логотипом и кастомным дизайном меню
@@ -250,7 +250,7 @@ export default function BillingPage() {
         <SectionHeading>История платежей</SectionHeading>
         {payments.length === 0 ? (
           <EmptyState
-            icon="💳"
+            icon={<Icon name="credit-card" size={40} />}
             title="Нет платежей"
             description="История платежей появится после первой оплаты"
           />

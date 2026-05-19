@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
-import { Skeleton, PLAN } from '@qrmenu/ui';
+import { Skeleton, PLAN, Icon } from '@qrmenu/ui';
 import { getMenu } from '../../api/menus';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './QRPage.module.css';
@@ -123,7 +123,7 @@ export default function QRPage() {
           <div className={`${styles.noPrint} ${styles.downloadRow}`}>
             <button onClick={downloadPNG} className={styles.btnDownload}>⬇ PNG</button>
             <button onClick={downloadSVG} className={styles.btnDownload}>⬇ SVG</button>
-            <button onClick={() => window.print()} className={styles.btnPrint}>🖨 Печать</button>
+            <button onClick={() => window.print()} className={styles.btnPrint}><Icon name="printer" size={16} /> Печать</button>
           </div>
         </div>
       </div>

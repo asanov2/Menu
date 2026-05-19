@@ -57,7 +57,7 @@ export default function ProfilePage() {
       const updated = await updateProfile(data);
       const token = localStorage.getItem('admin_token') ?? '';
       setAuth(token, updated);
-      showToast('Сохранено ✓', 'success');
+      showToast('Сохранено', 'success');
     } catch (err: unknown) {
       showToast(`Ошибка: ${getApiErrorMessage(err, 'Ошибка сервера')}`, 'error');
     } finally {
@@ -70,7 +70,7 @@ export default function ProfilePage() {
     try {
       await changePassword({ old_password: data.old_password, new_password: data.new_password });
       resetPass();
-      showToast('Пароль изменён ✓', 'success');
+      showToast('Пароль изменён', 'success');
     } catch (err: unknown) {
       showToast(`Ошибка: ${getApiErrorMessage(err, 'Ошибка сервера')}`, 'error');
     } finally {

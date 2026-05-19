@@ -1,7 +1,7 @@
 // === FILE: frontend/packages/admin/src/pages/Menus/components/ItemRow.tsx ===
 import { useState, memo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { formatPrice, useToast, ConfirmModal, getImageObjectPosition, getCleanImageUrl } from '@qrmenu/ui';
+import { formatPrice, useToast, ConfirmModal, getImageObjectPosition, getCleanImageUrl, Icon } from '@qrmenu/ui';
 import type { MenuItem } from '@qrmenu/ui';
 import { toggleAvailable, deleteItem } from '../../../api/items';
 import styles from './ItemRow.module.css';
@@ -92,7 +92,7 @@ function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowProps) {
           className={styles.actionBtn}
           title="Редактировать"
         >
-          ✏️
+          <Icon name="pencil" size={15} />
         </button>
 
         {/* Delete */}
@@ -101,7 +101,7 @@ function ItemRow({ item, categoryId, menuId, onEdit }: ItemRowProps) {
           className={styles.deleteBtn}
           title="Удалить"
         >
-          🗑
+          <Icon name="trash" size={15} />
         </button>
       </div>
 

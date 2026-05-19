@@ -1,7 +1,7 @@
 // === FILE: frontend/packages/admin/src/pages/Menus/MenusPage.tsx ===
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { EmptyState, Skeleton, useToast } from '@qrmenu/ui';
+import { EmptyState, Skeleton, useToast, Icon } from '@qrmenu/ui';
 import { getMenus, createMenu } from '../../api/menus';
 import MenuCard from './components/MenuCard';
 import PlanLimitModal from '../../components/PlanLimitModal';
@@ -35,7 +35,7 @@ export default function MenusPage() {
     try {
       await createMenu({ name: newName.trim(), language: newLang });
       queryClient.invalidateQueries({ queryKey: ['menus'] });
-      showToast('Меню создано ✓', 'success');
+      showToast('Меню создано', 'success');
       setCreateOpen(false);
       setNewName('');
       setNewLang('ru');
@@ -88,7 +88,7 @@ export default function MenusPage() {
         </div>
       ) : !menus.length ? (
         <EmptyState
-          icon="🍽️"
+          icon={<Icon name="tools-kitchen-2" size={40} />}
           title="Нет меню"
           description="Создайте первое меню для вашего ресторана"
           action={

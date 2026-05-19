@@ -125,7 +125,7 @@
 
 .itemName {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--ink-primary);
   line-height: 1.25;
@@ -135,7 +135,7 @@
 .itemDesc {
   font-size: 13px;
   color: var(--ink-secondary);
-  line-height: 1.6;
+  line-height: 1.65;
   margin-bottom: 16px;
   font-family: var(--font-ui);
 }
@@ -163,7 +163,7 @@
 
 .itemPrice {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 21px;
   font-weight: 600;
   color: var(--ink-primary);
 }

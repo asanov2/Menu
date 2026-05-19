@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useToast, INPUT_STYLE, useInputFocus, FormField } from '@qrmenu/ui';
+import { INPUT_STYLE, useInputFocus, FormField, Icon } from '@qrmenu/ui';
 import { login, getMe } from '../../api/auth';
 import { useAuthStore } from '../../store/authStore';
 import styles from './LoginPage.module.css';
@@ -17,9 +17,9 @@ type FormData = z.infer<typeof schema>;
 export default function LoginPage() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
-  const { showToast } = useToast();
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -30,6 +30,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
+    setServerError(null);
     try {
       const result = await login(data.email, data.password);
       const restaurant = await getMe(result.access_token);
@@ -37,10 +38,10 @@ export default function LoginPage() {
       navigate('/dashboard');
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
-      if (status === 401) {
-        showToast('Неверный email или пароль', 'error');
+      if (status === 401 || status === 403) {
+        setServerError('Неверный email или пароль');
       } else {
-        showToast('Ошибка подключения', 'error');
+        setServerError('Ошибка подключения. Попробуйте позже.');
       }
     } finally {
       setLoading(false);
@@ -59,7 +60,7 @@ export default function LoginPage() {
           <FormField label="Email" error={errors.email?.message} required>
             <input
               id="login-email"
-              {...register('email')}
+              {...register('email', { onChange: () => setServerError(null) })}
               {...emailFocus}
               type="email"
               placeholder="Email"
@@ -71,7 +72,7 @@ export default function LoginPage() {
             <div className={styles.passwordWrapper}>
               <input
                 id="login-password"
-                {...register('password')}
+                {...register('password', { onChange: () => setServerError(null) })}
                 {...passwordFocus}
                 type={showPass ? 'text' : 'password'}
                 placeholder="Пароль"
@@ -82,10 +83,17 @@ export default function LoginPage() {
                 onClick={() => setShowPass((v) => !v)}
                 className={styles.showPassBtn}
               >
-                {showPass ? '🙈' : '👁'}
+                {showPass ? <Icon name="eye-off" size={16} /> : <Icon name="eye" size={16} />}
               </button>
             </div>
           </FormField>
+
+          {serverError && (
+            <div className={styles.serverError}>
+              <i className="ti ti-alert-circle" style={{ fontSize: 14 }} />
+              {serverError}
+            </div>
+          )}
 
           <button
             type="submit"

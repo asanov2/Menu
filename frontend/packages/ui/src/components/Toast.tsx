@@ -3,7 +3,7 @@ import {
   useContext,
   useState,
   useCallback,
-  ReactNode,
+  type ReactNode,
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TOAST_DURATION_MS } from '../constants';
@@ -23,10 +23,10 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue>({ showToast: () => {} });
 
-const ICON: Record<ToastType, string> = {
-  success: '✓',
-  error: '✕',
-  warning: '⚠',
+const ICON: Record<ToastType, ReactNode> = {
+  success: <i className="ti ti-check"          style={{ fontSize: 16, lineHeight: 1 }} />,
+  error:   <i className="ti ti-x"              style={{ fontSize: 16, lineHeight: 1 }} />,
+  warning: <i className="ti ti-alert-triangle" style={{ fontSize: 16, lineHeight: 1 }} />,
 };
 
 const BG: Record<ToastType, string> = {

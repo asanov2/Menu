@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MenuItem, Category } from '@qrmenu/ui';
-import { INPUT_STYLE, useInputFocus, ANIMATION, FormField } from '@qrmenu/ui';
+import { INPUT_STYLE, useInputFocus, ANIMATION, FormField, Icon } from '@qrmenu/ui';
 import ImageUpload from './ImageUpload';
 import styles from './ItemFormModal.module.css';
 
@@ -212,7 +212,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                       onClick={onCancel}
                       className={`${styles.headerBtn} ${styles.headerBtnClose}`}
                     >
-                      ✕
+                      <Icon name="x" size={16} />
                     </button>
                   </div>
                 </div>

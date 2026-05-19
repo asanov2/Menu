@@ -150,7 +150,7 @@ export default function MenuPage() {
 
       {filteredItems !== null && filteredItems.length === 0 && (
         <div className={styles.emptySearch}>
-          <span className={styles.emptyIcon}>🍽️</span>
+          <i className="ti ti-tools-kitchen-2" style={{ fontSize: 40 }} />
           <div className={styles.emptyTitle}>Ничего не найдено</div>
           <div className={styles.emptyDesc}>Попробуйте другой запрос</div>
         </div>

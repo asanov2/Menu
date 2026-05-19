@@ -29,6 +29,7 @@ export { INPUT_STYLE, CARD_STYLE, LABEL_STYLE, SECTION_HEADING_STYLE, OVERLAY_ST
 export { useInputFocus } from './hooks/useInputStyle';
 
 // Components
+export { Icon } from './components/Icon';
 export { default as TagBadge } from './components/TagBadge';
 export { ToastProvider, useToast } from './components/Toast';
 export { default as ConfirmModal } from './components/ConfirmModal';

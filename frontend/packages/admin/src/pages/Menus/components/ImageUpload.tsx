@@ -1,6 +1,6 @@
 // === FILE: frontend/packages/admin/src/pages/Menus/components/ImageUpload.tsx ===
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { useToast } from '@qrmenu/ui';
+import { useToast, Icon } from '@qrmenu/ui';
 import { uploadImage } from '../../../api/upload';
 import styles from './ImageUpload.module.css';
 
@@ -248,7 +248,7 @@ export default function ImageUpload({ value, onChange, onPositionChange }: Image
 
             {!isDragging && (
               <div className={styles.dragHint}>
-                ✥ Перетащите фото
+                <Icon name="grip-vertical" size={14} /> Перетащите фото
               </div>
             )}
 
@@ -268,7 +268,7 @@ export default function ImageUpload({ value, onChange, onPositionChange }: Image
           </>
         ) : (
           <div className={styles.emptyContent}>
-            <span className={styles.emptyIcon}>🖼️</span>
+            <Icon name="photo" size={36} className={styles.emptyIcon} />
             <span className={styles.emptyText}>
               Нажмите для загрузки
               <br />
@@ -283,7 +283,9 @@ export default function ImageUpload({ value, onChange, onPositionChange }: Image
         onClick={() => inputRef.current?.click()}
         className={styles.chooseBtn}
       >
-        {preview ? '📷 Заменить фото' : '📷 Выбрать фото'}
+        {preview
+          ? <><Icon name="camera" size={14} /> Заменить фото</>
+          : <><Icon name="camera" size={14} /> Выбрать фото</>}
       </button>
 
       <input

@@ -14,7 +14,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Skeleton, EmptyState, useToast } from '@qrmenu/ui';
+import { Skeleton, EmptyState, useToast, Icon } from '@qrmenu/ui';
 import type { Category } from '@qrmenu/ui';
 import { getMenu } from '../../api/menus';
 import { getCategories, createCategory } from '../../api/categories';
@@ -74,7 +74,7 @@ export default function MenuDetailPage() {
     try {
       await createCategory({ name, menu_id: id! });
       queryClient.invalidateQueries({ queryKey: ['categories', id] });
-      showToast('Категория добавлена ✓', 'success');
+      showToast('Категория добавлена', 'success');
       setCatFormOpen(false);
     } catch {
       showToast('Ошибка: не удалось создать категорию', 'error');
@@ -108,7 +108,7 @@ export default function MenuDetailPage() {
             rel="noopener noreferrer"
             className={styles.btnPreview}
           >
-            👁 Предпросмотр
+            <Icon name="eye" size={14} /> Предпросмотр
           </a>
           <button
             onClick={() => setCatFormOpen(true)}
@@ -122,7 +122,7 @@ export default function MenuDetailPage() {
       {/* Categories */}
       {categories.length === 0 ? (
         <EmptyState
-          icon="📂"
+          icon={<Icon name="folder-open" size={40} />}
           title="Нет категорий"
           description="Добавьте первую категорию для организации блюд"
           action={

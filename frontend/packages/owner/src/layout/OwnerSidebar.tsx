@@ -5,11 +5,11 @@ import { getApplications } from '../api/owner'
 import styles from './OwnerSidebar.module.css'
 
 const NAV = [
-  { label: 'Дашборд',   icon: '📊', path: '/dashboard' },
-  { label: 'Рестораны', icon: '🏪', path: '/restaurants' },
-  { label: 'Заявки',    icon: '📋', path: '/applications' },
-  { label: 'Выручка',   icon: '💰', path: '/revenue' },
-  { label: 'Система',   icon: '🖥️', path: '/system' },
+  { label: 'Дашборд',   icon: 'chart-bar',      path: '/dashboard' },
+  { label: 'Рестораны', icon: 'building-store',  path: '/restaurants' },
+  { label: 'Заявки',    icon: 'clipboard-list',  path: '/applications' },
+  { label: 'Выручка',   icon: 'cash',            path: '/revenue' },
+  { label: 'Система',   icon: 'server',          path: '/system' },
 ]
 
 export default function OwnerSidebar() {
@@ -40,7 +40,7 @@ export default function OwnerSidebar() {
               `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
             }
           >
-            <span className={styles.navIcon}>{item.icon}</span>
+            <i className={`ti ti-${item.icon}`} style={{ fontSize: 18, lineHeight: 1 }} />
             <span className={styles.navLabel}>{item.label}</span>
             {item.path === '/applications' && pendingCount > 0 && (
               <span className={styles.navBadge}>{pendingCount}</span>

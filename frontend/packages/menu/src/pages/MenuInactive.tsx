@@ -11,7 +11,7 @@ export default function MenuInactive({ restaurantName }: MenuInactiveProps) {
 
   return (
     <div className={common.errorPage}>
-      <span className={styles.emoji}>🚧</span>
+      <i className="ti ti-barrier-block" style={{ fontSize: 64 }} />
 
       {restaurantName && (
         <div className={styles.restaurantName}>{restaurantName}</div>

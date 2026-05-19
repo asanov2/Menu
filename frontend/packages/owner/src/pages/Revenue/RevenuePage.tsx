@@ -173,9 +173,9 @@ export default function RevenuePage() {
       <SectionHeading size="lg" className={common.mb0}>Выручка</SectionHeading>
 
       <div className={common.kpiGrid3}>
-        <KPICard label="МРР (текущий)" value={stats ? formatPrice(stats.mrr) : '—'} subtitleColor="gold" icon="📈" />
-        <KPICard label={`Всего за ${year}`} value={formatPrice(yearTotal)} subtitleColor="default" icon="💎" />
-        <KPICard label="ARPU" value={avgCheck ? formatPrice(avgCheck) : '—'} subtitleColor="default" icon="🧾" />
+        <KPICard label="МРР (текущий)" value={stats ? formatPrice(stats.mrr) : '—'} subtitleColor="gold" icon="trending-up" />
+        <KPICard label={`Всего за ${year}`} value={formatPrice(yearTotal)} subtitleColor="default" icon="diamond" />
+        <KPICard label="ARPU" value={avgCheck ? formatPrice(avgCheck) : '—'} subtitleColor="default" icon="receipt" />
       </div>
 
       <div className={common.card}>
@@ -195,7 +195,7 @@ export default function RevenuePage() {
         </div>
         {revenueError ? (
           <EmptyState
-            icon="⚠️"
+            icon={<i className="ti ti-alert-triangle" style={{ fontSize: 40 }} />}
             title="Ошибка загрузки"
             description="Не удалось загрузить данные выручки"
             action={

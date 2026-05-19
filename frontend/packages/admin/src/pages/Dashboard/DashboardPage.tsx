@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, ReferenceLine,
 } from 'recharts';
-import { Skeleton, PLAN, ANALYTICS_DAYS, SectionHeading } from '@qrmenu/ui';
+import { Skeleton, PLAN, ANALYTICS_DAYS, SectionHeading, Icon } from '@qrmenu/ui';
 import { getOverview, getDailyStats, getPeakHours, getTopByCategory } from '../../api/analytics';
 import TopItemsByCategory from './TopItemsByCategory';
 import { useAuth } from '../../hooks/useAuth';
@@ -105,8 +105,8 @@ export default function DashboardPage() {
     ? (peakData ?? []).reduce((s, h) => s + h.views, 0) / 24
     : 0;
 
-  const peakHourStr = data?.most_common_peak_hour != null
-    ? `${String(data.most_common_peak_hour).padStart(2, '0')}:00 – ${String(data.most_common_peak_hour + 1).padStart(2, '0')}:00`
+  const peakHourStr = peakHour && peakHour.views > 0
+    ? `${String(peakHour.hour).padStart(2, '0')}:00 – ${String(peakHour.hour + 1).padStart(2, '0')}:00`
     : '—';
 
   const dailyChartData = (dailyData ?? []).map(d => ({
@@ -134,16 +134,20 @@ export default function DashboardPage() {
         <h1 className={common.pageTitle}>Дашборд</h1>
         <div className={styles.dayBtns}>
           {DAYS_OPTIONS.map((opt) => {
-            const isLocked = opt.value === ANALYTICS_DAYS[PLAN.PRO] && restaurant?.plan !== PLAN.PRO;
+            const isLocked = (() => {
+              const plan = restaurant?.plan ?? PLAN.STARTER;
+              const allowed = ANALYTICS_DAYS[plan as keyof typeof ANALYTICS_DAYS] ?? 7;
+              return opt.value > allowed;
+            })();
             const isActive = days === opt.value;
             return (
               <button
                 key={opt.value}
                 onClick={() => !isLocked && setDays(opt.value)}
                 className={`${styles.dayBtn} ${isActive ? styles.dayBtnActive : ''} ${isLocked ? styles.dayBtnLocked : ''}`}
-                title={isLocked ? 'Доступно на тарифе Бизнес/Про' : undefined}
+                title={isLocked ? 'Недоступно на вашем тарифе' : undefined}
               >
-                {isLocked && <span className={styles.lockIcon}>🔒</span>}
+                {isLocked && <Icon name="lock" size={14} className={styles.lockIcon} />}
                 {opt.label}
               </button>
             );
@@ -177,7 +181,7 @@ export default function DashboardPage() {
           <Skeleton height="200px" />
         ) : !hasDailyData ? (
           <div className={styles.emptyAnalytics}>
-            <span>📊</span>
+            <Icon name="chart-bar" size={20} />
             <p>Нет данных за выбранный период</p>
             <small>Данные обновляются ежедневно в 01:00</small>
           </div>
@@ -215,7 +219,7 @@ export default function DashboardPage() {
           <div className={styles.chartLabel}>Активность по часам</div>
           {peakHour && peakHour.views > 0 && (
             <div className={styles.peakBadge}>
-              🕐 Самый активный час: {String(peakHour.hour).padStart(2, '0')}:00–{String(peakHour.hour + 1).padStart(2, '0')}:00 · {peakHour.views} просмотров
+              <Icon name="clock" size={14} /> Самый активный час: {String(peakHour.hour).padStart(2, '0')}:00–{String(peakHour.hour + 1).padStart(2, '0')}:00 · {peakHour.views} просмотров
             </div>
           )}
         </div>
@@ -223,7 +227,7 @@ export default function DashboardPage() {
           <Skeleton height="160px" />
         ) : !hasPeakData ? (
           <div className={styles.emptyAnalytics}>
-            <span>🕐</span>
+            <Icon name="clock" size={14} />
             <p>Нет данных о пиковых часах</p>
           </div>
         ) : (

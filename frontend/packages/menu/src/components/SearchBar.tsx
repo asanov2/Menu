@@ -15,7 +15,7 @@ export default function SearchBar({ value, onChange, foundCount }: SearchBarProp
   return (
     <div className={styles.wrapper}>
       <div className={styles.inputRow}>
-        <span className={styles.icon}>🔍</span>
+        <i className="ti ti-search" style={{ fontSize: 16 }} />
         <input
           ref={inputRef}
           type="text"
@@ -29,7 +29,7 @@ export default function SearchBar({ value, onChange, foundCount }: SearchBarProp
             onClick={() => { onChange(''); inputRef.current?.focus(); }}
             className={styles.clearBtn}
           >
-            ✕
+            <i className="ti ti-x" style={{ fontSize: 14 }} />
           </button>
         )}
       </div>

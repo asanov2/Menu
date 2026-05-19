@@ -132,7 +132,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                     {isFullscreen ? '⊡' : '⊞'}
                   </button>
                   <button onClick={onClose} className={`${styles.iconBtn} ${styles.iconBtnClose}`}>
-                    ✕
+                    <i className="ti ti-x" style={{ fontSize: 16 }} />
                   </button>
                 </div>
 
@@ -152,7 +152,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                     />
                   </div>
                 ) : (
-                  <div className={styles.photoPlaceholder}>🍽️</div>
+                  <div className={styles.photoPlaceholder}><i className="ti ti-tools-kitchen-2" style={{ fontSize: 48 }} /></div>
                 )}
               </div>
 

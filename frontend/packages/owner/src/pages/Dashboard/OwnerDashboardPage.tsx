@@ -163,15 +163,15 @@ export default function OwnerDashboardPage() {
       ) : (
         <>
           <div className={common.kpiGrid4}>
-            <KPICard label="Ресторанов" value={stats?.total_restaurants ?? '—'} icon="🏪" />
-            <KPICard label="MRR" value={stats ? formatPrice(stats.mrr) : '—'} subtitleColor="gold" icon="💰" />
-            <KPICard label="Платящих" value={paying || '—'} subtitleColor="green" icon="✅" />
-            <KPICard label="Триал" value={trialCount || '—'} subtitleColor="gold" icon="⏱️" />
+            <KPICard label="Ресторанов" value={stats?.total_restaurants ?? '—'} icon="building-store" />
+            <KPICard label="MRR" value={stats ? formatPrice(stats.mrr) : '—'} subtitleColor="gold" icon="cash" />
+            <KPICard label="Платящих" value={paying || '—'} subtitleColor="green" icon="circle-check" />
+            <KPICard label="Триал" value={trialCount || '—'} subtitleColor="gold" icon="hourglass" />
           </div>
           <div className={common.kpiGrid3}>
-            <KPICard label={`Выручка ${year}`} value={formatPrice(yearTotal)} icon="💎" />
-            <KPICard label="ARPU" value={arpu ? formatPrice(arpu) : '—'} icon="📊" />
-            <KPICard label="Конверсия" value={conversionPct ? `${conversionPct}%` : '—'} subtitleColor="green" icon="📈" />
+            <KPICard label={`Выручка ${year}`} value={formatPrice(yearTotal)} icon="diamond" />
+            <KPICard label="ARPU" value={arpu ? formatPrice(arpu) : '—'} icon="chart-bar" />
+            <KPICard label="Конверсия" value={conversionPct ? `${conversionPct}%` : '—'} subtitleColor="green" icon="trending-up" />
           </div>
         </>
       )}

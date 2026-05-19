@@ -95,3 +95,16 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+.serverError {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--tag-red-bg);
+  border: 0.5px solid var(--error-text);
+  border-radius: var(--radius-md);
+  color: var(--error-text);
+  font-size: 13px;
+  font-family: var(--font-ui);
+}

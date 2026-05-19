@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { CategoryTopItems, TopItem } from '@qrmenu/ui';
-import { Skeleton } from '@qrmenu/ui';
+import { Skeleton, Icon } from '@qrmenu/ui';
 import styles from './TopItemsByCategory.module.css';
 
 interface Props {
@@ -24,23 +24,28 @@ function ItemImage({ name, imageUrl }: { name: string | null; imageUrl: string |
 
   return (
     <div className={styles.imgPlaceholder}>
-      {name?.[0]?.toUpperCase() ?? '🍽'}
+      {name?.[0]?.toUpperCase() ?? <Icon name="tools-kitchen-2" size={20} />}
     </div>
   );
 }
 
-const RANK_EMOJI = ['🥇', '🥈', '🥉'];
+const RANK_COLORS = ['#c9a227', '#8e9ba5', '#c07d4f'];
 
 function ItemRow({ item }: { item: TopItem }) {
   const isTopThree = item.rank <= 3;
-  const rankDisplay = isTopThree ? RANK_EMOJI[item.rank - 1] : String(item.rank);
+  const rankDisplay = String(item.rank);
   const rankClass = isTopThree
     ? styles[`rank${item.rank}` as keyof typeof styles]
     : styles.rankDefault;
 
   return (
     <div className={styles.itemRow}>
-      <span className={`${styles.rank} ${rankClass}`}>{rankDisplay}</span>
+      <span
+        className={`${styles.rank} ${rankClass}`}
+        style={isTopThree ? { color: RANK_COLORS[item.rank - 1] } : undefined}
+      >
+        {rankDisplay}
+      </span>
       <div className={styles.imgWrap}>
         <ItemImage name={item.name} imageUrl={item.image_url} />
       </div>
@@ -95,7 +100,7 @@ export default function TopItemsByCategory({ categories, isLoading }: Props) {
   if (!categories.length) {
     return (
       <div className={styles.empty}>
-        <span className={styles.emptyIcon}>📊</span>
+        <Icon name="chart-bar-off" size={36} className={styles.emptyIcon} />
         <p>Нет данных о просмотрах блюд</p>
         <small>Открывайте карточки блюд в меню — статистика появится завтра</small>
       </div>

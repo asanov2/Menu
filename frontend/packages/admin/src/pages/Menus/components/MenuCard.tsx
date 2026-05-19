@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { ConfirmModal, useToast } from '@qrmenu/ui';
+import { ConfirmModal, useToast, Icon } from '@qrmenu/ui';
 import type { Menu } from '@qrmenu/ui';
 import { deleteMenu, updateMenu } from '../../../api/menus';
 import styles from './MenuCard.module.css';
@@ -49,7 +49,7 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
     try {
       await updateMenu(menu.id, { name: nameValue.trim() });
       queryClient.invalidateQueries({ queryKey: ['menus'] });
-      showToast('Название обновлено ✓', 'success');
+      showToast('Название обновлено', 'success');
     } catch {
       showToast('Ошибка: не удалось обновить', 'error');
     } finally {
@@ -74,13 +74,13 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
               className={styles.nameInput}
             />
             <button onClick={handleRename} className={styles.saveBtn}>
-              ✓ Сохранить
+              <Icon name="check" size={14} /> Сохранить
             </button>
             <button
               onClick={() => { setEditName(false); setNameValue(menu.name); }}
               className={styles.cancelEditBtn}
             >
-              ✕
+              <Icon name="x" size={14} />
             </button>
           </div>
         ) : (
@@ -115,13 +115,13 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
                     onClick={() => { setEditName(true); setMenuOpen(false); }}
                     className={styles.dropdownItem}
                   >
-                    ✏️ Переименовать
+                    <Icon name="pencil" size={14} /> Переименовать
                   </button>
                   <button
                     onClick={() => { setConfirmDel(true); setMenuOpen(false); }}
                     className={`${styles.dropdownItem} ${styles.dropdownItemDelete}`}
                   >
-                    🗑 Удалить
+                    <Icon name="trash" size={14} /> Удалить
                   </button>
                 </div>
               )}

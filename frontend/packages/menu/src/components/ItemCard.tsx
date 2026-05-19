@@ -58,7 +58,7 @@ function ItemImage({
       className={styles.imgPlaceholder}
       style={{ ...sizeStyle, fontSize: Math.min((height ?? 56) * 0.5, 28) }}
     >
-      🍽️
+      <i className="ti ti-tools-kitchen-2" style={{ fontSize: 24 }} />
     </div>
   );
 }
@@ -120,7 +120,7 @@ function CardCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
             style={{ objectPosition: getImageObjectPosition(item.image_url) }}
           />
         ) : (
-          <div className={styles.cardNoImg}>🍽️</div>
+          <div className={styles.cardNoImg}><i className="ti ti-tools-kitchen-2" style={{ fontSize: 24 }} /></div>
         )}
         {!item.is_available && (
           <div className={styles.cardUnavailableOverlay}>
@@ -160,7 +160,7 @@ function GalleryCard({ item, onClick }: { item: MenuItem; onClick: () => void })
             style={{ objectPosition: getImageObjectPosition(item.image_url) }}
           />
         ) : (
-          <div className={styles.galleryNoImg}>🍽️</div>
+          <div className={styles.galleryNoImg}><i className="ti ti-tools-kitchen-2" style={{ fontSize: 24 }} /></div>
         )}
         {(item.tags ?? []).length > 0 && (
           <div className={styles.galleryTagsOverlay}>

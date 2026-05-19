@@ -57,7 +57,7 @@ export default function MenuHeader({
             className={styles.searchBtn}
             aria-label="Поиск"
           >
-            🔍
+            <i className="ti ti-search" style={{ fontSize: 18 }} />
           </button>
 
           <div className={styles.langSwitcher}>

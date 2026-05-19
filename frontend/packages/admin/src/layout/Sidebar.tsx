@@ -1,13 +1,13 @@
 import { NavLink } from 'react-router-dom';
-import { StatusBadge } from '@qrmenu/ui';
+import { StatusBadge, Icon } from '@qrmenu/ui';
 import { useAuth } from '../hooks/useAuth';
 import styles from './Sidebar.module.css';
 
 const NAV_ITEMS = [
-  { icon: '📊', label: 'Дашборд', to: '/dashboard' },
-  { icon: '🍽️', label: 'Меню', to: '/menus' },
-  { icon: '💳', label: 'Подписка', to: '/billing' },
-  { icon: '⚙️', label: 'Профиль', to: '/profile' },
+  { icon: 'chart-bar',      label: 'Дашборд',  to: '/dashboard' },
+  { icon: 'tools-kitchen-2',label: 'Меню',      to: '/menus' },
+  { icon: 'credit-card',    label: 'Подписка',  to: '/billing' },
+  { icon: 'settings',       label: 'Профиль',   to: '/profile' },
 ];
 
 export default function Sidebar() {
@@ -29,7 +29,7 @@ export default function Sidebar() {
             to={item.to}
             className={({ isActive }) => `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}
           >
-            <span className={styles.navIcon}>{item.icon}</span>
+            <span className={styles.navIcon}><Icon name={item.icon} size={18} /></span>
             <span>{item.label}</span>
           </NavLink>
         ))}
@@ -47,7 +47,7 @@ export default function Sidebar() {
         )}
 
         <button onClick={logout} className={styles.logoutBtn}>
-          <span>🚪</span>
+          <Icon name="logout" size={18} />
           <span>Выйти</span>
         </button>
       </div>

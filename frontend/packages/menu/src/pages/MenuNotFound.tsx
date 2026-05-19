@@ -7,7 +7,7 @@ export default function MenuNotFound() {
 
   return (
     <div className={common.errorPage}>
-      <span className={styles.emoji}>🍽️</span>
+      <i className="ti ti-tools-kitchen-2" style={{ fontSize: 64 }} />
       <div className={styles.title}>{t('errors.menuNotFoundTitle')}</div>
       <div className={styles.desc}>{t('errors.menuNotFoundDesc')}</div>
     </div>

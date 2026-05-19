@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useToast, INPUT_STYLE, FormField } from '@qrmenu/ui';
+import { useToast, INPUT_STYLE, FormField, Icon } from '@qrmenu/ui';
 import { register as registerRestaurant } from '../../api/auth';
 import styles from './RegisterPage.module.css';
 
@@ -105,7 +105,7 @@ export default function RegisterPage() {
     return (
       <div className={styles.page}>
         <div className={styles.card}>
-          <div className={styles.successIcon}>✅</div>
+          <div className={styles.successIcon}><Icon name="circle-check" size={48} style={{ color: 'var(--tag-green-text)' }} /></div>
           <div className={styles.successTitle}>Заявка отправлена!</div>
           <p className={styles.successText}>
             Мы рассмотрим заявку для «{submittedName}» в течение 24 часов.

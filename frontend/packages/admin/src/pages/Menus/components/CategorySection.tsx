@@ -13,7 +13,7 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
-import { useToast, ConfirmModal, EmptyState, getApiErrorMessage } from '@qrmenu/ui';
+import { useToast, ConfirmModal, EmptyState, getApiErrorMessage, Icon } from '@qrmenu/ui';
 import type { Category, MenuItem } from '@qrmenu/ui';
 import { deleteCategory } from '../../../api/categories';
 import { createItem, getItems, updateItem, reorderItems } from '../../../api/items';
@@ -74,10 +74,10 @@ export default function CategorySection({ category, allCategories, menuId, dragH
     try {
       if (editingItem) {
         await updateItem(editingItem.id, data);
-        showToast('Блюдо обновлено ✓', 'success');
+        showToast('Блюдо обновлено', 'success');
       } else {
         await createItem({ ...data, name: data.name!, price: data.price! });
-        showToast('Блюдо добавлено ✓', 'success');
+        showToast('Блюдо добавлено', 'success');
       }
       queryClient.invalidateQueries({ queryKey: ['items', category.id] });
       setItemFormOpen(false);
@@ -100,7 +100,7 @@ export default function CategorySection({ category, allCategories, menuId, dragH
     try {
       await updateCategory(category.id, { name });
       queryClient.invalidateQueries({ queryKey: ['categories', menuId] });
-      showToast('Категория обновлена ✓', 'success');
+      showToast('Категория обновлена', 'success');
       setEditCatOpen(false);
     } catch {
       showToast('Ошибка: не удалось обновить', 'error');
@@ -133,14 +133,14 @@ export default function CategorySection({ category, allCategories, menuId, dragH
           <span className={styles.itemCount}>
             {items.length} блюд
           </span>
-          <button onClick={() => setEditCatOpen(true)} className={styles.editBtn} title="Редактировать">✏️</button>
-          <button onClick={() => setConfirmDel(true)} className={styles.deleteBtn} title="Удалить">🗑</button>
+          <button onClick={() => setEditCatOpen(true)} className={styles.editBtn} title="Редактировать"><Icon name="pencil" size={15} /></button>
+          <button onClick={() => setConfirmDel(true)} className={styles.deleteBtn} title="Удалить"><Icon name="trash" size={15} /></button>
         </div>
 
         {/* Items */}
         {items.length === 0 ? (
           <div className={styles.emptyWrapper}>
-            <EmptyState icon="🍽️" title="Нет блюд" description="Добавьте первое блюдо в эту категорию" />
+            <EmptyState icon={<Icon name="tools-kitchen-2" size={40} />} title="Нет блюд" description="Добавьте первое блюдо в эту категорию" />
           </div>
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

@@ -2,6 +2,7 @@ import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import type { PlanLimitDetail } from '../utils/planLimitError'
 import { PLAN_NAMES, PLAN_PRICES } from '../utils/planLimitError'
+import { Icon } from '@qrmenu/ui'
 import styles from './PlanLimitModal.module.css'
 
 interface Props {
@@ -20,7 +21,7 @@ export default function PlanLimitModal({ detail, onClose }: Props) {
   return createPortal(
     <div className={styles.backdrop} onClick={onClose}>
       <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.lockIcon}>🔒</div>
+        <div className={styles.lockIcon}><Icon name="lock" size={48} /></div>
         <h2 className={styles.title}>Лимит тарифа</h2>
         <p className={styles.message}>{detail.message}</p>
 

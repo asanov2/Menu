@@ -41,7 +41,7 @@ export default function WaiterButton({ slug, table }: WaiterButtonProps) {
           animate={{ scale: 1, rotate: 0 }}
           className={styles.checkmark}
         >
-          ✓
+          <i className="ti ti-check" style={{ fontSize: 18 }} />
         </motion.span>
       ) : (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>

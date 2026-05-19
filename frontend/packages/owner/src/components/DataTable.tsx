@@ -53,7 +53,7 @@ export default function DataTable({
           ) : rows.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className={styles.tdEmpty}>
-                <EmptyState icon="📋" title={emptyMessage ?? 'Нет данных'} />
+                <EmptyState icon={<i className="ti ti-clipboard-x" style={{ fontSize: 40 }} />} title={emptyMessage ?? 'Нет данных'} />
               </td>
             </tr>
           ) : (

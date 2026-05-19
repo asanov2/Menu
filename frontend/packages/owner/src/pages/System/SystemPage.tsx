@@ -34,7 +34,7 @@ export default function SystemPage() {
 
       {hasOffline && (
         <div className={styles.errorAlert}>
-          ⚠️ Обнаружены проблемы с сервисами
+          <i className="ti ti-alert-triangle" style={{ fontSize: 16, lineHeight: 1 }} /> Обнаружены проблемы с сервисами
         </div>
       )}
 
