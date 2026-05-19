@@ -105,3 +105,19 @@
   flex-direction: column;
   gap: 20px;
 }
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+  }
+
+  .pageHeader {
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .pageTitle {
+    font-size: 20px;
+  }
+}

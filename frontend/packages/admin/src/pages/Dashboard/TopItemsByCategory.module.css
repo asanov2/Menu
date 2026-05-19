@@ -235,3 +235,16 @@
   font-size: 11px;
   color: var(--ink-tertiary);
 }
+
+@media (max-width: 768px) {
+  .scroll {
+    flex-direction: column;
+    overflow-x: visible;
+    gap: 10px;
+  }
+
+  .catCard {
+    flex: none;
+    width: 100%;
+  }
+}

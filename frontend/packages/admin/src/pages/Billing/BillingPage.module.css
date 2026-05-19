@@ -338,3 +338,92 @@
   font-size: 12px;
   font-family: var(--font-ui);
 }
+
+@media (max-width: 768px) {
+  /* ── Статус-карточка ── */
+  .statusHeader {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .statusPeriod {
+    text-align: left;
+  }
+
+  /* ── Тарифные карточки — одна колонка ── */
+  .plansGrid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── White Label — вертикально ── */
+  .whiteLabel {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* ── Таблица платежей → карточки ── */
+  .paymentTableWrap table {
+    display: block;
+    width: 100%;
+  }
+
+  .paymentTableWrap thead {
+    display: none;
+  }
+
+  .paymentTableWrap tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .paymentTableWrap tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+    border: 0.5px solid var(--cream-border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    background: var(--cream-bg);
+  }
+
+  .paymentTableWrap tr:hover {
+    background: var(--cream-bg);
+  }
+
+  .paymentTableWrap td {
+    display: flex;
+    flex-direction: column;
+    padding: 2px 0;
+    border: none;
+    font-size: 12px;
+  }
+
+  /* Дата — полная строка */
+  .paymentTableWrap td:first-child {
+    grid-column: 1 / -1;
+    color: var(--ink-tertiary);
+    font-size: 11px;
+    border-bottom: 0.5px solid var(--cream-border);
+    padding-bottom: 6px;
+    margin-bottom: 2px;
+  }
+
+  .tdAmount {
+    font-size: 15px !important;
+    padding: 4px 0 !important;
+  }
+
+  .tdStatus {
+    padding: 4px 0 !important;
+    align-items: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .plansGrid {
+    grid-template-columns: 1fr;
+  }
+}

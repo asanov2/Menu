@@ -60,3 +60,24 @@
 .sortableWrapper {
   /* static base — transform/transition/opacity stay inline (dnd-kit) */
 }
+
+@media (max-width: 768px) {
+  .actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .btnPreview {
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+
+  .btnPrimary {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  .breadcrumb {
+    font-size: 12px;
+  }
+}

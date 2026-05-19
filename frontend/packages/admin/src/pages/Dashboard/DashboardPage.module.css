@@ -136,3 +136,61 @@
   font-style: italic;
   font-size: 12px;
 }
+
+/* ── Обёртки для графиков — высота управляется через CSS ── */
+
+.chartWrapLg {
+  height: 200px;
+}
+
+.chartWrapSm {
+  height: 160px;
+}
+
+/* ── Мобильные стили ── */
+
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .statValue {
+    font-size: 20px;
+  }
+
+  .dayBtns {
+    width: 100%;
+  }
+
+  .dayBtn {
+    flex: 1;
+    justify-content: center;
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+
+  .chartWrapLg {
+    height: 120px;
+  }
+
+  .chartWrapSm {
+    height: 100px;
+  }
+
+  .peakBadge {
+    font-size: 10px;
+    white-space: normal;
+  }
+
+  .cardChart {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .statValue {
+    font-size: 18px;
+  }
+}

@@ -165,3 +165,27 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btnCreate {
+    width: 100%;
+    text-align: center;
+    padding: 10px 16px;
+    min-height: 44px;
+  }
+
+  .usageBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .usageTrack {
+    width: 100%;
+  }
+}

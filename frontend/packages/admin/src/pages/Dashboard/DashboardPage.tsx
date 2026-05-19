@@ -32,6 +32,8 @@ const TOOLTIP_STYLE = {
 
 const TICK = { fontSize: 10, fontFamily: 'var(--font-ui)', fill: 'var(--ink-tertiary)' };
 
+const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
 function formatChartDate(dateStr: string): string {
   const [, m, d] = dateStr.split('-');
   return `${parseInt(d, 10)} ${MONTHS_SHORT[parseInt(m, 10) - 1]}`;
@@ -186,30 +188,32 @@ export default function DashboardPage() {
             <small>Данные обновляются ежедневно в 01:00</small>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={dailyChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="var(--cream-border)" />
-              <XAxis
-                dataKey="date"
-                tickFormatter={formatChartDate}
-                tick={TICK}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis tick={TICK} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={TOOLTIP_STYLE}
-                cursor={{ fill: 'var(--cream-muted)' }}
-                formatter={(value: number, name: string) => [
-                  value,
-                  name === 'menu' ? 'Просмотры меню' : 'Просмотры блюд',
-                ]}
-                labelFormatter={(label: string) => formatChartDate(label)}
-              />
-              <Bar dataKey="menu" name="menu" fill="var(--accent-gold)" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="items" name="items" fill="var(--ink-tertiary)" radius={[3, 3, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className={styles.chartWrapLg}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dailyChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="var(--cream-border)" />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={formatChartDate}
+                  tick={TICK}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis tick={TICK} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={TOOLTIP_STYLE}
+                  cursor={{ fill: 'var(--cream-muted)' }}
+                  formatter={(value: number, name: string) => [
+                    value,
+                    name === 'menu' ? 'Просмотры меню' : 'Просмотры блюд',
+                  ]}
+                  labelFormatter={(label: string) => formatChartDate(label)}
+                />
+                <Bar dataKey="menu" name="menu" fill="var(--accent-gold)" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="items" name="items" fill="var(--ink-tertiary)" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </div>
 
@@ -231,45 +235,47 @@ export default function DashboardPage() {
             <p>Нет данных о пиковых часах</p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={160}>
-            <BarChart data={peakChartData} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="var(--cream-border)" />
-              <XAxis
-                dataKey="hour"
-                tickFormatter={formatHour}
-                interval={2}
-                tick={TICK}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis tick={TICK} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={TOOLTIP_STYLE}
-                cursor={{ fill: 'var(--cream-muted)' }}
-                formatter={(value: number) => [value, 'просмотров']}
-                labelFormatter={(hour: number) => `${String(hour).padStart(2, '0')}:00 – ${String(hour + 1).padStart(2, '0')}:00`}
-              />
-              {avgViews > 0 && (
-                <ReferenceLine
-                  y={avgViews}
-                  stroke="var(--ink-tertiary)"
-                  strokeDasharray="3 3"
-                  label={{
-                    value: 'среднее',
-                    position: 'insideTopRight',
-                    fontSize: 9,
-                    fontFamily: 'var(--font-ui)',
-                    fill: 'var(--ink-tertiary)',
-                  }}
+          <div className={styles.chartWrapSm}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={peakChartData} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="var(--cream-border)" />
+                <XAxis
+                  dataKey="hour"
+                  tickFormatter={formatHour}
+                  interval={isMobile ? 5 : 2}
+                  tick={TICK}
+                  axisLine={false}
+                  tickLine={false}
                 />
-              )}
-              <Bar dataKey="views" radius={[3, 3, 0, 0]}>
-                {peakChartData.map((entry, idx) => (
-                  <Cell key={idx} fill={entry.isPeak ? 'var(--accent-gold)' : 'var(--cream-border)'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                <YAxis tick={TICK} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={TOOLTIP_STYLE}
+                  cursor={{ fill: 'var(--cream-muted)' }}
+                  formatter={(value: number) => [value, 'просмотров']}
+                  labelFormatter={(hour: number) => `${String(hour).padStart(2, '0')}:00 – ${String(hour + 1).padStart(2, '0')}:00`}
+                />
+                {avgViews > 0 && (
+                  <ReferenceLine
+                    y={avgViews}
+                    stroke="var(--ink-tertiary)"
+                    strokeDasharray="3 3"
+                    label={{
+                      value: 'среднее',
+                      position: 'insideTopRight',
+                      fontSize: 9,
+                      fontFamily: 'var(--font-ui)',
+                      fill: 'var(--ink-tertiary)',
+                    }}
+                  />
+                )}
+                <Bar dataKey="views" radius={[3, 3, 0, 0]}>
+                  {peakChartData.map((entry, idx) => (
+                    <Cell key={idx} fill={entry.isPeak ? 'var(--accent-gold)' : 'var(--cream-border)'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </div>
 
