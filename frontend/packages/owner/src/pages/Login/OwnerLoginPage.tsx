@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -19,11 +19,12 @@ export default function OwnerLoginPage() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const setToken = useOwnerStore(s => s.setToken)
-
+  const token = useOwnerStore(s => s.token)
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) })
-
   const emailFocus    = useInputFocus(!!errors.email)
   const passwordFocus = useInputFocus(!!errors.password)
+
+  if (token) return <Navigate to="/dashboard" replace />
 
   const onSubmit = async (data: FormData) => {
     setLoading(true)

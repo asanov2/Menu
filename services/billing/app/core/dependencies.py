@@ -29,8 +29,14 @@ async def get_auth_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def get_current_restaurant(
-    authorization: str = Header(...),
+    authorization: str | None = Header(default=None),
 ) -> dict:
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authorization header")
     token = authorization.removeprefix("Bearer ").strip()

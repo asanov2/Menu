@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qrmenu.kz — Цифровые QR-меню для ресторанов Казахстана</title>
+  <meta name="description" content="qrmenu.kz — цифровые QR-меню для ресторанов Казахстана. Создайте красивое меню за 10 минут. Бесплатный период 14 дней." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    /* ── Reset ─────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream-bg:       #F5F0E8;
+      --cream-surface:  #EDE8DE;
+      --cream-border:   #D8D0C0;
+      --ink-primary:    #1A1208;
+      --ink-secondary:  #6B5B3E;
+      --ink-tertiary:   #9B8B6E;
+      --accent-gold:    #D4A853;
+      --accent-gold-dk: #B8882E;
+      --accent-gold-bg: rgba(212,168,83,0.12);
+      --shadow:         0 4px 24px rgba(26,18,8,0.08);
+      --shadow-md:      0 8px 32px rgba(26,18,8,0.12);
+      --radius:         16px;
+      --radius-sm:      10px;
+      --container:      1100px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Golos Text', system-ui, sans-serif;
+      background: var(--cream-bg);
+      color: var(--ink-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    img { display: block; max-width: 100%; }
+
+    /* ── Layout ────────────────────────────────────────────────────────── */
+    .container {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section { padding: 88px 0; }
+
+    .section-head {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 44px;
+      font-weight: 700;
+      color: var(--ink-primary);
+      line-height: 1.15;
+    }
+
+    .section-subtitle {
+      font-size: 17px;
+      color: var(--ink-secondary);
+      margin-top: 12px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── Scroll animations ─────────────────────────────────────────────── */
+    .anim {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .anim.in { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: 0.10s; }
+    .d2 { transition-delay: 0.20s; }
+    .d3 { transition-delay: 0.30s; }
+    .d4 { transition-delay: 0.40s; }
+    .d5 { transition-delay: 0.50s; }
+
+    /* ── Buttons ───────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Golos Text', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 11px 22px;
+      border-radius: 50px;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, border-color 0.2s, color 0.2s,
+                  transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--cream-border);
+      color: var(--ink-primary);
+    }
+    .btn-outline:hover {
+      border-color: var(--ink-secondary);
+      background: var(--cream-surface);
+    }
+
+    .btn-gold {
+      background: var(--accent-gold);
+      border-color: var(--accent-gold);
+      color: #fff;
+    }
+    .btn-gold:hover {
+      background: var(--accent-gold-dk);
+      border-color: var(--accent-gold-dk);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212,168,83,0.38);
+    }
+
+    .btn-lg { font-size: 16px; padding: 14px 30px; }
+
+    /* ── NAVBAR ────────────────────────────────────────────────────────── */
+    .navbar {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 900;
+      transition: background 0.3s, backdrop-filter 0.3s, box-shadow 0.3s;
+    }
+
+    .navbar.scrolled {
+      background: rgba(245,240,232,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 2px 20px rgba(26,18,8,0.07);
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 16px 24px;
+      max-width: var(--container);
+      margin: 0 auto;
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--ink-primary);
+      flex-shrink: 0;
+    }
+    .nav-logo span { color: var(--accent-gold); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-link {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink-secondary);
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--ink-primary); }
+
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+    .nav-ham {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--ink-primary);
+      font-size: 26px;
+      line-height: 1;
+      padding: 9px;
+      min-width: 44px;
+      min-height: 44px;
+    }
+
+    /* Mobile drawer */
+    .nav-drawer {
+      display: none;
+      background: var(--cream-bg);
+      border-top: 1px solid var(--cream-border);
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.35s ease;
+    }
+    .nav-drawer.open { max-height: 500px; }
+
+    .nav-drawer-inner {
+      padding: 8px 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-drawer-link {
+      display: block;
+      padding: 11px 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--ink-secondary);
+      border-bottom: 1px solid var(--cream-border);
+      transition: color 0.2s;
+    }
+    .nav-drawer-link:last-child { border-bottom: none; }
+    .nav-drawer-link:hover { color: var(--ink-primary); }
+
+    .nav-drawer-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 14px;
+    }
+    .nav-drawer-btns .btn { justify-content: center; border-radius: 12px; }
+
+    @media (max-width: 768px) {
+      .nav-links, .nav-actions { display: none; }
+      .nav-ham { display: flex; align-items: center; justify-content: center; }
+      .nav-drawer { display: block; }
+    }
+
+    /* ── HERO ──────────────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 88px;
+      position: relative;
+      background-color: var(--cream-bg);
+      background-image:
+        radial-gradient(circle at 1px 1px, var(--cream-border) 1.2px, transparent 0);
+      background-size: 28px 28px;
+    }
+
+    .hero-content {
+      max-width: 680px;
+      width: 100%;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-gold-bg);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold-dk);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 50px;
+      margin-bottom: 28px;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 60px;
+      font-weight: 700;
+      color: var(--ink-primary);
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--ink-secondary);
+      line-height: 1.75;
+      margin-bottom: 40px;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 56px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1.5px solid var(--cream-border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.55);
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+    }
+
+    .hero-stat {
+      padding: 22px 20px;
+      border-right: 1.5px solid var(--cream-border);
+    }
+    .hero-stat:last-child { border-right: none; }
+
+    .hero-stat-num {
+      display: block;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--accent-gold-dk);
+      line-height: 1;
+    }
+    .hero-stat-lbl {
+      font-size: 12px;
+      color: var(--ink-tertiary);
+      margin-top: 4px;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--ink-tertiary);
+      font-size: 28px;
+      animation: bob 2.2s ease-in-out infinite;
+      cursor: pointer;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(9px); }
+    }
+
+    @media (max-width: 768px) {
+      .hero-title { font-size: 38px; }
+      .hero-sub   { font-size: 16px; }
+    }
+    @media (max-width: 480px) {
+      .hero-title    { font-size: 28px; }
+      .hero-sub      { font-size: 15px; }
+      .hero-badge    { font-size: 12px; }
+      .hero-stat     { padding: 16px 10px; }
+      .hero-stat-num { font-size: 20px; }
+      .hero-btns     { flex-direction: column; align-items: stretch; }
+      .hero-btns .btn { justify-content: center; white-space: normal; text-align: center; }
+    }
+    @media (max-width: 375px) {
+      .hero-title    { font-size: 24px; }
+      .hero-stat-num { font-size: 17px; }
+      .hero-stat-lbl { font-size: 11px; }
+      .hero-stat     { padding: 14px 6px; }
+    }
+
+    /* ── HOW IT WORKS ──────────────────────────────────────────────────── */
+    .how-bg { background: var(--cream-surface); }
+
+    .steps-wrap { position: relative; }
+
+    /* Dashed connecting line between step icons (desktop only) */
+    .steps-wrap::before {
+      content: '';
+      position: absolute;
+      top: 98px;
+      left: calc(100% / 6);
+      right: calc(100% / 6);
+      border-top: 2px dashed var(--cream-border);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-card {
+      padding: 36px 28px 40px;
+      text-align: center;
+      border-radius: var(--radius);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .step-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+    }
+
+    .step-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-tertiary);
+      margin-bottom: 14px;
+    }
+
+    .step-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--accent-gold-bg);
+      border: 2px solid var(--accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      color: var(--accent-gold-dk);
+      margin: 0 auto 20px;
+      position: relative;
+      z-index: 1;
+      background-color: var(--cream-surface);
+    }
+
+    .step-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ink-primary);
+      margin-bottom: 10px;
+    }
+
+    .step-text {
+      font-size: 15px;
+      color: var(--ink-secondary);
+      line-height: 1.65;
+    }
+
+    @media (max-width: 768px) {
+      .steps-wrap::before { display: none; }
+      .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .step-card {
+        padding: 24px 20px;
+        background: #fff;
+        border-radius: var(--radius);
+        border: 1px solid var(--cream-border);
+      }
+      .step-icon { background-color: var(--accent-gold-bg); }
+    }
+
+    /* ── FEATURES ──────────────────────────────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feat-card {
+      background: #fff;
+      border: 1px solid var(--cream-border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .feat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .feat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: var(--accent-gold-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: var(--accent-gold-dk);
+      margin-bottom: 18px;
+    }
+
+    .feat-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink-primary);
+      margin-bottom: 8px;
+    }
+
+    .feat-text {
+      font-size: 14px;
+      color: var(--ink-secondary);
+      line-height: 1.65;
+    }
+
+    @media (max-width: 768px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    }
+    @media (max-width: 480px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── PRICING ───────────────────────────────────────────────────────── */
+    .pricing-bg { background: var(--cream-surface); }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .plan {
+      background: #fff;
+      border: 1.5px solid var(--cream-border);
+      border-radius: var(--radius);
+      padding: 32px 26px;
+    }
+
+    .plan--popular {
+      border-color: var(--accent-gold);
+      border-width: 2px;
+      position: relative;
+    }
+
+    .plan-badge {
+      display: inline-block;
+      background: var(--accent-gold);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 4px 12px;
+      border-radius: 50px;
+      margin-bottom: 16px;
+    }
+
+    .plan-name {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--ink-primary);
+      margin-bottom: 6px;
+    }
+
+    .plan-price {
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--ink-primary);
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+    .plan-price em {
+      font-size: 15px;
+      font-weight: 400;
+      font-style: normal;
+      color: var(--ink-tertiary);
+    }
+
+    .plan-divider {
+      height: 1px;
+      background: var(--cream-border);
+      margin: 20px 0;
+    }
+
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 28px;
+      min-height: 160px;
+    }
+
+    .plan-feat {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--ink-secondary);
+      line-height: 1.5;
+    }
+
+    .plan-feat .ti-check {
+      color: var(--accent-gold-dk);
+      font-size: 15px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .plan-cta {
+      width: 100%;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+    }
+
+    .wl-row {
+      margin-top: 36px;
+      padding: 22px 28px;
+      background: var(--accent-gold-bg);
+      border: 1px solid var(--accent-gold);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .wl-text {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink-primary);
+    }
+    .wl-text .ti { color: var(--accent-gold-dk); font-size: 18px; }
+
+    .wl-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-gold-dk);
+      transition: gap 0.2s;
+    }
+    .wl-link:hover { gap: 10px; }
+
+    @media (max-width: 768px) {
+      .pricing-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      .plan-features { min-height: unset; }
+    }
+
+    /* ── FOR WHOM ──────────────────────────────────────────────────────── */
+    .whom-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .whom-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      background: var(--cream-surface);
+      border: 1px solid var(--cream-border);
+      border-radius: var(--radius);
+      padding: 26px 24px;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .whom-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .whom-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: var(--accent-gold-bg);
+      border: 1px solid var(--accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--accent-gold-dk);
+      flex-shrink: 0;
+    }
+
+    .whom-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink-primary);
+      margin-bottom: 6px;
+    }
+
+    .whom-desc {
+      font-size: 14px;
+      color: var(--ink-secondary);
+      line-height: 1.55;
+    }
+
+    @media (max-width: 480px) {
+      .whom-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── CTA BANNER ────────────────────────────────────────────────────── */
+    .cta-section {
+      background: var(--ink-primary);
+      padding: 100px 24px;
+      text-align: center;
+    }
+
+    .cta-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 50px;
+      font-weight: 700;
+      color: var(--cream-bg);
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .cta-sub {
+      font-size: 18px;
+      color: rgba(245,240,232,0.7);
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 480px) {
+      .cta-title  { font-size: 30px; }
+      .cta-sub    { font-size: 15px; }
+      .cta-section { padding: 64px 24px; }
+    }
+
+    /* ── FOOTER ────────────────────────────────────────────────────────── */
+    .footer {
+      background: #120D06;
+      padding-top: 64px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr 1.2fr 1fr;
+      gap: 48px;
+      padding-bottom: 48px;
+    }
+
+    .footer-logo {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--cream-bg);
+      margin-bottom: 12px;
+    }
+    .footer-logo span { color: var(--accent-gold); }
+
+    .footer-desc {
+      font-size: 14px;
+      color: rgba(245,240,232,0.55);
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: rgba(245,240,232,0.35);
+    }
+
+    .footer-head {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.85);
+      margin-bottom: 18px;
+    }
+
+    .footer-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .footer-lnk {
+      font-size: 14px;
+      color: rgba(245,240,232,0.55);
+      transition: color 0.2s;
+    }
+    .footer-lnk:hover { color: var(--accent-gold); }
+
+    .footer-contact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: rgba(245,240,232,0.55);
+      margin-bottom: 10px;
+      transition: color 0.2s;
+      line-height: 1.4;
+      min-height: 44px;
+    }
+    .footer-contact:hover { color: rgba(245,240,232,0.9); }
+    .footer-contact .ti  { color: var(--accent-gold); font-size: 16px; flex-shrink: 0; }
+
+    .footer-dev-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: rgba(245,240,232,0.85);
+      margin-bottom: 8px;
+    }
+
+    .footer-dev-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--accent-gold);
+      transition: color 0.2s;
+    }
+    .footer-dev-link:hover { color: var(--accent-gold-dk); }
+
+    .footer-hr {
+      height: 1px;
+      background: rgba(245,240,232,0.07);
+      margin: 0 24px;
+    }
+
+    .footer-bottom {
+      padding: 18px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: rgba(245,240,232,0.3);
+    }
+    .footer-bottom .ti-heart { color: var(--accent-gold); }
+
+    @media (max-width: 900px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    }
+    @media (max-width: 480px) {
+      .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+    }
+
+    /* ── Misc ──────────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .section-title { font-size: 36px; }
+    }
+    @media (max-width: 480px) {
+      .section         { padding: 56px 0; }
+      .section-title   { font-size: 28px; }
+      .section-subtitle { font-size: 15px; }
+      .section-head    { margin-bottom: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════ NAVBAR ══════════ -->
+  <header class="navbar" id="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="nav-logo">qrmenu<span>.kz</span></a>
+
+      <nav class="nav-links" aria-label="Навигация">
+        <a href="#how"     class="nav-link">Как это работает</a>
+        <a href="#pricing" class="nav-link">Тарифы</a>
+        <a href="/menu/test-rest" class="nav-link">Пример меню</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="http://localhost:8080"          class="btn btn-outline">Войти</a>
+        <a href="http://localhost:8080/register" class="btn btn-gold">Попробовать бесплатно</a>
+      </div>
+
+      <button class="nav-ham" id="nav-ham" aria-label="Открыть меню" aria-expanded="false">
+        <i class="ti ti-menu-2" id="ham-icon"></i>
+      </button>
+    </div>
+
+    <div class="nav-drawer" id="nav-drawer" aria-hidden="true">
+      <div class="nav-drawer-inner">
+        <a href="#how"            class="nav-drawer-link" data-close>Как это работает</a>
+        <a href="#pricing"        class="nav-drawer-link" data-close>Тарифы</a>
+        <a href="/menu/test-rest" class="nav-drawer-link">Пример меню</a>
+      </div>
+      <div class="nav-drawer-btns" style="padding: 0 24px 20px;">
+        <a href="http://localhost:8080"          class="btn btn-outline">Войти</a>
+        <a href="http://localhost:8080/register" class="btn btn-gold">Попробовать бесплатно</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════ HERO ════════════ -->
+  <section class="hero" aria-label="Главный экран">
+    <div class="hero-content">
+
+      <div class="hero-badge anim">
+        <i class="ti ti-star"></i>
+        QR-меню для ресторанов Казахстана
+      </div>
+
+      <h1 class="hero-title anim d1">
+        Меню нового поколения<br>для вашего ресторана
+      </h1>
+
+      <p class="hero-sub anim d2">
+        Создайте красивое QR-меню для вашего ресторана за 10 минут.
+        Гости сканируют — и сразу видят блюда, цены и фото.
+        Без приложений, без оборудования.
+      </p>
+
+      <div class="hero-btns anim d3">
+        <a href="http://localhost:8080/register" class="btn btn-gold btn-lg">
+          Попробовать 14 дней бесплатно
+        </a>
+        <a href="/menu/test-rest" class="btn btn-outline btn-lg">
+          Смотреть пример меню
+        </a>
+      </div>
+
+      <div class="hero-stats anim d4">
+        <div class="hero-stat">
+          <span class="hero-stat-num">14 дней</span>
+          <div class="hero-stat-lbl">бесплатный период</div>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">10 минут</span>
+          <div class="hero-stat-lbl">на создание меню</div>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">0 ₸</span>
+          <div class="hero-stat-lbl">за оборудование</div>
+        </div>
+      </div>
+    </div>
+
+    <a href="#how" class="hero-scroll" aria-label="Прокрутить вниз">
+      <i class="ti ti-chevron-down"></i>
+    </a>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ HOW IT WORKS ════════ -->
+  <section class="section how-bg" id="how">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title anim">Как это работает</h2>
+        <p class="section-subtitle anim d1">Три шага до цифрового меню</p>
+      </div>
+
+      <div class="steps-wrap">
+        <div class="steps-grid">
+
+          <div class="step-card anim">
+            <div class="step-num">01</div>
+            <div class="step-icon">
+              <i class="ti ti-user-plus"></i>
+            </div>
+            <h3 class="step-title">Регистрируйтесь</h3>
+            <p class="step-text">Заполните заявку. Мы одобрим её в течение 24 часов.</p>
+          </div>
+
+          <div class="step-card anim d2">
+            <div class="step-num">02</div>
+            <div class="step-icon">
+              <i class="ti ti-tools-kitchen-2"></i>
+            </div>
+            <h3 class="step-title">Создайте меню</h3>
+            <p class="step-text">Добавьте категории, блюда и фотографии. Всё просто.</p>
+          </div>
+
+          <div class="step-card anim d3">
+            <div class="step-num">03</div>
+            <div class="step-icon">
+              <i class="ti ti-qrcode"></i>
+            </div>
+            <h3 class="step-title">Разместите QR-код</h3>
+            <p class="step-text">Распечатайте QR-код и поставьте на столики. Готово!</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ FEATURES ════════ -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title anim">Почему выбирают qrmenu.kz</h2>
+      </div>
+
+      <div class="features-grid">
+        <div class="feat-card anim">
+          <div class="feat-icon"><i class="ti ti-bolt"></i></div>
+          <h3 class="feat-title">Быстро</h3>
+          <p class="feat-text">Меню готово за 10 минут. Изменения — мгновенно.</p>
+        </div>
+
+        <div class="feat-card anim d1">
+          <div class="feat-icon"><i class="ti ti-device-mobile"></i></div>
+          <h3 class="feat-title">Работает на любом телефоне</h3>
+          <p class="feat-text">Гостям не нужно скачивать приложение. Просто камера.</p>
+        </div>
+
+        <div class="feat-card anim d2">
+          <div class="feat-icon"><i class="ti ti-chart-bar"></i></div>
+          <h3 class="feat-title">Аналитика</h3>
+          <p class="feat-text">Видите какие блюда смотрят чаще. Принимайте решения на основе данных.</p>
+        </div>
+
+        <div class="feat-card anim d3">
+          <div class="feat-icon"><i class="ti ti-photo"></i></div>
+          <h3 class="feat-title">Красивые фото</h3>
+          <p class="feat-text">Загружайте фото блюд. Меню выглядит как в дорогом ресторане.</p>
+        </div>
+
+        <div class="feat-card anim d4">
+          <div class="feat-icon"><i class="ti ti-language"></i></div>
+          <h3 class="feat-title">3 языка</h3>
+          <p class="feat-text">Меню на русском, казахском и английском. Для любых гостей.</p>
+        </div>
+
+        <div class="feat-card anim d5">
+          <div class="feat-icon"><i class="ti ti-shield-check"></i></div>
+          <h3 class="feat-title">Надёжно</h3>
+          <p class="feat-text">Работает 24/7. Данные защищены. Поддержка всегда на связи.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ PRICING ═════════ -->
+  <section class="section pricing-bg" id="pricing">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title anim">Прозрачные тарифы</h2>
+        <p class="section-subtitle anim d1">Начните бесплатно. Платите только когда готовы.</p>
+      </div>
+
+      <div class="pricing-grid">
+
+        <!-- СТАРТ -->
+        <div class="plan anim">
+          <div class="plan-name">Старт</div>
+          <div class="plan-price">3 900 ₸<em>/мес</em></div>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li class="plan-feat"><i class="ti ti-check"></i>1 меню, до 50 блюд</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>QR-код для ресторана</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Только русский язык</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Пометки на блюдах</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Аналитика — 7 дней</li>
+          </ul>
+          <a href="http://localhost:8080/register" class="btn btn-outline plan-cta">Начать бесплатно</a>
+        </div>
+
+        <!-- БИЗНЕС -->
+        <div class="plan plan--popular anim d1">
+          <div class="plan-badge">Популярный</div>
+          <div class="plan-name">Бизнес</div>
+          <div class="plan-price">7 900 ₸<em>/мес</em></div>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li class="plan-feat"><i class="ti ti-check"></i>До 200 блюд</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>3 языка (RU / KZ / EN)</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>До 5 меню</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Поиск по меню</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Аналитика — 30 дней</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Стоп-лист блюд</li>
+          </ul>
+          <a href="http://localhost:8080/register" class="btn btn-gold plan-cta">Выбрать Бизнес</a>
+        </div>
+
+        <!-- ПРО -->
+        <div class="plan anim d2">
+          <div class="plan-name">Про</div>
+          <div class="plan-price">14 900 ₸<em>/мес</em></div>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li class="plan-feat"><i class="ti ti-check"></i>Неограниченно блюд</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Неограниченно меню</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Аналитика — 90 дней</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Приоритетная поддержка</li>
+          </ul>
+          <a href="http://localhost:8080/register" class="btn btn-outline plan-cta">Выбрать Про</a>
+        </div>
+
+      </div>
+
+      <!-- White Label row -->
+      <div class="wl-row anim">
+        <div class="wl-text">
+          <i class="ti ti-diamond"></i>
+          White Label — от 150 000 ₸/мес &middot; Платформа под вашим брендом
+        </div>
+        <a href="https://wa.me/77077276435" class="wl-link" target="_blank" rel="noopener noreferrer">
+          Связаться для обсуждения
+          <i class="ti ti-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ FOR WHOM ════════ -->
+  <section class="section" id="for-whom">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title anim">Подходит для любого заведения</h2>
+      </div>
+
+      <div class="whom-grid">
+        <div class="whom-card anim">
+          <div class="whom-icon"><i class="ti ti-tools-kitchen-2"></i></div>
+          <div>
+            <div class="whom-title">Ресторан</div>
+            <div class="whom-desc">Полное меню с фото и описаниями блюд</div>
+          </div>
+        </div>
+
+        <div class="whom-card anim d1">
+          <div class="whom-icon"><i class="ti ti-coffee"></i></div>
+          <div>
+            <div class="whom-title">Кафе</div>
+            <div class="whom-desc">Быстрое меню для кофейни или бистро</div>
+          </div>
+        </div>
+
+        <div class="whom-card anim d2">
+          <div class="whom-icon"><i class="ti ti-meat"></i></div>
+          <div>
+            <div class="whom-title">Фастфуд</div>
+            <div class="whom-desc">Простое и понятное меню без лишних деталей</div>
+          </div>
+        </div>
+
+        <div class="whom-card anim d3">
+          <div class="whom-icon"><i class="ti ti-building"></i></div>
+          <div>
+            <div class="whom-title">Отель</div>
+            <div class="whom-desc">Меню для ресторана и room service</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ CTA BANNER ══════════ -->
+  <section class="cta-section">
+    <div class="container">
+      <h2 class="cta-title anim">Готовы запустить<br>цифровое меню?</h2>
+      <p class="cta-sub anim d1">Первые 14 дней — бесплатно. Без кредитной карты.</p>
+      <a href="http://localhost:8080/register" class="btn btn-gold btn-lg anim d2">
+        Зарегистрировать ресторан
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ FOOTER ══════════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+
+        <!-- Brand -->
+        <div>
+          <div class="footer-logo">qrmenu<span>.kz</span></div>
+          <p class="footer-desc">Цифровые меню для ресторанов Казахстана</p>
+          <p class="footer-copy">&copy; 2026 qrmenu.kz. Все права защищены.</p>
+        </div>
+
+        <!-- Navigation -->
+        <div>
+          <div class="footer-head">Навигация</div>
+          <ul class="footer-list">
+            <li><a href="#how"             class="footer-lnk">Как это работает</a></li>
+            <li><a href="#pricing"         class="footer-lnk">Тарифы</a></li>
+            <li><a href="/menu/test-rest"  class="footer-lnk">Пример меню</a></li>
+            <li><a href="http://localhost:8080" class="footer-lnk">Войти в панель</a></li>
+          </ul>
+        </div>
+
+        <!-- Contacts -->
+        <div>
+          <div class="footer-head">Контакты</div>
+          <a href="tel:+77077276435" class="footer-contact">
+            <i class="ti ti-phone"></i>+7 707 727 64 35
+          </a>
+          <a href="https://wa.me/77077276435" class="footer-contact" target="_blank" rel="noopener noreferrer">
+            <i class="ti ti-brand-whatsapp"></i>WhatsApp
+          </a>
+          <a href="https://t.me/asanov_2_7" class="footer-contact" target="_blank" rel="noopener noreferrer">
+            <i class="ti ti-brand-telegram"></i>@asanov_2_7
+          </a>
+          <a href="mailto:asannurmuhammed2@gmail.com" class="footer-contact">
+            <i class="ti ti-mail"></i>asannurmuhammed2@gmail.com
+          </a>
+        </div>
+
+        <!-- Developer -->
+        <div>
+          <div class="footer-head">Разработчик</div>
+          <p class="footer-desc" style="margin-bottom:6px;">Разработано</p>
+          <div class="footer-dev-name">Нурмухаммед Асанов</div>
+          <a href="https://t.me/asanov_2_7" class="footer-dev-link" target="_blank" rel="noopener noreferrer">
+            <i class="ti ti-brand-telegram"></i>@asanov_2_7
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer-hr"></div>
+    <div class="footer-bottom">
+      Сделано с <i class="ti ti-heart"></i> в Казахстане
+    </div>
+  </footer>
+
+  <script>
+    // ── Navbar scroll ──────────────────────────────────────────────────
+    const navbar = document.getElementById('navbar');
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          navbar.classList.toggle('scrolled', window.scrollY > 50);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // ── Mobile hamburger ───────────────────────────────────────────────
+    const hamBtn  = document.getElementById('nav-ham');
+    const hamIcon = document.getElementById('ham-icon');
+    const drawer  = document.getElementById('nav-drawer');
+    let drawerOpen = false;
+
+    function toggleDrawer(open) {
+      drawerOpen = open;
+      drawer.classList.toggle('open', open);
+      hamIcon.className = open ? 'ti ti-x' : 'ti ti-menu-2';
+      hamBtn.setAttribute('aria-expanded', String(open));
+      drawer.setAttribute('aria-hidden', String(!open));
+    }
+
+    hamBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDrawer(!drawerOpen);
+    });
+
+    // Close on link click
+    drawer.querySelectorAll('[data-close]').forEach(el => {
+      el.addEventListener('click', () => toggleDrawer(false));
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (drawerOpen && !navbar.contains(e.target)) toggleDrawer(false);
+    });
+
+    // ── Intersection Observer animations ───────────────────────────────
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.anim').forEach(el => io.observe(el));
+
+    // ── Smooth scroll for anchors ──────────────────────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const id = link.getAttribute('href');
+        if (id === '#') return;
+        const target = document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        const y = target.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        if (drawerOpen) toggleDrawer(false);
+      });
+    });
+  </script>
+</body>
+</html>

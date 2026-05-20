@@ -85,5 +85,5 @@ async def upload_image(file_content: bytes, content_type: str) -> dict[str, str]
             ContentLength=len(thumbnail_bytes),
         )
 
-    url = f"{settings.minio_public_url}/images/{key}"
+    url = f"/images/{key}"
     return {"url": url, "key": key}
