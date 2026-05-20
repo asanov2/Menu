@@ -159,6 +159,21 @@
   gap: 8px;
 }
 
+@media (max-width: 768px) {
+  .btnOpen,
+  .btnQr {
+    min-height: 44px;
+  }
+
+  .dotBtn {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 .btnOpen {
   flex: 1;
   padding: 8px 12px;

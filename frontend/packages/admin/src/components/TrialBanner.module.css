@@ -59,3 +59,26 @@
 .dismissBtn:hover {
   color: #ffffff;
 }
+
+@media (max-width: 480px) {
+  .banner {
+    flex-wrap: wrap;
+    padding: 8px 16px;
+    gap: 8px;
+  }
+
+  .message {
+    width: 100%;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .billingBtn {
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}

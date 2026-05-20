@@ -116,3 +116,70 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ── Мобильные карточки заявок ── */
+
+@media (max-width: 768px) {
+  /* Скрываем шапку таблицы */
+  .tableWrap thead {
+    display: none;
+  }
+
+  .tableWrap table {
+    display: block;
+  }
+
+  .tableWrap tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Каждая строка → карточка */
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    border: 0.5px solid var(--cream-border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    background: var(--cream-bg);
+  }
+
+  /* Название ресторана — вся ширина */
+  .row td:first-child {
+    grid-column: 1 / -1;
+    border-bottom: 0.5px solid var(--cream-border);
+    padding-bottom: 8px;
+    margin-bottom: 2px;
+  }
+
+  .tableWrap td {
+    display: block;
+    white-space: normal;
+    padding: 2px 0;
+    font-size: 12px;
+  }
+
+  /* Кнопки — полная ширина, нижняя строка */
+  .tdActions {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+    padding: 6px 0 0;
+    border-top: 0.5px solid var(--cream-border);
+    margin-top: 4px;
+  }
+
+  .btnApprove,
+  .btnReject {
+    flex: 1;
+    min-height: 44px;
+    justify-content: center;
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .row:hover td {
+    background: transparent;
+  }
+}

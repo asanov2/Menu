@@ -79,7 +79,7 @@ export default function ApplicationsPage() {
             <div className={styles.emptyText}>Новых заявок нет</div>
           </div>
         ) : (
-          <div className={common.tableWrapper}>
+          <div className={styles.tableWrap}>
             <table className={common.table}>
               <thead>
                 <tr className={common.theadRow}>

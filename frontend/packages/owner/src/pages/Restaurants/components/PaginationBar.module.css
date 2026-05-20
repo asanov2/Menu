@@ -33,3 +33,16 @@
   color: var(--ink-tertiary);
   cursor: default;
 }
+
+@media (max-width: 768px) {
+  .wrapper {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn {
+    min-height: 44px;
+    padding: 8px 20px;
+  }
+}

@@ -53,3 +53,27 @@
   color: var(--cream-bg);
   border-color: var(--ink-primary);
 }
+
+/* ── Обёртка графика ── */
+
+.chartWrap {
+  height: 240px;
+}
+
+@media (max-width: 768px) {
+  .chartWrap {
+    height: 160px;
+  }
+
+  .paymentsHeader {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .exportBtn {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+}

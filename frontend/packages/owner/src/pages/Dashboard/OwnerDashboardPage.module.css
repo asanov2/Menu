@@ -100,3 +100,25 @@
   color: var(--ink-tertiary);
   margin: 8px 0 0;
 }
+
+/* ── Обёртка графика — высота управляется через CSS ── */
+
+.chartWrap {
+  height: 200px;
+}
+
+@media (max-width: 768px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .chartWrap {
+    height: 150px;
+  }
+
+  .paymentsCardHeader {
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+}

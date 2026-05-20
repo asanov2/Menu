@@ -3,6 +3,32 @@
   .qrCenter { display: flex; justify-content: center; margin: 40px auto; }
 }
 
+@media (max-width: 768px) {
+  .card {
+    padding: 24px 20px;
+  }
+
+  .cardTitle {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .btnDownload,
+  .btnPrint {
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  .tableInput {
+    min-height: 44px;
+  }
+
+  .tableGenBtn {
+    min-height: 44px;
+    padding: 8px 14px;
+  }
+}
+
 .loadingCenter {
   display: flex;
   justify-content: center;

@@ -94,3 +94,19 @@
   color: var(--ink-secondary);
   font-weight: 500;
 }
+
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .servicesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .systemTitle {
+    font-size: 18px;
+  }
+}

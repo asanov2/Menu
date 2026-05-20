@@ -54,3 +54,60 @@
   color: var(--ink-primary);
   white-space: nowrap;
 }
+
+@media (max-width: 768px) {
+  .wrapper {
+    overflow-x: visible;
+  }
+
+  .table {
+    display: block;
+  }
+
+  .theadRow {
+    display: none;
+  }
+
+  .table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 10px;
+    border: 0.5px solid var(--cream-border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    height: auto;
+  }
+
+  .trClickable:hover {
+    background: transparent;
+  }
+
+  /* Первая ячейка (ресторан или дата) — вся строка */
+  .tr td:first-child {
+    grid-column: 1 / -1;
+    font-weight: 500;
+    font-size: 13px;
+    border-bottom: 0.5px solid var(--cream-border);
+    padding-bottom: 6px;
+    margin-bottom: 2px;
+  }
+
+  .td {
+    display: block;
+    white-space: normal;
+    padding: 2px 0;
+    height: auto;
+    font-size: 11px;
+  }
+
+  .tdLoading {
+    height: auto;
+    padding: 4px 0;
+  }
+}

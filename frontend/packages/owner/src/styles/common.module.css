@@ -122,3 +122,27 @@
   color: var(--ink-secondary);
   white-space: nowrap;
 }
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+  }
+
+  .kpiGrid4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .kpiGrid3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .pageStack {
+    gap: 16px;
+  }
+
+  .pageStackSm {
+    gap: 14px;
+  }
+}

@@ -64,3 +64,13 @@
   background: var(--ink-primary);
   color: var(--cream-surface);
 }
+
+@media (max-width: 768px) {
+  .searchWrapper {
+    max-width: 100%;
+  }
+
+  .filterBtn {
+    min-height: 36px;
+  }
+}

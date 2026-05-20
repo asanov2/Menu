@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import OwnerSidebar from './OwnerSidebar'
 import OwnerTopbar from './OwnerTopbar'
+import OwnerMobileTabBar from './OwnerMobileTabBar'
 import styles from './OwnerLayout.module.css'
 
 export default function OwnerLayout({ children }: { children: ReactNode }) {
@@ -13,6 +14,7 @@ export default function OwnerLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
+      <OwnerMobileTabBar />
     </div>
   )
 }

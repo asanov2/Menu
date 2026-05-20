@@ -16,3 +16,11 @@
   padding: 24px;
   overflow-y: auto;
 }
+
+@media (max-width: 768px) {
+  .content {
+    padding: 16px;
+    /* Отступ снизу под нижний таббар + safe area iOS */
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
+}

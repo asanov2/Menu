@@ -205,36 +205,38 @@ export default function RevenuePage() {
             }
           />
         ) : (
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={revenueData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-              <XAxis
-                dataKey="name"
-                tick={{ fontFamily: 'var(--font-ui)', fontSize: 11, fill: 'var(--ink-secondary)' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontFamily: 'var(--font-ui)', fontSize: 10, fill: 'var(--ink-secondary)' }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={v => `${Math.round((v as number) / 1000)}k`}
-              />
-              <Tooltip
-                formatter={(v: number) => [formatPrice(v), 'Выручка']}
-                contentStyle={{ fontFamily: 'var(--font-ui)', fontSize: 12, borderRadius: 8, border: '1px solid var(--cream-border)' }}
-              />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {revenueData.map((entry, idx) => (
-                  <Cell
-                    key={idx}
-                    fill={entry.value > 0
-                      ? (entry.isCurrentMonth ? 'var(--accent-gold)' : '#c8963e')
-                      : 'var(--cream-muted)'}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className={styles.chartWrap}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={revenueData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontFamily: 'var(--font-ui)', fontSize: 11, fill: 'var(--ink-secondary)' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontFamily: 'var(--font-ui)', fontSize: 10, fill: 'var(--ink-secondary)' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={v => `${Math.round((v as number) / 1000)}k`}
+                />
+                <Tooltip
+                  formatter={(v: number) => [formatPrice(v), 'Выручка']}
+                  contentStyle={{ fontFamily: 'var(--font-ui)', fontSize: 12, borderRadius: 8, border: '1px solid var(--cream-border)' }}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {revenueData.map((entry, idx) => (
+                    <Cell
+                      key={idx}
+                      fill={entry.value > 0
+                        ? (entry.isCurrentMonth ? 'var(--accent-gold)' : '#c8963e')
+                        : 'var(--cream-muted)'}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </div>
 

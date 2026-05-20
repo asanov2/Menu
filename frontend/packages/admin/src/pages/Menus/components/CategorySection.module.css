@@ -82,3 +82,19 @@
 .addBtnPlus {
   font-size: 16px;
 }
+
+@media (max-width: 768px) {
+  .editBtn,
+  .deleteBtn {
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .addBtn {
+    min-height: 44px;
+    padding: 8px 0;
+  }
+}

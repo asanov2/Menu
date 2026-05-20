@@ -50,3 +50,18 @@
 .logoutBtn:hover {
   color: var(--ink-primary);
 }
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0 16px;
+    height: 48px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .ownerBadge {
+    display: none;
+  }
+}
