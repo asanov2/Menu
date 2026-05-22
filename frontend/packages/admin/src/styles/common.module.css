@@ -3,10 +3,10 @@
 ─────────────────────────────────────────────────────────────── */
 
 .card {
-  background: var(--cream-bg);
-  border: 0.5px solid var(--cream-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
+  background: var(--cream-surface);
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 2px 10px rgba(26, 18, 8, 0.06), 0 1px 3px rgba(26, 18, 8, 0.04);
   padding: 24px;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .btnPrimary {
-  padding: 8px 16px;
+  padding: 9px 18px;
   background: var(--ink-primary);
   color: var(--cream-bg);
   border: none;
@@ -34,6 +34,11 @@
   font-family: var(--font-ui);
   cursor: pointer;
   font-weight: 500;
+  transition: opacity 0.18s;
+}
+
+.btnPrimary:hover {
+  opacity: 0.85;
 }
 
 .btnSecondary {

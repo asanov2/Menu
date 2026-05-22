@@ -338,6 +338,11 @@
       font-size: 28px;
       animation: bob 2.2s ease-in-out infinite;
       cursor: pointer;
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     @keyframes bob {
@@ -837,6 +842,41 @@
       .footer-grid { grid-template-columns: 1fr; gap: 28px; }
     }
 
+    /* ── Mobile tap target fixes ───────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-logo {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+      }
+
+      .footer-lnk {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+      }
+
+      .wl-link {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+
+    /* ── Drawer backdrop ───────────────────────────────────────────────── */
+    .nav-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26, 18, 8, 0.45);
+      z-index: 899;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    .nav-backdrop.open { display: block; }
+    body.drawer-open { overflow: hidden; }
+
     /* ── Misc ──────────────────────────────────────────────────────────── */
     @media (max-width: 768px) {
       .section-title { font-size: 36px; }
@@ -850,6 +890,8 @@
   </style>
 </head>
 <body>
+
+  <div class="nav-backdrop" id="nav-backdrop"></div>
 
   <!-- ═══════════════════════════════════════════════ NAVBAR ══════════ -->
   <header class="navbar" id="navbar">
@@ -1224,14 +1266,17 @@
     }, { passive: true });
 
     // ── Mobile hamburger ───────────────────────────────────────────────
-    const hamBtn  = document.getElementById('nav-ham');
-    const hamIcon = document.getElementById('ham-icon');
-    const drawer  = document.getElementById('nav-drawer');
+    const hamBtn   = document.getElementById('nav-ham');
+    const hamIcon  = document.getElementById('ham-icon');
+    const drawer   = document.getElementById('nav-drawer');
+    const backdrop = document.getElementById('nav-backdrop');
     let drawerOpen = false;
 
     function toggleDrawer(open) {
       drawerOpen = open;
       drawer.classList.toggle('open', open);
+      backdrop.classList.toggle('open', open);
+      document.body.classList.toggle('drawer-open', open);
       hamIcon.className = open ? 'ti ti-x' : 'ti ti-menu-2';
       hamBtn.setAttribute('aria-expanded', String(open));
       drawer.setAttribute('aria-hidden', String(!open));
@@ -1241,6 +1286,8 @@
       e.stopPropagation();
       toggleDrawer(!drawerOpen);
     });
+
+    backdrop.addEventListener('click', () => toggleDrawer(false));
 
     // Close on link click
     drawer.querySelectorAll('[data-close]').forEach(el => {

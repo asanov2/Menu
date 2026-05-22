@@ -48,6 +48,7 @@ class Menu(Base):
     categories: Mapped[list["Category"]] = relationship(
         "Category", back_populates="menu", lazy="selectin",
         primaryjoin="and_(Menu.id == Category.menu_id, Category.deleted_at == None)",
+        order_by="Category.sort_order",
     )
 
 
@@ -73,6 +74,7 @@ class Category(Base):
     items: Mapped[list["Item"]] = relationship(
         "Item", back_populates="category", lazy="selectin",
         primaryjoin="and_(Category.id == Item.category_id, Item.deleted_at == None)",
+        order_by="Item.sort_order",
     )
 
 

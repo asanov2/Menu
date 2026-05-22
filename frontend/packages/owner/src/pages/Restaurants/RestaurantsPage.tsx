@@ -97,7 +97,7 @@ export default function RestaurantsPage() {
             {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} height="40px" />)}
           </div>
         ) : (
-          <div className={common.tableWrapper}>
+          <div className={`${common.tableWrapper} ${styles.tableContainer}`}>
             <table className={common.table}>
               <thead>
                 <tr className={common.theadRow}>

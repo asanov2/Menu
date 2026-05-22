@@ -1,39 +1,48 @@
 .card {
   background: var(--cream-surface);
-  border: 0.5px solid var(--cream-border);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-xl);
+  padding: 22px 24px;
+  box-shadow: 0 2px 10px rgba(26, 18, 8, 0.06), 0 1px 3px rgba(26, 18, 8, 0.04);
   position: relative;
   overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 6px 20px rgba(26, 18, 8, 0.09), 0 2px 6px rgba(26, 18, 8, 0.05);
+  transform: translateY(-1px);
 }
 
 .iconBg {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  font-size: 32px;
-  opacity: 0.2;
+  top: 14px;
+  right: 14px;
+  font-size: 30px;
+  opacity: 0.18;
   user-select: none;
+  color: var(--accent-gold);
 }
 
 .label {
-  font-size: 10px;
+  font-size: 11px;
   font-family: var(--font-ui);
   color: var(--ink-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 8px;
+  letter-spacing: 0.09em;
+  margin-bottom: 10px;
+  font-weight: 500;
 }
 
 .value {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 30px;
   color: var(--ink-primary);
-  line-height: 1;
+  line-height: 1.1;
 }
 
 .subtitle {
-  font-size: 10px;
+  font-size: 11px;
   font-family: var(--font-ui);
+  font-weight: 500;
 }

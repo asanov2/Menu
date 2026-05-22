@@ -8,12 +8,13 @@ class PlanLimits:
     max_items: Optional[int]
     max_languages: int
     can_search: bool
+    can_stoplist: bool
 
 
 PLAN_LIMITS: dict[str, PlanLimits] = {
-    "starter":  PlanLimits(max_menus=1,    max_items=50,   max_languages=1, can_search=False),
-    "business": PlanLimits(max_menus=5,    max_items=200,  max_languages=3, can_search=True),
-    "pro":      PlanLimits(max_menus=None, max_items=None, max_languages=3, can_search=True),
+    "starter":  PlanLimits(max_menus=1,    max_items=50,   max_languages=1, can_search=False, can_stoplist=False),
+    "business": PlanLimits(max_menus=5,    max_items=200,  max_languages=3, can_search=True,  can_stoplist=True),
+    "pro":      PlanLimits(max_menus=None, max_items=None, max_languages=3, can_search=True,  can_stoplist=True),
 }
 
 ALLOWED_LANGUAGES: dict[str, set[str]] = {

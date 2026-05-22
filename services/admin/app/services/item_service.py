@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.dialects.postgresql import UUID as pgUUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.plan_errors import items_limit_error
+from app.core.plan_errors import items_limit_error, stoplist_limit_error
 from app.core.plan_limits import get_limits
 from app.models.menu import Category, Item
 from app.schemas.menu import ItemCreate, ItemReorderItem, ItemUpdate
@@ -109,7 +109,10 @@ class ItemService:
         item.deleted_at = datetime.now(timezone.utc)
         await self._db.commit()
 
-    async def toggle_available(self, restaurant_id: UUID, item_id: UUID) -> Item:
+    async def toggle_available(self, restaurant_id: UUID, item_id: UUID, plan: str) -> Item:
+        limits = get_limits(plan)
+        if not limits.can_stoplist:
+            raise stoplist_limit_error()
         item = await self.get_item(restaurant_id, item_id)
         item.is_available = not item.is_available
         await self._db.commit()

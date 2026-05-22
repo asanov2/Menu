@@ -1,56 +1,71 @@
 .wrapper {
-  padding: 8px 16px;
-  background: var(--cream-bg);
-  border-bottom: 0.5px solid var(--cream-border);
+  padding: 10px 16px 12px;
+  background: var(--sidebar-bg);
 }
 
 .inputRow {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-lg);
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.2s, background 0.2s;
+  color: var(--sidebar-muted);
 }
 
-.icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 14px;
-  color: var(--ink-tertiary);
-  pointer-events: none;
+.inputRow:focus-within {
+  border-color: rgba(212, 168, 83, 0.55);
+  background: rgba(255, 255, 255, 0.13);
 }
 
 .input {
-  width: 100%;
-  padding: 10px 36px;
-  background: var(--cream-surface);
-  border: 0.5px solid var(--cream-border);
-  border-radius: var(--radius-md);
+  flex: 1;
+  padding: 11px 0;
+  background: transparent;
+  border: none;
   font-size: 14px;
-  color: var(--ink-primary);
+  color: var(--sidebar-text);
   outline: none;
   font-family: var(--font-ui);
   min-height: 44px;
 }
 
+.input::placeholder {
+  color: rgba(160, 144, 128, 0.7);
+}
+
 .clearBtn {
-  position: absolute;
-  right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  color: var(--ink-tertiary);
+  color: var(--sidebar-muted);
   cursor: pointer;
-  background: none;
+  background: rgba(255, 255, 255, 0.08);
   border: none;
+  border-radius: var(--radius-full);
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.clearBtn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--sidebar-text);
 }
 
 .foundCount {
-  margin-top: 6px;
+  margin-top: 7px;
   font-size: 12px;
-  color: var(--ink-secondary);
+  color: var(--sidebar-muted);
   font-family: var(--font-ui);
+  padding: 0 2px;
+}
+
+.icon {
+  display: none;
 }

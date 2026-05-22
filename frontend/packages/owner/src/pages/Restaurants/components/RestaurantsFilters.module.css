@@ -70,7 +70,11 @@
     max-width: 100%;
   }
 
+  .searchInput {
+    min-height: 44px;
+  }
+
   .filterBtn {
-    min-height: 36px;
+    min-height: 44px;
   }
 }

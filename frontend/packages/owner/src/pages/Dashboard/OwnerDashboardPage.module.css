@@ -121,4 +121,15 @@
     gap: 6px;
     align-items: flex-start;
   }
+
+  .yearBtn {
+    min-height: 44px;
+    padding: 3px 14px;
+  }
+
+  .viewAllLink {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
 }

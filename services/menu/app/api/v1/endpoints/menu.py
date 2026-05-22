@@ -57,7 +57,12 @@ async def get_menu(
     service = MenuService(db)
     restaurant, menu = await service.get_full_menu(slug, menu_id=menu_id, lang=lang)
 
-    visible_cats = [c for c in menu.categories if c.is_visible]
+    visible_cats = sorted(
+        [c for c in menu.categories if c.is_visible],
+        key=lambda c: c.sort_order,
+    )
+    for cat in visible_cats:
+        cat.items = sorted(cat.items, key=lambda i: i.sort_order)
 
     response = MenuPageResponse(
         restaurant=RestaurantInfo.model_validate(restaurant),

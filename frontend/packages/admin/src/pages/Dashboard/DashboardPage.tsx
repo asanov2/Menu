@@ -259,10 +259,10 @@ export default function DashboardPage() {
                     y={avgViews}
                     stroke="var(--ink-tertiary)"
                     strokeDasharray="3 3"
-                    label={{
+                    label={isMobile ? undefined : {
                       value: 'среднее',
                       position: 'insideTopRight',
-                      fontSize: 9,
+                      fontSize: 11,
                       fontFamily: 'var(--font-ui)',
                       fill: 'var(--ink-tertiary)',
                     }}

@@ -77,6 +77,6 @@ async def toggle_available(
     db: AsyncSession = Depends(get_db),
 ) -> ItemResponse:
     service = ItemService(db)
-    item = await service.toggle_available(current.id, item_id)
+    item = await service.toggle_available(current.id, item_id, current.plan)
     await invalidate_menu_cache(current.slug)
     return ItemResponse.model_validate(item)

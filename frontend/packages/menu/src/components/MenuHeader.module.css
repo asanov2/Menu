@@ -5,10 +5,10 @@
 
 .topBar {
   background: var(--sidebar-bg);
-  padding: 12px 16px 10px;
+  padding: 14px 20px 12px;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
 }
 
@@ -18,63 +18,82 @@
 
 .restaurantName {
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 22px;
   font-weight: 600;
   color: var(--sidebar-text);
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: 0.01em;
 }
 
 .tableNumber {
   font-size: 11px;
   color: var(--sidebar-muted);
-  margin-top: 2px;
+  margin-top: 3px;
   font-family: var(--font-ui);
+  letter-spacing: 0.04em;
 }
 
 .actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .searchBtn {
-  background: none;
+  background: rgba(255, 255, 255, 0.08);
   border: none;
+  border-radius: var(--radius-full);
   cursor: pointer;
   color: var(--sidebar-text);
   font-size: 18px;
-  padding: 4px 6px;
-  opacity: 0.75;
+  opacity: 0.85;
   flex-shrink: 0;
   line-height: 1;
   -webkit-tap-highlight-color: transparent;
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s, opacity 0.18s;
+}
+
+.searchBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  opacity: 1;
 }
 
 .langSwitcher {
   display: flex;
   gap: 2px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-full);
+  padding: 3px;
 }
 
 .langBtn {
-  padding: 4px 7px;
+  padding: 5px 9px;
   border-radius: var(--radius-full);
-  font-size: 11px;
+  font-size: 10px;
   font-family: var(--font-ui);
   font-weight: 500;
   background: transparent;
   color: var(--sidebar-muted);
   border: none;
   cursor: pointer;
-  min-height: 28px;
-  transition: all 0.15s;
+  min-height: 30px;
+  min-width: 36px;
+  transition: all 0.18s;
   -webkit-tap-highlight-color: transparent;
+  letter-spacing: 0.04em;
 }
 
 .langBtnActive {
   background: var(--accent-gold);
   color: var(--sidebar-bg);
+  font-weight: 600;
 }

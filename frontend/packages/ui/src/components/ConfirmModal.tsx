@@ -40,12 +40,11 @@ export default function ConfirmModal({
 
           <motion.div
             key="modal"
-            initial={{ opacity: 0, scale: 0.94, y: -12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.94, y: -12 }}
+            initial={{ opacity: 0, scale: 0.94, x: '-50%', y: 'calc(-50% - 12px)' }}
+            animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+            exit={{ opacity: 0, scale: 0.94, x: '-50%', y: 'calc(-50% - 12px)' }}
             transition={ANIMATION.spring}
             className={styles.panel}
-            style={{ transform: 'translate(-50%, -50%)' }}
           >
             <div className={styles.title}>{title}</div>
 

@@ -32,6 +32,14 @@ def items_limit_error(plan: str) -> PlanLimitError:
     })
 
 
+def stoplist_limit_error() -> PlanLimitError:
+    return PlanLimitError({
+        "code": "PLAN_LIMIT_REACHED",
+        "message": "Стоп-лист доступен только на тарифе Бизнес и выше.",
+        "upgrade_to": "business",
+    })
+
+
 def language_limit_error(plan: str, language: str) -> PlanLimitError:
     from app.core.plan_limits import get_allowed_languages
     allowed = ", ".join(sorted(get_allowed_languages(plan)))

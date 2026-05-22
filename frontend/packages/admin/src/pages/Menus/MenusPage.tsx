@@ -122,7 +122,6 @@ export default function MenusPage() {
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
               className={styles.modal}
-              style={{ transform: 'translate(-50%, -50%)' }}
             >
               <div className={styles.modalTitle}>Новое меню</div>
               <div className={styles.modalForm}>

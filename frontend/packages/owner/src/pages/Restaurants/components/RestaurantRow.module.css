@@ -66,3 +66,7 @@
 .toggleBtnPending {
   cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+  .tr { height: auto; }
+}
