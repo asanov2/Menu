@@ -1,0 +1,262 @@
+networks:
+  qrmenu-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  rabbitmq_data:
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/landing:/usr/share/nginx/landing:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
+    depends_on:
+      - auth-service
+      - menu-service
+      - admin-service
+      - billing-service
+      - analytics-service
+      - owner-service
+      - menu-frontend
+      - admin-frontend
+      - owner-frontend
+    networks:
+      - qrmenu-network
+    restart: always
+    mem_limit: 128m
+    logging: *default-logging
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - qrmenu-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: always
+    mem_limit: 512m
+    logging: *default-logging
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - qrmenu-network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: always
+    mem_limit: 256m
+    logging: *default-logging
+
+  rabbitmq:
+    image: rabbitmq:3.12-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - qrmenu-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: always
+    mem_limit: 256m
+    logging: *default-logging
+
+  minio:
+    image: minio/minio:RELEASE.2024-05-01T01-11-10Z
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BROWSER: "off"
+    volumes:
+      - minio_data:/data
+    networks:
+      - qrmenu-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: always
+    mem_limit: 256m
+    logging: *default-logging
+
+  auth-service:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - qrmenu-network
+    restart: always
+    mem_limit: 256m
+    logging: *default-logging
+
+  menu-service:
+    build:
+      context: ./services/menu
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - qrmenu-network
+    restart: always
+    mem_limit: 256m
+    logging: *default-logging
+
+  admin-service:
+    build:
+      context: ./services/admin
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - qrmenu-network
+    restart: always
+    mem_limit: 256m
+    logging: *default-logging
+
+  billing-service:
+    build:
+      context: ./services/billing
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - qrmenu-network
+    restart: always
+    mem_limit: 256m
+    logging: *default-logging
+
+  analytics-service:
+    build:
+      context: ./services/analytics
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - qrmenu-network
+    restart: always
+    mem_limit: 256m
+    logging: *default-logging
+
+  owner-service:
+    build:
+      context: ./services/owner
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - qrmenu-network
+    restart: always
+    mem_limit: 256m
+    logging: *default-logging
+
+  menu-frontend:
+    build:
+      context: ./frontend
+      dockerfile: packages/menu/Dockerfile
+    networks:
+      - qrmenu-network
+    restart: always
+    mem_limit: 128m
+    logging: *default-logging
+
+  admin-frontend:
+    build:
+      context: ./frontend
+      dockerfile: packages/admin/Dockerfile
+      args:
+        VITE_APP_URL: "https://qrmenus.kz"
+        VITE_API_URL: "https://qrmenus.kz"
+    networks:
+      - qrmenu-network
+    restart: always
+    mem_limit: 128m
+    logging: *default-logging
+
+  owner-frontend:
+    build:
+      context: ./frontend
+      dockerfile: packages/owner/Dockerfile
+    networks:
+      - qrmenu-network
+    restart: always
+    mem_limit: 128m
+    logging: *default-logging
