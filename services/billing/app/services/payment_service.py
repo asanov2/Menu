@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 PLAN_PRICES: dict[str, Decimal] = {
     "starter": Decimal("3900.00"),
-    "business": Decimal("7900.00"),
-    "pro": Decimal("14900.00"),
+    "business": Decimal("9900.00"),
+    "pro": Decimal("24900.00"),
 }
 
 

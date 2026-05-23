@@ -3,7 +3,8 @@ export function getApiErrorMessage(
   fallback = 'Неизвестная ошибка'
 ): string {
   if (typeof err === 'object' && err !== null && 'response' in err) {
-    const response = (err as { response?: { data?: { message?: string } } }).response;
+    const response = (err as { response?: { data?: { detail?: string; message?: string } } }).response;
+    if (response?.data?.detail && typeof response.data.detail === 'string') return response.data.detail;
     if (response?.data?.message) return response.data.message;
   }
   return fallback;

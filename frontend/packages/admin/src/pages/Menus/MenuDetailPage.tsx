@@ -19,8 +19,11 @@ import type { Category } from '@qrmenu/ui';
 import { getMenu } from '../../api/menus';
 import { getCategories, createCategory } from '../../api/categories';
 import { useAuth } from '../../hooks/useAuth';
+import type { PlanLimitDetail } from '../../utils/planLimitError';
+import PlanLimitModal from '../../components/PlanLimitModal';
 import CategorySection from './components/CategorySection';
 import CategoryFormModal from './components/CategoryFormModal';
+import TranslateMenuModal from './components/TranslateMenuModal';
 import { useCategoryDnd } from './hooks/useCategoryDnd';
 import styles from './MenuDetailPage.module.css';
 import common from '../../styles/common.module.css';
@@ -53,6 +56,23 @@ export default function MenuDetailPage() {
   const { restaurant } = useAuth();
   const [catFormOpen, setCatFormOpen] = useState(false);
   const [catSaving, setCatSaving] = useState(false);
+  const [translateOpen, setTranslateOpen] = useState(false);
+  const [planLimitDetail, setPlanLimitDetail] = useState<PlanLimitDetail | null>(null);
+
+  const canTranslate =
+    restaurant?.plan === 'business' || restaurant?.plan === 'pro';
+
+  const handleTranslateClick = () => {
+    if (!canTranslate) {
+      setPlanLimitDetail({
+        code: 'PLAN_LIMIT_REACHED',
+        message: 'AI-перевод меню доступен только на тарифе Бизнес и выше.',
+        upgrade_to: 'business',
+      });
+      return;
+    }
+    setTranslateOpen(true);
+  };
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const { handleDragEnd } = useCategoryDnd(id!);
@@ -110,6 +130,9 @@ export default function MenuDetailPage() {
           >
             <Icon name="eye" size={14} /> Предпросмотр
           </a>
+          <button onClick={handleTranslateClick} className={styles.btnTranslate}>
+            <Icon name="language" size={14} /> Перевести
+          </button>
           <button
             onClick={() => setCatFormOpen(true)}
             className={styles.btnPrimary}
@@ -147,6 +170,14 @@ export default function MenuDetailPage() {
         onCancel={() => setCatFormOpen(false)}
         loading={catSaving}
       />
+
+      <TranslateMenuModal
+        menuId={id!}
+        isOpen={translateOpen}
+        onClose={() => setTranslateOpen(false)}
+      />
+
+      <PlanLimitModal detail={planLimitDetail} onClose={() => setPlanLimitDetail(null)} />
     </div>
   );
 }

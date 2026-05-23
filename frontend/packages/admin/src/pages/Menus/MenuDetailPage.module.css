@@ -58,6 +58,26 @@
   color: var(--ink-primary);
 }
 
+.btnTranslate {
+  padding: 9px 16px;
+  background: transparent;
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold-dk);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.18s, color 0.18s;
+}
+
+.btnTranslate:hover {
+  background: color-mix(in srgb, var(--accent-gold) 10%, transparent);
+}
+
 .btnPrimary {
   padding: 9px 18px;
   background: var(--ink-primary);

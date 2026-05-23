@@ -25,6 +25,30 @@ class Restaurant(Base):
     slug: Mapped[str] = mapped_column(String(100), index=True)
     is_active: Mapped[bool] = mapped_column(Boolean)
     name: Mapped[str] = mapped_column(String(255))
+    plan: Mapped[str] = mapped_column(String(20), nullable=False, default="starter")
+
+
+class CategoryTranslation(Base):
+    """Read-only view — managed by admin service migrations."""
+
+    __tablename__ = "category_translations"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    category_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
+    language: Mapped[str] = mapped_column(String(10))
+    name: Mapped[str] = mapped_column(String(255))
+
+
+class ItemTranslation(Base):
+    """Read-only view — managed by admin service migrations."""
+
+    __tablename__ = "item_translations"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    item_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
+    language: Mapped[str] = mapped_column(String(10))
+    name: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class Menu(Base):

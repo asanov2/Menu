@@ -64,10 +64,29 @@ async def get_menu(
     for cat in visible_cats:
         cat.items = sorted(cat.items, key=lambda i: i.sort_order)
 
+    categories_response = [CategoryResponse.model_validate(c) for c in visible_cats]
+
+    # Apply translations when a non-base language is requested
+    if lang and lang != "ru":
+        cat_ids = [c.id for c in visible_cats]
+        item_ids = [UUID(str(item.id)) for c in visible_cats for item in c.items]
+        cat_trans, item_trans = await service.get_translations(cat_ids, item_ids, lang)
+
+        for cat_resp, cat_orm in zip(categories_response, visible_cats):
+            if cat_orm.id in cat_trans:
+                cat_resp.name = cat_trans[cat_orm.id]
+            for item_resp in cat_resp.items:
+                item_uuid = UUID(str(item_resp.id))
+                if item_uuid in item_trans:
+                    translated_name, translated_desc = item_trans[item_uuid]
+                    item_resp.name = translated_name
+                    if translated_desc is not None:
+                        item_resp.description = translated_desc
+
     response = MenuPageResponse(
         restaurant=RestaurantInfo.model_validate(restaurant),
         menu=MenuInfo.model_validate(menu),
-        categories=[CategoryResponse.model_validate(c) for c in visible_cats],
+        categories=categories_response,
     )
 
     if menu_id is None:

@@ -8,6 +8,7 @@ class RestaurantInfo(BaseModel):
     name: str
     slug: str
     logo_url: str | None = None  # not in DB, frontend expects it nullable
+    plan: str = "starter"  # default for backward compat with cached entries
 
     model_config = ConfigDict(from_attributes=True)
 

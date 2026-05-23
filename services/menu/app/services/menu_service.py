@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.menu import Category, Item, Menu, Restaurant
+from app.models.menu import Category, CategoryTranslation, Item, ItemTranslation, Menu, Restaurant
 
 
 class MenuService:
@@ -111,6 +111,41 @@ class MenuService:
             .order_by(Category.sort_order)
         )
         return list(result.scalars().all())
+
+    async def get_translations(
+        self,
+        category_ids: list[UUID],
+        item_ids: list[UUID],
+        lang: str,
+    ) -> tuple[dict[UUID, str], dict[UUID, tuple[str, str | None]]]:
+        """Returns (cat_name_by_id, {item_id: (name, description)}) for the given language."""
+        cat_trans: dict[UUID, str] = {}
+        if category_ids:
+            result = await self._db.execute(
+                select(CategoryTranslation).where(
+                    and_(
+                        CategoryTranslation.category_id.in_(category_ids),
+                        CategoryTranslation.language == lang,
+                    )
+                )
+            )
+            for t in result.scalars():
+                cat_trans[t.category_id] = t.name
+
+        item_trans: dict[UUID, tuple[str, str | None]] = {}
+        if item_ids:
+            result = await self._db.execute(
+                select(ItemTranslation).where(
+                    and_(
+                        ItemTranslation.item_id.in_(item_ids),
+                        ItemTranslation.language == lang,
+                    )
+                )
+            )
+            for t in result.scalars():
+                item_trans[t.item_id] = (t.name, t.description)
+
+        return cat_trans, item_trans
 
     async def get_items(
         self,

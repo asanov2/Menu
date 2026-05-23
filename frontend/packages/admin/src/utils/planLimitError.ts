@@ -12,8 +12,8 @@ export const PLAN_NAMES: Record<string, string> = {
 
 export const PLAN_PRICES: Record<string, number> = {
   starter: 3900,
-  business: 7900,
-  pro: 14900,
+  business: 9900,
+  pro: 24900,
 }
 
 function extractDetail(err: unknown): Record<string, unknown> | null {

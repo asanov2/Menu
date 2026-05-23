@@ -25,5 +25,7 @@ class Settings(BaseSettings):
     # fix #19: CORS origin from env instead of hardcoded
     frontend_url: str = "http://localhost:5173"
 
+    gemini_api_key: str = ""
+
 
 settings = Settings()

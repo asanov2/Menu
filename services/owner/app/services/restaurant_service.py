@@ -19,7 +19,7 @@ from app.schemas.restaurants import (
 
 logger = logging.getLogger(__name__)
 
-_PLAN_PRICES = {"starter": 3900, "business": 7900, "pro": 14900}
+_PLAN_PRICES = {"starter": 3900, "business": 9900, "pro": 24900}
 _VALID_PLANS = {"starter", "business", "pro"}
 
 _RESTAURANT_SELECT = """
@@ -140,8 +140,8 @@ class RestaurantService:
                     SELECT COALESCE(SUM(
                       CASE plan
                         WHEN 'starter'  THEN 3900
-                        WHEN 'business' THEN 7900
-                        WHEN 'pro'      THEN 14900
+                        WHEN 'business' THEN 9900
+                        WHEN 'pro'      THEN 24900
                         ELSE 0
                       END
                     ), 0) AS amount

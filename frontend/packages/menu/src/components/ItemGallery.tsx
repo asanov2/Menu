@@ -15,6 +15,7 @@ export default function ItemGallery({ items, onItemClick }: ItemGalleryProps) {
         <motion.div
           key={item.id}
           layout
+          className={styles.item}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.3) }}

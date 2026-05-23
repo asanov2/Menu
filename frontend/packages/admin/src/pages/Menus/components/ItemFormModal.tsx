@@ -4,7 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { MenuItem, Category } from '@qrmenu/ui';
-import { INPUT_STYLE, useInputFocus, ANIMATION, FormField, Icon } from '@qrmenu/ui';
+import { INPUT_STYLE, useInputFocus, ANIMATION, FormField, Icon, useToast, getApiErrorMessage } from '@qrmenu/ui';
+import { useAuth } from '../../../hooks/useAuth';
+import { translateItem } from '../../../api/translate';
 import ImageUpload from './ImageUpload';
 import styles from './ItemFormModal.module.css';
 
@@ -45,10 +47,28 @@ interface ItemFormModalProps {
 }
 
 export default function ItemFormModal({ isOpen, item, categories, defaultCategoryId, onSave, onCancel, loading }: ItemFormModalProps) {
+  const { showToast } = useToast();
+  const { restaurant } = useAuth();
+  const canTranslate = restaurant?.plan === 'business' || restaurant?.plan === 'pro';
+
   const [snapPoint,  setSnapPoint]  = useState<'default' | 'fullscreen'>('default');
   const [dragY,      setDragY]      = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const dragStartClientY = useRef(0);
+
+  const handleTranslateItem = async () => {
+    if (!item?.id) return;
+    setTranslating(true);
+    try {
+      const res = await translateItem(item.id, ['kz', 'en']);
+      showToast(`Переведено ${res.translated_items} блюдо`, 'success');
+    } catch (err) {
+      showToast(getApiErrorMessage(err, 'Ошибка перевода'), 'error');
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   const { register, handleSubmit, reset, control, watch, setValue, getValues, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -236,13 +256,29 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                 <div className={styles.scrollArea}>
                   {/* Name */}
                   <FormField label="Название блюда" error={errors.name?.message} required>
-                    <input
-                      id="item-name"
-                      {...register('name')}
-                      {...nameFocus}
-                      placeholder="Название блюда"
-                      style={{ ...INPUT_STYLE, borderColor: errors.name ? 'var(--error-text)' : 'var(--cream-border)' }}
-                    />
+                    <div className={styles.fieldWithAction}>
+                      <input
+                        id="item-name"
+                        {...register('name')}
+                        {...nameFocus}
+                        placeholder="Название блюда"
+                        style={{ ...INPUT_STYLE, borderColor: errors.name ? 'var(--error-text)' : 'var(--cream-border)', flex: 1 }}
+                      />
+                      {item && canTranslate && (
+                        <button
+                          type="button"
+                          title="Перевести блюдо через AI"
+                          className={styles.translateBtn}
+                          disabled={translating}
+                          onClick={handleTranslateItem}
+                        >
+                          {translating
+                            ? <span className={styles.spinnerDark} />
+                            : <Icon name="language" size={14} />
+                          }
+                        </button>
+                      )}
+                    </div>
                   </FormField>
 
                   {/* Description */}

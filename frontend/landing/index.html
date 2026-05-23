@@ -601,6 +601,32 @@
       margin-top: 2px;
     }
 
+    .plan-feat--soon {
+      opacity: 0.55;
+    }
+
+    .plan-feat--soon .ti-clock-hour-3 {
+      color: var(--ink-tertiary);
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .feat-soon-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--cream-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--ink-tertiary);
+      border-radius: 4px;
+      padding: 1px 5px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
     .plan-cta {
       width: 100%;
       justify-content: center;
@@ -1084,7 +1110,7 @@
           <ul class="plan-features">
             <li class="plan-feat"><i class="ti ti-check"></i>1 меню, до 50 блюд</li>
             <li class="plan-feat"><i class="ti ti-check"></i>QR-код для ресторана</li>
-            <li class="plan-feat"><i class="ti ti-check"></i>Только русский язык</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Только русский язык (RU)</li>
             <li class="plan-feat"><i class="ti ti-check"></i>Пометки на блюдах</li>
             <li class="plan-feat"><i class="ti ti-check"></i>Аналитика — 7 дней</li>
           </ul>
@@ -1095,15 +1121,16 @@
         <div class="plan plan--popular anim d1">
           <div class="plan-badge">Популярный</div>
           <div class="plan-name">Бизнес</div>
-          <div class="plan-price">7 900 ₸<em>/мес</em></div>
+          <div class="plan-price">9 900 ₸<em>/мес</em></div>
           <div class="plan-divider"></div>
           <ul class="plan-features">
-            <li class="plan-feat"><i class="ti ti-check"></i>До 200 блюд</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>5 меню, до 200 блюд</li>
             <li class="plan-feat"><i class="ti ti-check"></i>3 языка (RU / KZ / EN)</li>
-            <li class="plan-feat"><i class="ti ti-check"></i>До 5 меню</li>
-            <li class="plan-feat"><i class="ti ti-check"></i>Поиск по меню</li>
             <li class="plan-feat"><i class="ti ti-check"></i>Аналитика — 30 дней</li>
             <li class="plan-feat"><i class="ti ti-check"></i>Стоп-лист блюд</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Поиск по меню</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Перевод меню через AI</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>КБЖУ помощник AI</li>
           </ul>
           <a href="http://localhost:8080/register" class="btn btn-gold plan-cta">Выбрать Бизнес</a>
         </div>
@@ -1111,13 +1138,18 @@
         <!-- ПРО -->
         <div class="plan anim d2">
           <div class="plan-name">Про</div>
-          <div class="plan-price">14 900 ₸<em>/мес</em></div>
+          <div class="plan-price">24 900 ₸<em>/мес</em></div>
           <div class="plan-divider"></div>
           <ul class="plan-features">
-            <li class="plan-feat"><i class="ti ti-check"></i>Неограниченно блюд</li>
-            <li class="plan-feat"><i class="ti ti-check"></i>Неограниченно меню</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Неограниченно меню и блюд</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>3 языка (RU / KZ / EN)</li>
             <li class="plan-feat"><i class="ti ti-check"></i>Аналитика — 90 дней</li>
-            <li class="plan-feat"><i class="ti ti-check"></i>Приоритетная поддержка</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Все AI функции</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Аллергены</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Telegram сводка</li>
+            <li class="plan-feat"><i class="ti ti-check"></i>Убрать брендинг "Powered by"</li>
+            <li class="plan-feat plan-feat--soon"><i class="ti ti-clock-hour-3"></i>Кастомный домен <span class="feat-soon-badge">Скоро</span></li>
+            <li class="plan-feat plan-feat--soon"><i class="ti ti-clock-hour-3"></i>Поддержка 2ч <span class="feat-soon-badge">Скоро</span></li>
           </ul>
           <a href="http://localhost:8080/register" class="btn btn-outline plan-cta">Выбрать Про</a>
         </div>

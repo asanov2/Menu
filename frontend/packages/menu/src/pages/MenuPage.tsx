@@ -161,6 +161,19 @@ export default function MenuPage() {
       {table && slug && (
         <WaiterButton slug={slug} table={parseInt(table, 10)} />
       )}
+
+      {data.restaurant.plan !== 'pro' && (
+        <div className={styles.poweredBy}>
+          <a
+            href="https://qrmenus.kz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.poweredByLink}
+          >
+            Powered by qrmenus.kz
+          </a>
+        </div>
+      )}
     </div>
   );
 }

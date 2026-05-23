@@ -5,6 +5,7 @@ export interface Restaurant {
   name: string;
   slug: string;
   logo_url: string | null;
+  plan: 'starter' | 'business' | 'pro';
 }
 
 export interface Menu {

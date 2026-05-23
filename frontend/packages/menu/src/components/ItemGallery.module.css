@@ -1,7 +1,10 @@
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
   padding: 12px 16px;
-  align-items: start;
+}
+
+.item {
+  min-width: 0;
 }

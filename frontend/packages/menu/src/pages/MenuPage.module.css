@@ -59,3 +59,20 @@
   color: var(--ink-secondary);
   line-height: 1.5;
 }
+
+.poweredBy {
+  text-align: center;
+  padding: 20px 16px 8px;
+}
+
+.poweredByLink {
+  font-size: 11px;
+  color: var(--ink-tertiary);
+  text-decoration: none;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.poweredByLink:hover {
+  opacity: 0.9;
+}
