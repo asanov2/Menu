@@ -2,14 +2,23 @@ import json
 import logging
 
 import httpx
+import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.ai_guard import (
+    check_daily_limit,
+    check_rate_limit,
+    log_ai_call,
+    validate_description,
+    validate_name,
+)
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import CurrentRestaurant, get_current_restaurant
 from app.core.plan_limits import get_limits
+from app.core.redis_client import get_redis
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -49,8 +58,19 @@ async def suggest_nutrition(
     body: SuggestNutritionRequest,
     current: CurrentRestaurant = Depends(get_current_restaurant),
     _db: AsyncSession = Depends(get_db),
+    redis: aioredis.Redis = Depends(get_redis),
 ) -> SuggestNutritionResponse:
     _require_ai_nutrition(current.plan)
+
+    # Input validation
+    validate_name(body.name)
+    validate_description(body.description)
+
+    # Rate limit: 10 requests / minute per restaurant
+    await check_rate_limit(redis, current.id, "suggest_nutrition", 10, 60)
+
+    # Daily quota: 50 requests / day per restaurant
+    await check_daily_limit(redis, current.id, "suggest_nutrition", 50)
 
     desc_part = body.description or ""
     prompt = (
@@ -59,6 +79,8 @@ async def suggest_nutrition(
         f'Верни ТОЛЬКО валидный JSON: {{"calories": float, "protein": float, "fat": float, "carbs": float}}. '
         f"Округли до 1 знака после запятой."
     )
+
+    log_ai_call(current.id, "suggest_nutrition", prompt)
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.post(

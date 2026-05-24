@@ -2,14 +2,22 @@ import logging
 from typing import Literal
 
 import httpx
+import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.ai_guard import (
+    check_daily_limit,
+    check_rate_limit,
+    log_ai_call,
+    validate_name,
+)
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import CurrentRestaurant, get_current_restaurant
 from app.core.plan_limits import get_limits
+from app.core.redis_client import get_redis
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -67,8 +75,18 @@ async def generate_description(
     body: GenerateDescriptionRequest,
     current: CurrentRestaurant = Depends(get_current_restaurant),
     _db: AsyncSession = Depends(get_db),
+    redis: aioredis.Redis = Depends(get_redis),
 ) -> GenerateDescriptionResponse:
     _require_ai_description(current.plan)
+
+    # Input validation
+    validate_name(body.name)
+
+    # Rate limit: 10 requests / minute per restaurant
+    await check_rate_limit(redis, current.id, "generate_description", 10, 60)
+
+    # Daily quota: 50 requests / day per restaurant
+    await check_daily_limit(redis, current.id, "generate_description", 50)
 
     cat_part = body.category_name or "не указана"
     lang_name = _LANGUAGE_NAMES.get(body.language, body.language)
@@ -83,6 +101,8 @@ async def generate_description(
         f"Язык: {lang_name}. "
         f"Верни ТОЛЬКО текст описания без кавычек, заголовков и пояснений."
     )
+
+    log_ai_call(current.id, "generate_description", prompt)
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.post(
