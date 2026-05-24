@@ -46,3 +46,16 @@ export async function suggestNutrition(
   });
   return data;
 }
+
+export interface GenerateDescriptionParams {
+  name: string;
+  category_name?: string | null;
+  length: 'short' | 'medium' | 'long';
+  style: 'classic' | 'appetizing' | 'premium';
+  language: 'ru' | 'kz' | 'en';
+}
+
+export async function generateDescription(params: GenerateDescriptionParams): Promise<string> {
+  const { data } = await adminApi.post('/api/v1/admin/items/generate-description', params);
+  return data.description;
+}

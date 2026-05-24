@@ -1,0 +1,247 @@
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--backdrop-bg);
+  backdrop-filter: blur(4px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.panel {
+  background: var(--cream-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 0.5px solid var(--cream-border);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.titleIcon {
+  color: var(--accent-gold);
+}
+
+.closeBtn {
+  background: var(--cream-muted);
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-secondary);
+  flex-shrink: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.optionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optionLabel {
+  font-size: 11px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.segmented {
+  display: flex;
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--cream-muted);
+}
+
+.segBtn {
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  border-right: 0.5px solid var(--cream-border);
+}
+
+.segBtn:last-child {
+  border-right: none;
+}
+
+.segBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.segBtnActive {
+  background: var(--ink-primary);
+  color: var(--cream-bg);
+  font-weight: 600;
+}
+
+.segBtnActive:disabled {
+  opacity: 0.7;
+}
+
+.btnGenerate {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--accent-gold);
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+
+.btnGenerate:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btnGenerate:not(:disabled):hover {
+  opacity: 0.88;
+}
+
+.previewBlock {
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  background: var(--cream-muted);
+}
+
+.previewLabel {
+  font-size: 10px;
+  font-family: var(--font-ui);
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.previewText {
+  margin: 0;
+  font-size: 14px;
+  font-family: var(--font-ui);
+  color: var(--ink-primary);
+  line-height: 1.55;
+}
+
+.footer {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px 20px;
+}
+
+.btnRegenerate {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--cream-border);
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: border-color 0.15s;
+}
+
+.btnRegenerate:hover:not(:disabled) {
+  border-color: var(--accent-gold);
+}
+
+.btnRegenerate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnInsert {
+  flex: 1.5;
+  padding: 11px;
+  border-radius: var(--radius-md);
+  background: var(--accent-gold);
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+
+.btnInsert:hover {
+  opacity: 0.88;
+}
+
+.spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+.spinnerDark {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--cream-border);
+  border-top-color: var(--ink-secondary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}

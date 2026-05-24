@@ -12,6 +12,7 @@ import { isPlanLimitError, getPlanLimitDetail } from '../../../utils/planLimitEr
 import PlanLimitModal from '../../../components/PlanLimitModal';
 import type { PlanLimitDetail } from '../../../utils/planLimitError';
 import ImageUpload from './ImageUpload';
+import GenerateDescriptionModal from './GenerateDescriptionModal';
 import styles from './ItemFormModal.module.css';
 
 const SNAP_TRANSITION = 'transform 0.42s cubic-bezier(0.32,0.72,0,1), height 0.42s cubic-bezier(0.32,0.72,0,1), border-radius 0.3s ease';
@@ -64,12 +65,14 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
   const { restaurant } = useAuth();
   const canTranslate = restaurant?.plan === 'business' || restaurant?.plan === 'pro';
   const canNutrition = restaurant?.plan === 'business' || restaurant?.plan === 'pro';
+  const canDescription = restaurant?.plan === 'pro';
 
   const [snapPoint,  setSnapPoint]  = useState<'default' | 'fullscreen'>('default');
   const [dragY,      setDragY]      = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [translating, setTranslating] = useState(false);
   const [suggestingNutrition, setSuggestingNutrition] = useState(false);
+  const [generateDescOpen, setGenerateDescOpen] = useState(false);
   const [planLimitDetail, setPlanLimitDetail] = useState<PlanLimitDetail | null>(null);
   const dragStartClientY = useRef(0);
 
@@ -330,7 +333,28 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                     </FormField>
 
                     {/* Description */}
-                    <FormField label="Описание">
+                    <div>
+                      <div className={styles.descLabelRow}>
+                        <span className={styles.descLabel}>Описание</span>
+                        <button
+                          type="button"
+                          className={styles.descAiBtn}
+                          title={canDescription ? 'Сгенерировать описание через AI' : 'Доступно только на тарифе Про'}
+                          onClick={() => {
+                            if (!canDescription) {
+                              setPlanLimitDetail({
+                                code: 'PLAN_LIMIT_REACHED',
+                                message: 'AI-генерация описаний доступна только на тарифе Про.',
+                                upgrade_to: 'pro',
+                              });
+                            } else {
+                              setGenerateDescOpen(true);
+                            }
+                          }}
+                        >
+                          <Icon name="sparkles" size={13} />
+                        </button>
+                      </div>
                       <textarea
                         id="item-description"
                         {...register('description')}
@@ -339,7 +363,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                         className={styles.textareaField}
                         style={INPUT_STYLE}
                       />
-                    </FormField>
+                    </div>
 
                     {/* Price + Prep time */}
                     <div className={styles.priceGrid}>
@@ -522,6 +546,14 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
           </>
         )}
       </AnimatePresence>
+
+      <GenerateDescriptionModal
+        isOpen={generateDescOpen}
+        itemName={watch('name')}
+        categoryName={categories.find(c => c.id === watch('category_id'))?.name ?? null}
+        onInsert={(text) => setValue('description', text)}
+        onClose={() => setGenerateDescOpen(false)}
+      />
 
       <PlanLimitModal detail={planLimitDetail} onClose={() => setPlanLimitDetail(null)} />
     </>
