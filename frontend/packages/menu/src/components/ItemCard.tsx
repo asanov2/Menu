@@ -63,6 +63,20 @@ function ItemImage({
   );
 }
 
+function NutritionBadge({ item }: { item: MenuItem }) {
+  if (item.calories == null) return null;
+  const parts: string[] = [`~${item.calories} ккал`];
+  if (item.protein != null) parts.push(`Б ${item.protein}`);
+  if (item.fat != null) parts.push(`Ж ${item.fat}`);
+  if (item.carbs != null) parts.push(`У ${item.carbs}`);
+  return (
+    <span className={styles.nutritionBadge}>
+      <i className="ti ti-flame" style={{ fontSize: 9 }} />
+      {parts.join(' · ')}
+    </span>
+  );
+}
+
 function ListCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
   const hasBadges = (item.tags ?? []).length > 0 || !item.is_available;
   return (
@@ -93,6 +107,7 @@ function ListCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
         {item.description && (
           <div className={styles.listDesc}>{item.description}</div>
         )}
+        <NutritionBadge item={item} />
       </div>
 
       <div className={styles.listPriceSide}>
@@ -134,6 +149,7 @@ function CardCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
           {item.tags?.[0] && <TagBadge tag={item.tags[0]} />}
         </div>
         <div className={styles.cardName}>{item.name}</div>
+        <NutritionBadge item={item} />
         <div className={styles.cardPriceRow}>
           <span className={styles.cardPrice}>{formatPrice(item.price)}</span>
           {item.preparation_time && <PrepBadge minutes={item.preparation_time} />}
@@ -172,6 +188,7 @@ function GalleryCard({ item, onClick }: { item: MenuItem; onClick: () => void })
       </div>
       <div className={styles.galleryTextArea}>
         <div className={styles.galleryName}>{item.name}</div>
+        <NutritionBadge item={item} />
         <div className={styles.galleryPriceRow}>
           <span className={styles.galleryPrice}>{formatPrice(item.price)}</span>
           {item.preparation_time && <PrepBadge minutes={item.preparation_time} />}

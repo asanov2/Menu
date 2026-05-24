@@ -308,3 +308,60 @@
   animation: spin 0.6s linear infinite;
   display: inline-block;
 }
+
+/* ── Nutrition section ── */
+
+.nutritionSection {
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px 14px;
+  background: var(--cream-muted);
+}
+
+.nutritionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.nutritionTitle {
+  font-size: 11px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nutritionAiBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--cream-border);
+  background: var(--cream-surface);
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.nutritionAiBtn:hover:not(:disabled) {
+  border-color: var(--accent-gold);
+  background: color-mix(in srgb, var(--accent-gold) 8%, var(--cream-surface));
+  color: var(--ink-primary);
+}
+
+.nutritionAiBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.nutritionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}

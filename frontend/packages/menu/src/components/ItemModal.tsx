@@ -172,6 +172,23 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                     <div className={styles.itemDesc}>{item.description}</div>
                   )}
 
+                  {item.calories != null && (
+                    <div className={styles.nutritionRow}>
+                      <i className="ti ti-flame" style={{ fontSize: 12, flexShrink: 0 }} />
+                      <span>~{item.calories} ккал</span>
+                      {item.protein != null && (
+                        <span className={styles.nutritionChip}>Б {item.protein} г</span>
+                      )}
+                      {item.fat != null && (
+                        <span className={styles.nutritionChip}>Ж {item.fat} г</span>
+                      )}
+                      {item.carbs != null && (
+                        <span className={styles.nutritionChip}>У {item.carbs} г</span>
+                      )}
+                      <span className={styles.nutritionPer}>на 100 г</span>
+                    </div>
+                  )}
+
                   <div className={styles.divider} />
 
                   <div className={styles.bottomRow}>

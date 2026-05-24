@@ -182,3 +182,32 @@
 .safeArea {
   height: env(safe-area-inset-bottom, 8px);
 }
+
+/* ─── Nutrition row ─── */
+
+.nutritionRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+}
+
+.nutritionChip {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--cream-muted);
+  border: 0.5px solid var(--cream-border);
+  font-size: 11px;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+
+.nutritionPer {
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  margin-left: auto;
+}

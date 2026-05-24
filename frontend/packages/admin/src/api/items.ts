@@ -1,4 +1,3 @@
-// === FILE: frontend/packages/admin/src/api/items.ts ===
 import { adminApi } from '@qrmenu/ui';
 import type { MenuItem } from '@qrmenu/ui';
 
@@ -28,4 +27,22 @@ export async function toggleAvailable(id: string): Promise<MenuItem> {
 
 export async function reorderItems(items: { id: string; sort_order: number }[]): Promise<void> {
   await adminApi.put('/api/v1/admin/items/reorder', items);
+}
+
+export interface NutritionSuggestion {
+  calories: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+}
+
+export async function suggestNutrition(
+  name: string,
+  description?: string | null,
+): Promise<NutritionSuggestion> {
+  const { data } = await adminApi.post('/api/v1/admin/items/suggest-nutrition', {
+    name,
+    description: description ?? null,
+  });
+  return data;
 }

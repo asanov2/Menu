@@ -36,6 +36,10 @@ export interface MenuItem {
   tags: string[];
   sort_order: number;
   category_id: string;
+  calories: number | null;
+  protein: number | null;
+  fat: number | null;
+  carbs: number | null;
 }
 
 // ── API responses ─────────────────────────────────────────────────────────────

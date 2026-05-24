@@ -33,6 +33,10 @@ class ItemResponse(BaseModel):
     sort_order: int
     preparation_time: int | None = None
     tags: list[str] = []
+    calories: float | None = None
+    protein: float | None = None
+    fat: float | None = None
+    carbs: float | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -86,6 +90,10 @@ class ItemsFilterResponse(BaseModel):
     sort_order: int
     preparation_time: int | None = None
     tags: list[str] = []
+    calories: float | None = None
+    protein: float | None = None
+    fat: float | None = None
+    carbs: float | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

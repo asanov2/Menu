@@ -93,6 +93,10 @@ class ItemCreate(BaseModel):
     sort_order: int = 0
     preparation_time: int | None = None
     tags: list[str] | None = None
+    calories: float | None = None
+    protein: float | None = None
+    fat: float | None = None
+    carbs: float | None = None
 
 
 class ItemUpdate(BaseModel):
@@ -104,6 +108,10 @@ class ItemUpdate(BaseModel):
     sort_order: int | None = None
     preparation_time: int | None = None
     tags: list[str] | None = None
+    calories: float | None = None
+    protein: float | None = None
+    fat: float | None = None
+    carbs: float | None = None
 
 
 class ItemReorderItem(BaseModel):
@@ -123,6 +131,10 @@ class ItemResponse(BaseModel):
     sort_order: int
     preparation_time: int | None
     tags: list[str] | None
+    calories: float | None = None
+    protein: float | None = None
+    fat: float | None = None
+    carbs: float | None = None
     created_at: datetime
     updated_at: datetime
 

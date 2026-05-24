@@ -322,3 +322,18 @@
   color: var(--ink-primary);
   font-family: var(--font-ui);
 }
+
+/* ─── Nutrition badge ─── */
+
+.nutritionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-family: var(--font-ui);
+  color: var(--ink-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
