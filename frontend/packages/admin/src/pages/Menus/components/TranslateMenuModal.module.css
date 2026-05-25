@@ -175,3 +175,67 @@
   animation: spin 0.6s linear infinite;
   flex-shrink: 0;
 }
+
+@media (max-width: 768px) {
+  /* Bottom-sheet positioning */
+  .backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .panel {
+    max-width: 100%;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  /* Drag handle visual */
+  .header {
+    padding-top: 24px;
+    position: relative;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    translate: -50%;
+    width: 36px;
+    height: 4px;
+    background: var(--cream-border);
+    border-radius: 2px;
+  }
+
+  /* Bigger close button */
+  .closeBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Bigger lang rows */
+  .langRow {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .checkbox {
+    width: 20px;
+    height: 20px;
+  }
+
+  .langLabel {
+    font-size: 15px;
+  }
+
+  /* Footer buttons */
+  .footer {
+    padding: 14px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    gap: 8px;
+  }
+
+  .btnCancel,
+  .btnTranslate {
+    min-height: 48px;
+    font-size: 15px;
+  }
+}

@@ -15,14 +15,6 @@
   gap: 10px;
 }
 
-.dragHandle {
-  cursor: grab;
-  color: var(--ink-tertiary);
-  font-size: 16px;
-  flex-shrink: 0;
-  user-select: none;
-}
-
 .catName {
   flex: 1;
   font-family: var(--font-display);
@@ -86,8 +78,8 @@
 @media (max-width: 768px) {
   .editBtn,
   .deleteBtn {
-    min-width: 36px;
-    min-height: 36px;
+    min-width: 44px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -96,5 +88,10 @@
   .addBtn {
     min-height: 44px;
     padding: 8px 0;
+    font-size: 14px;
+  }
+
+  .catName {
+    font-size: 15px;
   }
 }

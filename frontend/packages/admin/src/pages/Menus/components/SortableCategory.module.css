@@ -24,3 +24,10 @@
 .dragHandle:active {
   cursor: grabbing;
 }
+
+@media (max-width: 768px) {
+  .dragHandle {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

@@ -535,3 +535,87 @@
   border-color: var(--accent-gold);
   color: var(--ink-secondary);
 }
+
+/* ── Mobile overrides ── */
+@media (max-width: 768px) {
+  /* Header buttons: 44×44 touch targets */
+  .headerBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .headerRow {
+    padding: 0 16px 12px;
+  }
+
+  .headerTitle {
+    font-size: 18px;
+  }
+
+  .imageWrapper {
+    padding: 0 16px 12px;
+  }
+
+  .scrollArea {
+    padding: 14px 16px;
+    gap: 16px;
+  }
+
+  /* Translate button: 44×44 */
+  .translateBtn {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+  }
+
+  /* Description AI button: larger tap area */
+  .descAiBtn {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* КБЖУ: 4 col → 2×2 grid */
+  .nutritionGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Tag buttons: bigger touch target */
+  .tagBtn {
+    padding: 8px 14px;
+    min-height: 36px;
+    font-size: 13px;
+  }
+
+  /* Allergen tags: bigger touch target */
+  .allergenTag {
+    padding: 8px 12px;
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  /* Footer buttons */
+  .footer {
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    gap: 8px;
+  }
+
+  .btnCancel,
+  .btnSubmit {
+    min-height: 48px;
+    font-size: 15px;
+  }
+
+  /* Nutrition AI button */
+  .nutritionAiBtn {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-height: 36px;
+  }
+
+  /* Price grid: stays 2-col on mobile since it's short fields */
+  .priceGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}

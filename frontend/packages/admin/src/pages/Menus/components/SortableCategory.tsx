@@ -1,19 +1,18 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Icon } from '@qrmenu/ui';
-import type { MenuItem } from '@qrmenu/ui';
-import ItemRow from './ItemRow';
-import styles from './SortableItem.module.css';
+import type { Category } from '@qrmenu/ui';
+import CategorySection from './CategorySection';
+import styles from './SortableCategory.module.css';
 
-interface SortableItemProps {
-  item: MenuItem;
-  categoryId: string;
+interface SortableCategoryProps {
+  category: Category;
+  allCategories: Category[];
   menuId: string;
-  onEdit: (item: MenuItem) => void;
 }
 
-export default function SortableItem({ item, categoryId, menuId, onEdit }: SortableItemProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+export default function SortableCategory({ category, allCategories, menuId }: SortableCategoryProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: category.id });
 
   const dragHandle = (
     <div
@@ -35,7 +34,12 @@ export default function SortableItem({ item, categoryId, menuId, onEdit }: Sorta
         transition,
       }}
     >
-      <ItemRow item={item} categoryId={categoryId} menuId={menuId} onEdit={onEdit} dragHandle={dragHandle} />
+      <CategorySection
+        category={category}
+        allCategories={allCategories}
+        menuId={menuId}
+        dragHandle={dragHandle}
+      />
     </div>
   );
 }

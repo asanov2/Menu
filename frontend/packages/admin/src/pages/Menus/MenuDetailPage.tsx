@@ -4,50 +4,27 @@ import { useState } from 'react';
 import {
   DndContext,
   closestCenter,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
 import {
   SortableContext,
   verticalListSortingStrategy,
-  useSortable,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { Skeleton, EmptyState, useToast, Icon } from '@qrmenu/ui';
-import type { Category } from '@qrmenu/ui';
 import { getMenu } from '../../api/menus';
 import { getCategories, createCategory } from '../../api/categories';
-import { useAuth } from '../../hooks/useAuth';
+ import { useAuth } from '../../hooks/useAuth';
 import type { PlanLimitDetail } from '../../utils/planLimitError';
 import PlanLimitModal from '../../components/PlanLimitModal';
-import CategorySection from './components/CategorySection';
+import SortableCategory from './components/SortableCategory';
 import CategoryFormModal from './components/CategoryFormModal';
 import TranslateMenuModal from './components/TranslateMenuModal';
 import { useCategoryDnd } from './hooks/useCategoryDnd';
 import styles from './MenuDetailPage.module.css';
 import common from '../../styles/common.module.css';
-
-function SortableCategory({ category, allCategories, menuId }: { category: Category; allCategories: Category[]; menuId: string }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: category.id });
-  return (
-    <div
-      ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-      }}
-    >
-      <CategorySection
-        category={category}
-        allCategories={allCategories}
-        menuId={menuId}
-        dragHandleProps={{ ...attributes, ...listeners }}
-      />
-    </div>
-  );
-}
 
 export default function MenuDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -74,7 +51,10 @@ export default function MenuDetailPage() {
     setTranslateOpen(true);
   };
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { distance: 5 } }),
+  );
   const { handleDragEnd } = useCategoryDnd(id!);
 
   const { data: menu, isLoading: menuLoading } = useQuery({

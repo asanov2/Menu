@@ -61,15 +61,41 @@
 }
 
 @media (max-width: 768px) {
+  /* Backdrop: align panel to bottom */
+  .backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  /* Panel: full-width bottom sheet */
+  .panel {
+    max-width: 100%;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Visual drag handle bar at top */
+  .panel::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--cream-border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
   .actions {
     justify-content: stretch;
     flex-direction: row;
+    gap: 8px;
   }
 
   .btnCancel,
   .btnSubmit {
     flex: 1;
-    min-height: 44px;
+    min-height: 48px;
     text-align: center;
+    font-size: 15px;
   }
 }

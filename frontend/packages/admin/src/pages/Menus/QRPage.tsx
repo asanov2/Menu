@@ -90,9 +90,9 @@ export default function QRPage() {
 
           {/* Download buttons */}
           <div className={`${styles.noPrint} ${styles.downloadRow}`}>
-            <button onClick={downloadPNG} className={styles.btnDownload}>⬇ PNG</button>
-            <button onClick={downloadSVG} className={styles.btnDownload}>⬇ SVG</button>
-            <button onClick={() => window.print()} className={styles.btnPrint}><Icon name="printer" size={16} /> Печать</button>
+            <button onClick={downloadPNG} className={styles.btnDownload}><Icon name="download" size={15} /> PNG</button>
+            <button onClick={downloadSVG} className={styles.btnDownload}><Icon name="download" size={15} /> SVG</button>
+            <button onClick={() => window.print()} className={styles.btnPrint}><Icon name="printer" size={15} /> Печать</button>
           </div>
         </div>
       </div>

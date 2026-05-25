@@ -245,3 +245,76 @@
   animation: spin 0.6s linear infinite;
   display: inline-block;
 }
+
+@media (max-width: 768px) {
+  /* Bottom-sheet */
+  .backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .panel {
+    max-width: 100%;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .header {
+    padding-top: 24px;
+    position: relative;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    translate: -50%;
+    width: 36px;
+    height: 4px;
+    background: var(--cream-border);
+    border-radius: 2px;
+  }
+
+  /* Bigger close button */
+  .closeBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Body padding */
+  .body {
+    padding: 16px 20px;
+    gap: 14px;
+  }
+
+  /* Segmented buttons: taller touch targets */
+  .segBtn {
+    min-height: 44px;
+    padding: 10px 4px;
+    font-size: 13px;
+  }
+
+  /* Generate button */
+  .btnGenerate {
+    min-height: 48px;
+    font-size: 15px;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 0 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    gap: 8px;
+  }
+
+  .btnRegenerate,
+  .btnInsert {
+    min-height: 48px;
+    font-size: 14px;
+  }
+
+  /* Preview text */
+  .previewText {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+}

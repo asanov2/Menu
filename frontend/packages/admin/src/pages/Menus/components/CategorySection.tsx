@@ -4,7 +4,8 @@ import {
   DndContext,
   closestCenter,
   DragEndEvent,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -30,10 +31,10 @@ interface CategorySectionProps {
   category: Category;
   allCategories: Category[];
   menuId: string;
-  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  dragHandle?: React.ReactNode;
 }
 
-export default function CategorySection({ category, allCategories, menuId, dragHandleProps }: CategorySectionProps) {
+export default function CategorySection({ category, allCategories, menuId, dragHandle }: CategorySectionProps) {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { data: items = [] } = useQuery<MenuItem[]>({
@@ -48,7 +49,10 @@ export default function CategorySection({ category, allCategories, menuId, dragH
   const [confirmDel, setConfirmDel] = useState(false);
   const [planLimitDetail, setPlanLimitDetail] = useState<PlanLimitDetail | null>(null);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { distance: 5 } }),
+  );
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -126,7 +130,7 @@ export default function CategorySection({ category, allCategories, menuId, dragH
       <div className={styles.card}>
         {/* Category header */}
         <div className={styles.header}>
-          <div {...dragHandleProps} className={styles.dragHandle}>⠿</div>
+          {dragHandle}
           <div className={styles.catName}>
             {category.name}
           </div>

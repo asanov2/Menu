@@ -103,19 +103,38 @@
   .actions {
     flex-wrap: wrap;
     gap: 8px;
+    width: 100%;
   }
 
   .btnPreview {
     min-height: 44px;
     padding: 10px 14px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .btnTranslate {
+    min-height: 44px;
+    padding: 10px 14px;
+    flex: 1;
+    justify-content: center;
   }
 
   .btnPrimary {
     min-height: 44px;
     padding: 10px 16px;
+    width: 100%;
   }
 
   .breadcrumb {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btnPreview,
+  .btnTranslate {
     font-size: 12px;
+    padding: 10px 10px;
   }
 }
