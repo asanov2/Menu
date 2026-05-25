@@ -26,6 +26,7 @@ interface ItemCardProps {
   mode: ItemCardMode;
   onClick: () => void;
   isFlagged?: boolean;
+  onAddToCart?: (item: MenuItem) => void;
 }
 
 function PrepBadge({ minutes }: { minutes: number }) {
@@ -95,7 +96,7 @@ function NutritionBadge({ item }: { item: MenuItem }) {
   );
 }
 
-function ListCard({ item, onClick, isFlagged }: { item: MenuItem; onClick: () => void; isFlagged?: boolean }) {
+function ListCard({ item, onClick, isFlagged, onAddToCart }: { item: MenuItem; onClick: () => void; isFlagged?: boolean; onAddToCart?: (item: MenuItem) => void }) {
   const hasBadges = (item.tags ?? []).length > 0 || !item.is_available;
   const hasMeta = item.calories != null || (item.allergens ?? []).length > 0 || isFlagged;
   return (
@@ -143,12 +144,21 @@ function ListCard({ item, onClick, isFlagged }: { item: MenuItem; onClick: () =>
       <div className={styles.listPriceSide}>
         <span className={styles.listPrice}>{formatPrice(item.price)}</span>
         {item.preparation_time && <PrepBadge minutes={item.preparation_time} />}
+        {onAddToCart && item.is_available && (
+          <button
+            className={styles.addBtn}
+            onClick={(e) => { e.stopPropagation(); onAddToCart(item); }}
+            aria-label="Добавить в корзину"
+          >
+            <i className="ti ti-plus" style={{ fontSize: 14 }} />
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-function CardCard({ item, onClick, isFlagged }: { item: MenuItem; onClick: () => void; isFlagged?: boolean }) {
+function CardCard({ item, onClick, isFlagged, onAddToCart }: { item: MenuItem; onClick: () => void; isFlagged?: boolean; onAddToCart?: (item: MenuItem) => void }) {
   return (
     <div
       onClick={onClick}
@@ -199,13 +209,22 @@ function CardCard({ item, onClick, isFlagged }: { item: MenuItem; onClick: () =>
         <div className={styles.cardPriceRow}>
           <span className={styles.cardPrice}>{formatPrice(item.price)}</span>
           {item.preparation_time && <PrepBadge minutes={item.preparation_time} />}
+          {onAddToCart && item.is_available && (
+            <button
+              className={styles.addBtn}
+              onClick={(e) => { e.stopPropagation(); onAddToCart(item); }}
+              aria-label="Добавить в корзину"
+            >
+              <i className="ti ti-plus" style={{ fontSize: 14 }} />
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function GalleryCard({ item, onClick, isFlagged }: { item: MenuItem; onClick: () => void; isFlagged?: boolean }) {
+function GalleryCard({ item, onClick, isFlagged, onAddToCart }: { item: MenuItem; onClick: () => void; isFlagged?: boolean; onAddToCart?: (item: MenuItem) => void }) {
   return (
     <div
       onClick={onClick}
@@ -255,14 +274,23 @@ function GalleryCard({ item, onClick, isFlagged }: { item: MenuItem; onClick: ()
         <div className={styles.galleryPriceRow}>
           <span className={styles.galleryPrice}>{formatPrice(item.price)}</span>
           {item.preparation_time && <PrepBadge minutes={item.preparation_time} />}
+          {onAddToCart && item.is_available && (
+            <button
+              className={styles.addBtn}
+              onClick={(e) => { e.stopPropagation(); onAddToCart(item); }}
+              aria-label="Добавить в корзину"
+            >
+              <i className="ti ti-plus" style={{ fontSize: 14 }} />
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-export default function ItemCard({ item, mode, onClick, isFlagged }: ItemCardProps) {
-  if (mode === 'list') return <ListCard item={item} onClick={onClick} isFlagged={isFlagged} />;
-  if (mode === 'card') return <CardCard item={item} onClick={onClick} isFlagged={isFlagged} />;
-  return <GalleryCard item={item} onClick={onClick} isFlagged={isFlagged} />;
+export default function ItemCard({ item, mode, onClick, isFlagged, onAddToCart }: ItemCardProps) {
+  if (mode === 'list') return <ListCard item={item} onClick={onClick} isFlagged={isFlagged} onAddToCart={onAddToCart} />;
+  if (mode === 'card') return <CardCard item={item} onClick={onClick} isFlagged={isFlagged} onAddToCart={onAddToCart} />;
+  return <GalleryCard item={item} onClick={onClick} isFlagged={isFlagged} onAddToCart={onAddToCart} />;
 }

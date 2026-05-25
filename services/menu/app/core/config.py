@@ -18,5 +18,7 @@ class Settings(BaseSettings):
     auth_service_url: str = "http://auth-service:8002"
     cache_ttl: int = 300
 
+    telegram_bot_token: str = ""
+
 
 settings = Settings()

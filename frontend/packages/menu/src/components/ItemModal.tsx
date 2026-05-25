@@ -11,9 +11,10 @@ const SNAP_TRANSITION = 'transform 0.42s cubic-bezier(0.32,0.72,0,1), height 0.4
 interface ItemModalProps {
   item: MenuItem | null;
   onClose: () => void;
+  onAddToCart?: (item: MenuItem) => void;
 }
 
-export default function ItemModal({ item, onClose }: ItemModalProps) {
+export default function ItemModal({ item, onClose, onAddToCart }: ItemModalProps) {
   const { t, i18n } = useTranslation();
 
   const [snapPoint,  setSnapPoint]  = useState<'default' | 'fullscreen'>('default');
@@ -227,6 +228,15 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                     <div className={styles.unavailableNotice}>
                       {t('menu.temporarilyUnavailable')}
                     </div>
+                  )}
+
+                  {onAddToCart && item.is_available && (
+                    <button
+                      onClick={() => onAddToCart(item)}
+                      className={styles.addToCartBtn}
+                    >
+                      Добавить в корзину
+                    </button>
                   )}
 
                   <div className={styles.safeArea} />

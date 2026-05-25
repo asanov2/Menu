@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     RABBITMQ_URL: str
     AUTH_SERVICE_URL: str = "http://auth-service:8002"
     INTERNAL_SECRET: str
+    TELEGRAM_BOT_TOKEN: str = ""
 
 
 settings = Settings()

@@ -4,10 +4,11 @@ import { useAuth } from '../hooks/useAuth';
 import styles from './Sidebar.module.css';
 
 const NAV_ITEMS = [
-  { icon: 'chart-bar',      label: 'Дашборд',  to: '/dashboard' },
-  { icon: 'tools-kitchen-2',label: 'Меню',      to: '/menus' },
-  { icon: 'credit-card',    label: 'Подписка',  to: '/billing' },
-  { icon: 'settings',       label: 'Профиль',   to: '/profile' },
+  { icon: 'chart-bar',       label: 'Дашборд',  to: '/dashboard' },
+  { icon: 'tools-kitchen-2', label: 'Меню',      to: '/menus' },
+  { icon: 'brand-telegram',  label: 'Telegram',  to: '/telegram' },
+  { icon: 'credit-card',     label: 'Подписка',  to: '/billing' },
+  { icon: 'settings',        label: 'Профиль',   to: '/profile' },
 ];
 
 export default function Sidebar() {

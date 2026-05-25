@@ -7,9 +7,10 @@ interface ItemGalleryProps {
   items: MenuItem[];
   onItemClick: (item: MenuItem) => void;
   flaggedItemIds?: Set<string>;
+  onAddToCart?: (item: MenuItem) => void;
 }
 
-export default function ItemGallery({ items, onItemClick, flaggedItemIds }: ItemGalleryProps) {
+export default function ItemGallery({ items, onItemClick, flaggedItemIds, onAddToCart }: ItemGalleryProps) {
   return (
     <div className={styles.grid}>
       {items.map((item, i) => (
@@ -21,7 +22,7 @@ export default function ItemGallery({ items, onItemClick, flaggedItemIds }: Item
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.3) }}
         >
-          <ItemCard item={item} mode="gallery" onClick={() => onItemClick(item)} isFlagged={flaggedItemIds?.has(item.id)} />
+          <ItemCard item={item} mode="gallery" onClick={() => onItemClick(item)} isFlagged={flaggedItemIds?.has(item.id)} onAddToCart={onAddToCart} />
         </motion.div>
       ))}
     </div>

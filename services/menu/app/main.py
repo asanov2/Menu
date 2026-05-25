@@ -16,8 +16,31 @@ from app.core.redis_client import close_redis
 logger = logging.getLogger(__name__)
 
 
+def run_migrations() -> None:
+    import subprocess
+    import sys
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "alembic", "upgrade", "head"],
+            capture_output=True,
+            text=True,
+            cwd="/app",
+        )
+        if result.returncode == 0:
+            logger.info("✅ Menu migrations applied successfully")
+            if result.stdout:
+                logger.info(result.stdout)
+        else:
+            logger.error(f"❌ Menu migration failed: {result.stderr}")
+    except Exception as e:
+        logger.error(f"❌ Menu migration error: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, run_migrations)
+
     # fix #23: declare RabbitMQ exchange at startup — not on first request
     try:
         connection = await aio_pika.connect_robust(settings.rabbitmq_url)
@@ -48,7 +71,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 

@@ -10,6 +10,7 @@ import MenuDetailPage from './pages/Menus/MenuDetailPage';
 import QRPage from './pages/Menus/QRPage';
 import BillingPage from './pages/Billing/BillingPage';
 import ProfilePage from './pages/Profile/ProfilePage';
+import TelegramPage from './pages/Telegram/TelegramPage';
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/menus/:id/qr" element={<PrivateRoute><QRPage /></PrivateRoute>} />
         <Route path="/billing" element={<PrivateRoute><BillingPage /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+        <Route path="/telegram" element={<PrivateRoute><TelegramPage /></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </ToastProvider>

@@ -179,6 +179,26 @@
   text-align: center;
 }
 
+.addToCartBtn {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  background: var(--ink-primary, #1a1208);
+  color: #fdfaf5;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.16s;
+  margin-top: 4px;
+}
+
+.addToCartBtn:hover {
+  opacity: 0.88;
+}
+
 .safeArea {
   height: env(safe-area-inset-bottom, 8px);
 }

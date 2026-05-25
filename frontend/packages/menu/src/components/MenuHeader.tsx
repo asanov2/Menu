@@ -17,6 +17,8 @@ interface MenuHeaderProps {
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
   onSearchToggle?: () => void;
+  cartCount?: number;
+  onCartOpen?: () => void;
 }
 
 const LANGS: { code: Language; label: string }[] = [
@@ -36,6 +38,8 @@ export default function MenuHeader({
   viewMode,
   onViewModeChange,
   onSearchToggle,
+  cartCount = 0,
+  onCartOpen,
 }: MenuHeaderProps) {
   const { t } = useTranslation();
 
@@ -52,6 +56,19 @@ export default function MenuHeader({
         </div>
 
         <div className={styles.actions}>
+          {onCartOpen && (
+            <button
+              onClick={onCartOpen}
+              className={styles.cartBtn}
+              aria-label="Корзина"
+            >
+              <i className="ti ti-shopping-cart" style={{ fontSize: 18 }} />
+              {cartCount > 0 && (
+                <span className={styles.cartBadge}>{cartCount}</span>
+              )}
+            </button>
+          )}
+
           <button
             onClick={onSearchToggle}
             className={styles.searchBtn}

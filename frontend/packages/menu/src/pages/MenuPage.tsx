@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { useMenu } from '../hooks/useMenu';
 import { useSearch } from '../hooks/useSearch';
-import { trackItemView } from '../api/menu';
+import { useCart } from '../hooks/useCart';
+import { trackItemView, getOrderConfig, type OrderConfig } from '../api/menu';
 import type { MenuItem } from '@qrmenu/ui';
 import MenuHeader from '../components/MenuHeader';
 import SearchBar from '../components/SearchBar';
@@ -11,6 +13,7 @@ import ItemList from '../components/ItemList';
 import ItemGrid from '../components/ItemGrid';
 import ItemGallery from '../components/ItemGallery';
 import ItemModal from '../components/ItemModal';
+import CartModal from '../components/CartModal';
 import WaiterButton from '../components/WaiterButton';
 import SkeletonLoader from '../components/SkeletonLoader';
 import ViewToggle, { ViewMode } from '../components/ViewToggle';
@@ -20,6 +23,8 @@ import styles from './MenuPage.module.css';
 
 type Language = 'ru' | 'kz' | 'en';
 const VIEW_PREF_KEY = 'menu_view_preference';
+
+const DEFAULT_CONFIG: OrderConfig = { orders_enabled: false, preorders_enabled: false, tables_count: 10 };
 
 export default function MenuPage() {
   const { data, isLoading, error, slug, lang, setLang, table } = useMenu();
@@ -31,6 +36,19 @@ export default function MenuPage() {
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const cart = useCart(slug ?? '');
+
+  const { data: orderConfig = DEFAULT_CONFIG } = useQuery<OrderConfig>({
+    queryKey: ['order-config', slug],
+    queryFn: () => getOrderConfig(slug!),
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  const ordersAvailable = orderConfig.orders_enabled || orderConfig.preorders_enabled;
 
   const visibleCategories = useMemo(
     () => (data?.categories ?? []).filter((c) => c.is_visible),
@@ -93,7 +111,12 @@ export default function MenuPage() {
   };
 
   const renderItems = () => {
-    const props = { items: displayItems, onItemClick: handleItemClick, flaggedItemIds };
+    const props = {
+      items: displayItems,
+      onItemClick: handleItemClick,
+      flaggedItemIds,
+      onAddToCart: ordersAvailable ? (item: MenuItem) => cart.addItem({ item_id: item.id, name: item.name, price: item.price }) : undefined,
+    };
     switch (viewMode) {
       case 'card':    return <ItemGrid {...props} />;
       case 'gallery': return <ItemGallery {...props} />;
@@ -115,6 +138,8 @@ export default function MenuPage() {
           viewMode={viewMode}
           onViewModeChange={handleViewModeChange}
           onSearchToggle={() => setShowSearch((prev) => !prev)}
+          cartCount={ordersAvailable ? cart.totalCount : 0}
+          onCartOpen={ordersAvailable ? () => setCartOpen(true) : undefined}
         />
 
         <AnimatePresence>
@@ -158,7 +183,28 @@ export default function MenuPage() {
         </div>
       )}
 
-      <ItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+      <ItemModal
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+        onAddToCart={ordersAvailable ? (item) => {
+          cart.addItem({ item_id: item.id, name: item.name, price: item.price });
+          setSelectedItem(null);
+        } : undefined}
+      />
+
+      {ordersAvailable && (
+        <CartModal
+          open={cartOpen}
+          onClose={() => setCartOpen(false)}
+          items={cart.items}
+          totalPrice={cart.totalPrice}
+          onUpdateQty={cart.updateQuantity}
+          onRemove={cart.removeItem}
+          onClear={cart.clearCart}
+          config={orderConfig}
+          slug={slug ?? ''}
+        />
+      )}
 
       {table && slug && (
         <WaiterButton slug={slug} table={parseInt(table, 10)} />

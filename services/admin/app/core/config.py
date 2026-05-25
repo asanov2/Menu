@@ -27,5 +27,8 @@ class Settings(BaseSettings):
 
     gemini_api_key: str = ""
 
+    telegram_bot_token: str = ""
+    telegram_bot_username: str = "qrmenuskz_bot"
+
 
 settings = Settings()

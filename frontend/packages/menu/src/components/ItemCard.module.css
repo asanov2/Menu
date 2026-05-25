@@ -1,3 +1,27 @@
+/* ─── Add to cart button ─── */
+
+.addBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--cream-border, #e8e0d4);
+  background: var(--cream-bg, #fdfaf5);
+  color: var(--ink-primary, #1a1208);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.14s, border-color 0.14s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.addBtn:hover {
+  background: var(--ink-primary, #1a1208);
+  border-color: var(--ink-primary, #1a1208);
+  color: #fdfaf5;
+}
+
 /* ─── Shared badges ─── */
 
 .prepBadge {

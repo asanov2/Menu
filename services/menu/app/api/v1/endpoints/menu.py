@@ -15,6 +15,7 @@ from app.schemas.menu import (
     MenuPageResponse,
     RestaurantInfo,
 )
+from app.schemas.order import OrderConfigResponse, OrderCreate, OrderResponse
 from app.services.cache_service import (
     get_cached_categories,
     get_cached_items,
@@ -24,6 +25,7 @@ from app.services.cache_service import (
     set_cached_menu,
 )
 from app.services.menu_service import MenuService
+from app.services.order_service import create_order as _create_order, get_order_config as _get_order_config
 
 router = APIRouter()
 
@@ -169,3 +171,33 @@ async def get_items(
     response = [ItemsFilterResponse.model_validate(i) for i in items]
     await set_cached_items(slug, category_id, available_only, [r.model_dump(mode="json") for r in response])
     return response
+
+
+@router.get("/{slug}/order-config", response_model=OrderConfigResponse)
+async def get_order_config(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+) -> OrderConfigResponse:
+    service = MenuService(db)
+    restaurant, _ = await service.get_full_menu(slug)
+    tg_settings = await _get_order_config(db, restaurant)
+    if not tg_settings or restaurant.plan not in ("business", "pro"):
+        return OrderConfigResponse(orders_enabled=False, preorders_enabled=False, tables_count=10)
+    return OrderConfigResponse(
+        orders_enabled=tg_settings.orders_enabled,
+        preorders_enabled=tg_settings.preorders_enabled,
+        tables_count=tg_settings.tables_count,
+    )
+
+
+@router.post("/{slug}/order", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
+async def create_order(
+    slug: str,
+    body: OrderCreate,
+    db: AsyncSession = Depends(get_db),
+) -> OrderResponse:
+    service = MenuService(db)
+    restaurant, menu = await service.get_full_menu(slug)
+    order = await _create_order(db, restaurant, menu.id, body)
+    msg = "Заказ принят! Ожидайте звонка" if body.order_type == "preorder" else "Заказ передан на кухню"
+    return OrderResponse(order_id=str(order.id), message=msg)

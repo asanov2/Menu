@@ -12,8 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.core.config import settings
 from app.core.database import Base
-from app.models.menu import Category, Item, ItemAllergen, Menu  # noqa: F401 — registers tables in metadata
-from app.models.telegram import RestaurantTelegramSettings  # noqa: F401
+from app.models.order import Order  # noqa: F401 — registers table in metadata
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)
@@ -23,8 +22,7 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-# Isolated version table so auth and admin alembic don't conflict in the shared DB
-VERSION_TABLE = "admin_alembic_version"
+VERSION_TABLE = "menu_alembic_version"
 
 
 def run_migrations_offline() -> None:

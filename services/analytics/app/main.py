@@ -12,6 +12,7 @@ from app.core.auth_client import auth_client
 from app.core.config import settings
 from app.core.consumer import start_consumer, stop_consumer
 from app.services.aggregate_service import aggregate_yesterday
+from app.services.telegram_notify import send_daily_summaries
 
 logging.basicConfig(
     level=logging.DEBUG if settings.DEBUG else logging.INFO,
@@ -57,6 +58,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         hour=1,
         minute=0,
         id="aggregate_yesterday",
+        replace_existing=True,
+    )
+    async def _run_daily_summaries() -> None:
+        await send_daily_summaries(settings.TELEGRAM_BOT_TOKEN)
+
+    # 09:00 Asia/Almaty = 04:00 UTC
+    scheduler.add_job(
+        _run_daily_summaries,
+        trigger="cron",
+        hour=4,
+        minute=0,
+        id="telegram_daily_summary",
         replace_existing=True,
     )
     scheduler.start()
