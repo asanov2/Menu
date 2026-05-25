@@ -93,7 +93,11 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
       const res = await translateItem(item.id, ['kz', 'en']);
       showToast(`Переведено ${res.translated_items} блюдо`, 'success');
     } catch (err) {
-      showToast(getApiErrorMessage(err, 'Ошибка перевода'), 'error');
+      if (isPlanLimitError(err)) {
+        setPlanLimitDetail(getPlanLimitDetail(err));
+      } else {
+        showToast(getApiErrorMessage(err, 'Ошибка перевода'), 'error');
+      }
     } finally {
       setTranslating(false);
     }
@@ -467,74 +471,108 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                     {/* ── Nutrition section ── */}
                     <div className={styles.nutritionSection}>
                       <div className={styles.nutritionHeader}>
-                        <span className={styles.nutritionTitle}>Пищевая ценность</span>
+                        <div className={styles.nutritionTitleRow}>
+                          <span className={styles.nutritionTitle}>Пищевая ценность</span>
+                          {!canNutrition && (
+                            <span className={styles.nutritionLockBadge}>
+                              <Icon name="lock" size={10} />
+                              Бизнес и выше
+                            </span>
+                          )}
+                        </div>
                         <button
                           type="button"
                           className={styles.nutritionAiBtn}
-                          disabled={suggestingNutrition}
-                          onClick={handleSuggestNutrition}
+                          disabled={suggestingNutrition && canNutrition}
+                          onClick={() => {
+                            if (!canNutrition) {
+                              setPlanLimitDetail({
+                                code: 'PLAN_LIMIT_REACHED',
+                                message: 'AI-помощник КБЖУ доступен только на тарифе Бизнес и выше.',
+                                upgrade_to: 'business',
+                              });
+                            } else {
+                              handleSuggestNutrition();
+                            }
+                          }}
                           title={canNutrition ? 'Заполнить КБЖУ через AI' : 'Доступно на тарифе Бизнес и выше'}
                         >
-                          {suggestingNutrition
+                          {suggestingNutrition && canNutrition
                             ? <span className={styles.spinnerDark} />
                             : <Icon name="sparkles" size={13} />
                           }
                           <span>Заполнить AI</span>
                         </button>
                       </div>
-                      <div className={styles.nutritionGrid}>
-                        <FormField label="Калории (ккал)">
-                          <input
-                            {...register('calories')}
-                            type="number"
-                            min={0}
-                            max={9999}
-                            step="0.1"
-                            placeholder="—"
-                            onFocus={(e) => e.target.select()}
-                            className={styles.focusField}
-                            style={INPUT_STYLE}
+                      <div className={styles.nutritionGridWrap}>
+                        <div className={`${styles.nutritionGrid} ${!canNutrition ? styles.nutritionGridLocked : ''}`}>
+                          <FormField label="Калории (ккал)">
+                            <input
+                              {...register('calories')}
+                              type="number"
+                              min={0}
+                              max={9999}
+                              step="0.1"
+                              placeholder="—"
+                              disabled={!canNutrition}
+                              onFocus={(e) => e.target.select()}
+                              className={styles.focusField}
+                              style={INPUT_STYLE}
+                            />
+                          </FormField>
+                          <FormField label="Белки (г)">
+                            <input
+                              {...register('protein')}
+                              type="number"
+                              min={0}
+                              max={9999}
+                              step="0.1"
+                              placeholder="—"
+                              disabled={!canNutrition}
+                              onFocus={(e) => e.target.select()}
+                              className={styles.focusField}
+                              style={INPUT_STYLE}
+                            />
+                          </FormField>
+                          <FormField label="Жиры (г)">
+                            <input
+                              {...register('fat')}
+                              type="number"
+                              min={0}
+                              max={9999}
+                              step="0.1"
+                              placeholder="—"
+                              disabled={!canNutrition}
+                              onFocus={(e) => e.target.select()}
+                              className={styles.focusField}
+                              style={INPUT_STYLE}
+                            />
+                          </FormField>
+                          <FormField label="Углеводы (г)">
+                            <input
+                              {...register('carbs')}
+                              type="number"
+                              min={0}
+                              max={9999}
+                              step="0.1"
+                              placeholder="—"
+                              disabled={!canNutrition}
+                              onFocus={(e) => e.target.select()}
+                              className={styles.focusField}
+                              style={INPUT_STYLE}
+                            />
+                          </FormField>
+                        </div>
+                        {!canNutrition && (
+                          <div
+                            className={styles.nutritionLockOverlay}
+                            onClick={() => setPlanLimitDetail({
+                              code: 'PLAN_LIMIT_REACHED',
+                              message: 'AI-помощник КБЖУ доступен только на тарифе Бизнес и выше.',
+                              upgrade_to: 'business',
+                            })}
                           />
-                        </FormField>
-                        <FormField label="Белки (г)">
-                          <input
-                            {...register('protein')}
-                            type="number"
-                            min={0}
-                            max={9999}
-                            step="0.1"
-                            placeholder="—"
-                            onFocus={(e) => e.target.select()}
-                            className={styles.focusField}
-                            style={INPUT_STYLE}
-                          />
-                        </FormField>
-                        <FormField label="Жиры (г)">
-                          <input
-                            {...register('fat')}
-                            type="number"
-                            min={0}
-                            max={9999}
-                            step="0.1"
-                            placeholder="—"
-                            onFocus={(e) => e.target.select()}
-                            className={styles.focusField}
-                            style={INPUT_STYLE}
-                          />
-                        </FormField>
-                        <FormField label="Углеводы (г)">
-                          <input
-                            {...register('carbs')}
-                            type="number"
-                            min={0}
-                            max={9999}
-                            step="0.1"
-                            placeholder="—"
-                            onFocus={(e) => e.target.select()}
-                            className={styles.focusField}
-                            style={INPUT_STYLE}
-                          />
-                        </FormField>
+                        )}
                       </div>
                     </div>
                     {/* ── Allergens section ── */}
