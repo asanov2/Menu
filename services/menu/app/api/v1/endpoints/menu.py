@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.allergens import ALLERGENS, AllergenInfo
 from app.core.database import get_db
 from app.core.rabbitmq import publish_menu_event
 from app.schemas.menu import (
@@ -25,6 +26,11 @@ from app.services.cache_service import (
 from app.services.menu_service import MenuService
 
 router = APIRouter()
+
+
+@router.get("/allergens", response_model=list[AllergenInfo])
+async def list_allergens() -> list[AllergenInfo]:
+    return ALLERGENS
 
 _MOBILE_KEYWORDS = (
     "mobile", "android", "iphone", "ipad",

@@ -59,3 +59,16 @@ export async function generateDescription(params: GenerateDescriptionParams): Pr
   const { data } = await adminApi.post('/api/v1/admin/items/generate-description', params);
   return data.description;
 }
+
+export interface AllergenInfo {
+  code: string;
+  name_ru: string;
+  name_kz: string;
+  name_en: string;
+  icon: string;
+}
+
+export async function fetchAllergens(): Promise<AllergenInfo[]> {
+  const { data } = await adminApi.get('/api/v1/admin/allergens');
+  return data;
+}

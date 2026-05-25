@@ -29,7 +29,7 @@ class Restaurant(Base):
 
 
 class CategoryTranslation(Base):
-    """Read-only view — managed by admin service migrations."""
+    """Read-only — managed by admin service migrations."""
 
     __tablename__ = "category_translations"
 
@@ -40,7 +40,7 @@ class CategoryTranslation(Base):
 
 
 class ItemTranslation(Base):
-    """Read-only view — managed by admin service migrations."""
+    """Read-only — managed by admin service migrations."""
 
     __tablename__ = "item_translations"
 
@@ -51,22 +51,25 @@ class ItemTranslation(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
+class ItemAllergen(Base):
+    """Read-only — managed by admin service migrations."""
+
+    __tablename__ = "item_allergens"
+
+    item_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    allergen_code: Mapped[str] = mapped_column(String(30), primary_key=True)
+
+
 class Menu(Base):
     __tablename__ = "menus"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     restaurant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     is_default: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    language: Mapped[LanguageType] = mapped_column(
-        SAEnum(LanguageType), default=LanguageType.ru, nullable=False
-    )
+    language: Mapped[LanguageType] = mapped_column(SAEnum(LanguageType), default=LanguageType.ru, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     categories: Mapped[list["Category"]] = relationship(
@@ -79,9 +82,7 @@ class Menu(Base):
 class Category(Base):
     __tablename__ = "categories"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     menu_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("menus.id", ondelete="CASCADE"), index=True, nullable=False)
     restaurant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -89,9 +90,7 @@ class Category(Base):
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     is_visible: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     menu: Mapped["Menu"] = relationship("Menu", back_populates="categories")
@@ -105,9 +104,7 @@ class Category(Base):
 class Item(Base):
     __tablename__ = "items"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     category_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("categories.id", ondelete="CASCADE"), index=True, nullable=False)
     restaurant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -123,9 +120,13 @@ class Item(Base):
     fat: Mapped[float | None] = mapped_column(Float, nullable=True)
     carbs: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     category: Mapped["Category"] = relationship("Category", back_populates="items")
+    allergens: Mapped[list["ItemAllergen"]] = relationship(
+        "ItemAllergen",
+        lazy="selectin",
+        primaryjoin="Item.id == ItemAllergen.item_id",
+        foreign_keys="ItemAllergen.item_id",
+    )

@@ -2,20 +2,39 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import Integer, and_, bindparam, func, select, text
+from sqlalchemy import Integer, and_, bindparam, delete, func, select, text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.dialects.postgresql import UUID as pgUUID
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.plan_errors import items_limit_error, stoplist_limit_error
 from app.core.plan_limits import get_limits
-from app.models.menu import Category, Item
+from app.models.menu import Category, Item, ItemAllergen
 from app.schemas.menu import ItemCreate, ItemReorderItem, ItemUpdate
 
 
 class ItemService:
     def __init__(self, db: AsyncSession) -> None:
         self._db = db
+
+    async def _load_item(self, restaurant_id: UUID, item_id: UUID) -> Item:
+        """Load a single item with allergens via selectinload."""
+        result = await self._db.execute(
+            select(Item)
+            .where(
+                and_(
+                    Item.id == item_id,
+                    Item.restaurant_id == restaurant_id,
+                    Item.deleted_at == None,  # noqa: E711
+                )
+            )
+            .options(selectinload(Item.allergens))
+        )
+        item = result.scalar_one_or_none()
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+        return item
 
     async def list_items(self, restaurant_id: UUID, category_id: UUID | None = None) -> list[Item]:
         conditions = [
@@ -26,29 +45,17 @@ class ItemService:
             conditions.append(Item.category_id == category_id)
 
         result = await self._db.execute(
-            select(Item).where(and_(*conditions)).order_by(Item.sort_order)
+            select(Item)
+            .where(and_(*conditions))
+            .order_by(Item.sort_order)
+            .options(selectinload(Item.allergens))
         )
         return list(result.scalars().all())
 
     async def get_item(self, restaurant_id: UUID, item_id: UUID) -> Item:
-        result = await self._db.execute(
-            select(Item).where(
-                and_(
-                    Item.id == item_id,
-                    Item.restaurant_id == restaurant_id,
-                    Item.deleted_at == None,  # noqa: E711
-                )
-            )
-        )
-        item = result.scalar_one_or_none()
-        if not item:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
-        return item
+        return await self._load_item(restaurant_id, item_id)
 
-    async def _validate_category_ownership(
-        self, restaurant_id: UUID, category_id: UUID
-    ) -> None:
-        # fix #6: ensure category_id belongs to THIS restaurant before inserting
+    async def _validate_category_ownership(self, restaurant_id: UUID, category_id: UUID) -> None:
         result = await self._db.execute(
             select(Category).where(
                 and_(
@@ -63,6 +70,13 @@ class ItemService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Category does not belong to your restaurant",
             )
+
+    async def _save_allergens(self, item_id: UUID, codes: list[str]) -> None:
+        await self._db.execute(
+            delete(ItemAllergen).where(ItemAllergen.item_id == item_id)
+        )
+        for code in codes:
+            self._db.add(ItemAllergen(item_id=item_id, allergen_code=code))
 
     async def create_item(self, restaurant_id: UUID, plan: str, data: ItemCreate) -> Item:
         limits = get_limits(plan)
@@ -91,18 +105,28 @@ class ItemService:
             tags=data.tags,
         )
         self._db.add(item)
+        await self._db.flush()
+
+        await self._save_allergens(item.id, data.allergens or [])
+
         await self._db.commit()
-        await self._db.refresh(item)
-        return item
+        return await self._load_item(restaurant_id, item.id)
 
     async def update_item(self, restaurant_id: UUID, item_id: UUID, data: ItemUpdate) -> Item:
         item = await self.get_item(restaurant_id, item_id)
-        # fix #17: exclude_unset so PATCH {"image_url": null} clears the field
-        for field, value in data.model_dump(exclude_unset=True).items():
+
+        update_dict = data.model_dump(exclude_unset=True)
+        allergens = update_dict.pop("allergens", None)
+        allergens_sent = "allergens" in data.model_fields_set
+
+        for field, value in update_dict.items():
             setattr(item, field, value)
+
+        if allergens_sent:
+            await self._save_allergens(item_id, allergens or [])
+
         await self._db.commit()
-        await self._db.refresh(item)
-        return item
+        return await self._load_item(restaurant_id, item_id)
 
     async def delete_item(self, restaurant_id: UUID, item_id: UUID) -> None:
         item = await self.get_item(restaurant_id, item_id)
@@ -116,14 +140,11 @@ class ItemService:
         item = await self.get_item(restaurant_id, item_id)
         item.is_available = not item.is_available
         await self._db.commit()
-        await self._db.refresh(item)
-        return item
+        return await self._load_item(restaurant_id, item_id)
 
     async def reorder_items(self, restaurant_id: UUID, items: list[ItemReorderItem]) -> None:
         if not items:
             return
-        # bindparam with explicit ARRAY type avoids the :param::cast[] syntax
-        # conflict that breaks SQLAlchemy's asyncpg dialect parameter parser.
         await self._db.execute(
             text("""
                 UPDATE items

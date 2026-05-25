@@ -7,8 +7,8 @@ class RestaurantInfo(BaseModel):
     id: UUID
     name: str
     slug: str
-    logo_url: str | None = None  # not in DB, frontend expects it nullable
-    plan: str = "starter"  # default for backward compat with cached entries
+    logo_url: str | None = None
+    plan: str = "starter"
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -27,7 +27,7 @@ class ItemResponse(BaseModel):
     category_id: UUID
     name: str
     description: str | None = None
-    price: float  # float so JSON serializes as number, not string
+    price: float
     image_url: str | None = None
     is_available: bool
     sort_order: int
@@ -37,6 +37,7 @@ class ItemResponse(BaseModel):
     protein: float | None = None
     fat: float | None = None
     carbs: float | None = None
+    allergens: list[str] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -44,6 +45,16 @@ class ItemResponse(BaseModel):
     @classmethod
     def normalize_tags(cls, v: object) -> list[str]:
         return list(v) if v is not None else []
+
+    @field_validator("allergens", mode="before")
+    @classmethod
+    def coerce_allergens(cls, v: object) -> list[str]:
+        if not v:
+            return []
+        items = list(v)
+        if items and not isinstance(items[0], str):
+            return [a.allergen_code for a in items]
+        return items
 
 
 class CategoryResponse(BaseModel):
@@ -94,6 +105,7 @@ class ItemsFilterResponse(BaseModel):
     protein: float | None = None
     fat: float | None = None
     carbs: float | None = None
+    allergens: list[str] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -101,3 +113,13 @@ class ItemsFilterResponse(BaseModel):
     @classmethod
     def normalize_tags(cls, v: object) -> list[str]:
         return list(v) if v is not None else []
+
+    @field_validator("allergens", mode="before")
+    @classmethod
+    def coerce_allergens(cls, v: object) -> list[str]:
+        if not v:
+            return []
+        items = list(v)
+        if items and not isinstance(items[0], str):
+            return [a.allergen_code for a in items]
+        return items

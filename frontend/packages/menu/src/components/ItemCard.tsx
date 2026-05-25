@@ -1,13 +1,31 @@
 import type { MenuItem } from '@qrmenu/ui';
-import { TagBadge, formatPrice, getImageObjectPosition, getCleanImageUrl } from '@qrmenu/ui';
+import { TagBadge, Icon, formatPrice, getImageObjectPosition, getCleanImageUrl } from '@qrmenu/ui';
+import { ALLERGEN_MAP } from '../constants/allergens';
 import styles from './ItemCard.module.css';
 
 export type ItemCardMode = 'list' | 'card' | 'gallery';
+
+function AllergenIcons({ allergens }: { allergens: string[] }) {
+  if (!allergens.length) return null;
+  const visible = allergens.slice(0, 4);
+  const extra = allergens.length - 4;
+  return (
+    <>
+      {visible.map((code) => {
+        const info = ALLERGEN_MAP[code];
+        if (!info) return null;
+        return <Icon key={code} name={info.icon} size={13} className={styles.allergenIcon} />;
+      })}
+      {extra > 0 && <span className={styles.allergenMore}>+{extra}</span>}
+    </>
+  );
+}
 
 interface ItemCardProps {
   item: MenuItem;
   mode: ItemCardMode;
   onClick: () => void;
+  isFlagged?: boolean;
 }
 
 function PrepBadge({ minutes }: { minutes: number }) {
@@ -77,8 +95,9 @@ function NutritionBadge({ item }: { item: MenuItem }) {
   );
 }
 
-function ListCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
+function ListCard({ item, onClick, isFlagged }: { item: MenuItem; onClick: () => void; isFlagged?: boolean }) {
   const hasBadges = (item.tags ?? []).length > 0 || !item.is_available;
+  const hasMeta = item.calories != null || (item.allergens ?? []).length > 0 || isFlagged;
   return (
     <div
       onClick={onClick}
@@ -107,7 +126,18 @@ function ListCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
         {item.description && (
           <div className={styles.listDesc}>{item.description}</div>
         )}
-        <NutritionBadge item={item} />
+        {hasMeta && (
+          <div className={styles.listMetaRow}>
+            <NutritionBadge item={item} />
+            <AllergenIcons allergens={item.allergens ?? []} />
+            {isFlagged && (
+              <div className={styles.allergenWarning}>
+                <Icon name="alert-triangle" size={11} />
+                <span>аллерген</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className={styles.listPriceSide}>
@@ -118,7 +148,7 @@ function ListCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
   );
 }
 
-function CardCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
+function CardCard({ item, onClick, isFlagged }: { item: MenuItem; onClick: () => void; isFlagged?: boolean }) {
   return (
     <div
       onClick={onClick}
@@ -149,7 +179,23 @@ function CardCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
           {item.tags?.[0] && <TagBadge tag={item.tags[0]} />}
         </div>
         <div className={styles.cardName}>{item.name}</div>
-        <NutritionBadge item={item} />
+
+        {/* Fixed-height slot — always reserves space for nutrition */}
+        <div className={styles.cardNutritionSlot}>
+          <NutritionBadge item={item} />
+        </div>
+
+        {/* Fixed-height slot — always reserves space for allergens + warning */}
+        <div className={styles.cardAllergenSlot}>
+          <AllergenIcons allergens={item.allergens ?? []} />
+          {isFlagged && (
+            <div className={styles.allergenWarning}>
+              <Icon name="alert-triangle" size={11} />
+              <span>аллерген</span>
+            </div>
+          )}
+        </div>
+
         <div className={styles.cardPriceRow}>
           <span className={styles.cardPrice}>{formatPrice(item.price)}</span>
           {item.preparation_time && <PrepBadge minutes={item.preparation_time} />}
@@ -159,7 +205,7 @@ function CardCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
   );
 }
 
-function GalleryCard({ item, onClick }: { item: MenuItem; onClick: () => void }) {
+function GalleryCard({ item, onClick, isFlagged }: { item: MenuItem; onClick: () => void; isFlagged?: boolean }) {
   return (
     <div
       onClick={onClick}
@@ -186,9 +232,26 @@ function GalleryCard({ item, onClick }: { item: MenuItem; onClick: () => void })
           </div>
         )}
       </div>
+
       <div className={styles.galleryTextArea}>
         <div className={styles.galleryName}>{item.name}</div>
-        <NutritionBadge item={item} />
+
+        {/* Fixed-height slot — always reserves space for nutrition */}
+        <div className={styles.galleryNutritionSlot}>
+          <NutritionBadge item={item} />
+        </div>
+
+        {/* Fixed-height slot — always reserves space for allergens + warning */}
+        <div className={styles.galleryAllergenSlot}>
+          <AllergenIcons allergens={item.allergens ?? []} />
+          {isFlagged && (
+            <div className={styles.allergenWarning}>
+              <Icon name="alert-triangle" size={10} />
+              <span>аллерген</span>
+            </div>
+          )}
+        </div>
+
         <div className={styles.galleryPriceRow}>
           <span className={styles.galleryPrice}>{formatPrice(item.price)}</span>
           {item.preparation_time && <PrepBadge minutes={item.preparation_time} />}
@@ -198,8 +261,8 @@ function GalleryCard({ item, onClick }: { item: MenuItem; onClick: () => void })
   );
 }
 
-export default function ItemCard({ item, mode, onClick }: ItemCardProps) {
-  if (mode === 'list') return <ListCard item={item} onClick={onClick} />;
-  if (mode === 'card') return <CardCard item={item} onClick={onClick} />;
-  return <GalleryCard item={item} onClick={onClick} />;
+export default function ItemCard({ item, mode, onClick, isFlagged }: ItemCardProps) {
+  if (mode === 'list') return <ListCard item={item} onClick={onClick} isFlagged={isFlagged} />;
+  if (mode === 'card') return <CardCard item={item} onClick={onClick} isFlagged={isFlagged} />;
+  return <GalleryCard item={item} onClick={onClick} isFlagged={isFlagged} />;
 }

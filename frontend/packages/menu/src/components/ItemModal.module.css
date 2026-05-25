@@ -211,3 +211,38 @@
   color: var(--ink-tertiary);
   margin-left: auto;
 }
+
+/* ─── Allergens ─── */
+
+.allergenBlock {
+  margin-bottom: 14px;
+}
+
+.allergenBlockTitle {
+  font-size: 10px;
+  font-family: var(--font-ui);
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.allergenList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.allergenChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--cream-muted);
+  border: 0.5px solid var(--cream-border);
+  font-size: 12px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}

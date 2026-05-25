@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import type { MenuItem } from '@qrmenu/ui';
-import { TagBadge, formatPrice, Z_INDEX, ANIMATION, getImageObjectPosition, getCleanImageUrl } from '@qrmenu/ui';
+import { TagBadge, Icon, formatPrice, Z_INDEX, ANIMATION, getImageObjectPosition, getCleanImageUrl } from '@qrmenu/ui';
+import { ALLERGEN_MAP } from '../constants/allergens';
 import styles from './ItemModal.module.css';
 
 const SNAP_TRANSITION = 'transform 0.42s cubic-bezier(0.32,0.72,0,1), height 0.42s cubic-bezier(0.32,0.72,0,1), border-radius 0.3s ease';
@@ -13,7 +14,7 @@ interface ItemModalProps {
 }
 
 export default function ItemModal({ item, onClose }: ItemModalProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [snapPoint,  setSnapPoint]  = useState<'default' | 'fullscreen'>('default');
   const [dragY,      setDragY]      = useState(0);
@@ -186,6 +187,26 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                         <span className={styles.nutritionChip}>У {item.carbs} г</span>
                       )}
                       <span className={styles.nutritionPer}>на 100 г</span>
+                    </div>
+                  )}
+
+                  {(item.allergens ?? []).length > 0 && (
+                    <div className={styles.allergenBlock}>
+                      <div className={styles.allergenBlockTitle}>Аллергены</div>
+                      <div className={styles.allergenList}>
+                        {(item.allergens ?? []).map((code) => {
+                          const info = ALLERGEN_MAP[code];
+                          if (!info) return null;
+                          const lang = i18n.language as 'ru' | 'kz' | 'en';
+                          const name = lang === 'kz' ? info.name_kz : lang === 'en' ? info.name_en : info.name_ru;
+                          return (
+                            <span key={code} className={styles.allergenChip}>
+                              <Icon name={info.icon} size={13} />
+                              {name}
+                            </span>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 

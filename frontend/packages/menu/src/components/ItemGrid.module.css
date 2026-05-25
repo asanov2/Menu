@@ -3,8 +3,12 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   padding: 12px 16px;
+  align-items: stretch;
 }
 
+/* height: 100% ensures the motion.div wrapper fills the grid cell
+   so the card inside can use height: 100% to match its siblings */
 .item {
   min-width: 0;
+  height: 100%;
 }

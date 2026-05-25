@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.v1.endpoints.allergens import router as allergens_router
 from app.api.v1.endpoints.categories import router as categories_router
 from app.api.v1.endpoints.description import router as description_router
 from app.api.v1.endpoints.items import router as items_router
@@ -16,3 +17,4 @@ router.include_router(upload_router, prefix="/admin/upload", tags=["admin-upload
 router.include_router(translate_router, prefix="/admin", tags=["admin-translate"])
 router.include_router(nutrition_router, prefix="/admin", tags=["admin-nutrition"])
 router.include_router(description_router, prefix="/admin", tags=["admin-description"])
+router.include_router(allergens_router, prefix="/admin/allergens", tags=["admin-allergens"])

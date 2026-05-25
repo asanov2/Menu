@@ -36,7 +36,7 @@ export default function MenuPage() {
     () => (data?.categories ?? []).filter((c) => c.is_visible),
     [data?.categories],
   );
-  const { query, setQuery, filteredItems } = useSearch(data?.categories ?? []);
+  const { query, setQuery, filteredItems, selectedAllergens, toggleAllergen, flaggedItemIds } = useSearch(data?.categories ?? []);
 
   useEffect(() => {
     if (visibleCategories.length > 0 && !activeCategory) {
@@ -93,7 +93,7 @@ export default function MenuPage() {
   };
 
   const renderItems = () => {
-    const props = { items: displayItems, onItemClick: handleItemClick };
+    const props = { items: displayItems, onItemClick: handleItemClick, flaggedItemIds };
     switch (viewMode) {
       case 'card':    return <ItemGrid {...props} />;
       case 'gallery': return <ItemGallery {...props} />;
@@ -130,6 +130,8 @@ export default function MenuPage() {
                 value={query}
                 onChange={setQuery}
                 foundCount={filteredItems ? filteredItems.length : null}
+                selectedAllergens={selectedAllergens}
+                onAllergenToggle={toggleAllergen}
               />
             </motion.div>
           )}

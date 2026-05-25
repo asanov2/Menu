@@ -83,6 +83,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 2px;
+  overflow: hidden;
 }
 
 .listBadges {
@@ -114,6 +115,16 @@
   line-height: 1.4;
 }
 
+/* Nutrition + allergens on a single row in list mode */
+.listMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 18px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
 .listPriceSide {
   flex-shrink: 0;
   display: flex;
@@ -142,6 +153,8 @@
   -webkit-tap-highlight-color: transparent;
   display: flex;
   flex-direction: column;
+  /* Fill the grid cell so all cards in a row are the same height */
+  height: 100%;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -193,15 +206,17 @@
   padding: 12px;
   display: flex;
   flex-direction: column;
+  /* flex: 1 makes the text area fill remaining card height */
   flex: 1;
+  gap: 4px;
 }
 
 .cardTagRow {
   height: 20px;
   display: flex;
   align-items: center;
-  margin-bottom: 4px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .cardName {
@@ -214,15 +229,37 @@
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  flex: 1;
+  /* flex-shrink: 0 keeps name at natural height; price is pushed down via margin-top: auto */
+  flex-shrink: 0;
+}
+
+/* Fixed-height slot — reserves vertical space even when nutrition is absent */
+.cardNutritionSlot {
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Fixed-height slot — reserves vertical space even when allergens are absent */
+.cardAllergenSlot {
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
 }
 
 .cardPriceRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 6px;
+  padding-top: 4px;
   flex-shrink: 0;
+  /* Push price row to the bottom of the card regardless of content above */
+  margin-top: auto;
 }
 
 .cardPrice {
@@ -243,6 +280,8 @@
   -webkit-tap-highlight-color: transparent;
   display: flex;
   flex-direction: column;
+  /* Fill the grid cell so all cards in a row are the same height */
+  height: 100%;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -294,8 +333,8 @@
   padding: 6px 8px 8px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
   flex: 1;
+  gap: 2px;
 }
 
 .galleryName {
@@ -307,13 +346,36 @@
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3;
+  flex-shrink: 0;
+}
+
+/* Fixed-height slot — reserves space for nutrition in gallery */
+.galleryNutritionSlot {
+  height: 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Fixed-height slot — reserves space for allergens in gallery */
+.galleryAllergenSlot {
+  height: 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  overflow: hidden;
 }
 
 .galleryPriceRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  /* Push price row to the bottom */
   margin-top: auto;
+  padding-top: 2px;
+  flex-shrink: 0;
 }
 
 .galleryPrice {
@@ -335,5 +397,31 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* ─── Allergen icons ─── */
+
+.allergenIcon {
+  color: var(--ink-tertiary);
+  flex-shrink: 0;
+}
+
+.allergenMore {
+  font-size: 10px;
+  font-family: var(--font-ui);
+  color: var(--ink-tertiary);
+  flex-shrink: 0;
+}
+
+.allergenWarning {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-family: var(--font-ui);
+  color: var(--error-text);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 }

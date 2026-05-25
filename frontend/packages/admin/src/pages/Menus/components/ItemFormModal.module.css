@@ -401,3 +401,99 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
+
+/* ── Allergens section ── */
+
+.allergenSection {
+  border: 0.5px solid var(--cream-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px 14px;
+  background: var(--cream-muted);
+}
+
+.allergenHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.allergenTitle {
+  font-size: 11px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.proBadge {
+  font-size: 10px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  color: var(--accent-gold-dk);
+  background: color-mix(in srgb, var(--accent-gold) 15%, transparent);
+  border: 0.5px solid color-mix(in srgb, var(--accent-gold) 35%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  letter-spacing: 0.05em;
+}
+
+.allergenGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.allergenTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--cream-border);
+  background: var(--cream-surface);
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.allergenTag:hover {
+  border-color: var(--accent-gold);
+  background: color-mix(in srgb, var(--accent-gold) 6%, var(--cream-surface));
+}
+
+.allergenTagSelected {
+  background: var(--accent-gold);
+  color: #fff;
+  border-color: var(--accent-gold);
+  font-weight: 500;
+}
+
+.allergenTagSelected:hover {
+  background: var(--accent-gold-dk);
+  border-color: var(--accent-gold-dk);
+}
+
+.allergenLocked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 0.5px dashed var(--cream-border);
+  background: transparent;
+  color: var(--ink-tertiary);
+  font-size: 12px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.allergenLocked:hover {
+  border-color: var(--accent-gold);
+  color: var(--ink-secondary);
+}

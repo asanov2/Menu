@@ -40,6 +40,7 @@ export interface MenuItem {
   protein: number | null;
   fat: number | null;
   carbs: number | null;
+  allergens: string[];
 }
 
 // ── API responses ─────────────────────────────────────────────────────────────

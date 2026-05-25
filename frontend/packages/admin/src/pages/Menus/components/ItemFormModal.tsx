@@ -7,7 +7,8 @@ import type { MenuItem, Category } from '@qrmenu/ui';
 import { INPUT_STYLE, useInputFocus, ANIMATION, FormField, Icon, useToast, getApiErrorMessage } from '@qrmenu/ui';
 import { useAuth } from '../../../hooks/useAuth';
 import { translateItem } from '../../../api/translate';
-import { suggestNutrition } from '../../../api/items';
+import { suggestNutrition, fetchAllergens } from '../../../api/items';
+import type { AllergenInfo } from '../../../api/items';
 import { isPlanLimitError, getPlanLimitDetail } from '../../../utils/planLimitError';
 import PlanLimitModal from '../../../components/PlanLimitModal';
 import type { PlanLimitDetail } from '../../../utils/planLimitError';
@@ -38,6 +39,7 @@ const schema = z.object({
   protein: nutritionFloat,
   fat: nutritionFloat,
   carbs: nutritionFloat,
+  allergens: z.array(z.string()).default([]),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -66,6 +68,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
   const canTranslate = restaurant?.plan === 'business' || restaurant?.plan === 'pro';
   const canNutrition = restaurant?.plan === 'business' || restaurant?.plan === 'pro';
   const canDescription = restaurant?.plan === 'pro';
+  const canAllergens = restaurant?.plan === 'pro';
 
   const [snapPoint,  setSnapPoint]  = useState<'default' | 'fullscreen'>('default');
   const [dragY,      setDragY]      = useState(0);
@@ -73,8 +76,15 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
   const [translating, setTranslating] = useState(false);
   const [suggestingNutrition, setSuggestingNutrition] = useState(false);
   const [generateDescOpen, setGenerateDescOpen] = useState(false);
+  const [allergenList, setAllergenList] = useState<AllergenInfo[]>([]);
   const [planLimitDetail, setPlanLimitDetail] = useState<PlanLimitDetail | null>(null);
   const dragStartClientY = useRef(0);
+
+  useEffect(() => {
+    if (isOpen && canAllergens && allergenList.length === 0) {
+      fetchAllergens().then(setAllergenList).catch(() => {});
+    }
+  }, [isOpen, canAllergens]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTranslateItem = async () => {
     if (!item?.id) return;
@@ -125,6 +135,7 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
       protein: '' as unknown as number,
       fat: '' as unknown as number,
       carbs: '' as unknown as number,
+      allergens: [],
     },
   });
 
@@ -143,10 +154,11 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
         tags: item?.tags ?? [],
         is_available: item?.is_available ?? true,
         image_url: item?.image_url ?? '',
-        calories: (item?.calories ?? '') as unknown as number,
-        protein: (item?.protein  ?? '') as unknown as number,
-        fat:     (item?.fat      ?? '') as unknown as number,
-        carbs:   (item?.carbs    ?? '') as unknown as number,
+        calories:  (item?.calories ?? '') as unknown as number,
+        protein:   (item?.protein  ?? '') as unknown as number,
+        fat:       (item?.fat      ?? '') as unknown as number,
+        carbs:     (item?.carbs    ?? '') as unknown as number,
+        allergens: item?.allergens ?? [],
       });
     }
   }, [isOpen, item, defaultCategoryId, reset]);
@@ -161,6 +173,11 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
   const toggleTag = useCallback((tag: string) => {
     const current = (getValues('tags') ?? []) as string[];
     setValue('tags', current.includes(tag) ? current.filter(t => t !== tag) : [...current, tag]);
+  }, [getValues, setValue]);
+
+  const toggleAllergen = useCallback((code: string) => {
+    const current = (getValues('allergens') ?? []) as string[];
+    setValue('allergens', current.includes(code) ? current.filter(c => c !== code) : [...current, code]);
   }, [getValues, setValue]);
 
   const onSubmit = async (data: FormData) => {
@@ -519,6 +536,46 @@ export default function ItemFormModal({ isOpen, item, categories, defaultCategor
                           />
                         </FormField>
                       </div>
+                    </div>
+                    {/* ── Allergens section ── */}
+                    <div className={styles.allergenSection}>
+                      <div className={styles.allergenHeader}>
+                        <span className={styles.allergenTitle}>Аллергены</span>
+                        {!canAllergens && (
+                          <span className={styles.proBadge}>PRO</span>
+                        )}
+                      </div>
+                      {canAllergens ? (
+                        <div className={styles.allergenGrid}>
+                          {allergenList.map((allergen) => {
+                            const selected = (watch('allergens') ?? []).includes(allergen.code);
+                            return (
+                              <button
+                                key={allergen.code}
+                                type="button"
+                                onClick={() => toggleAllergen(allergen.code)}
+                                className={`${styles.allergenTag} ${selected ? styles.allergenTagSelected : ''}`}
+                              >
+                                <Icon name={allergen.icon} size={13} />
+                                <span>{allergen.name_ru}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className={styles.allergenLocked}
+                          onClick={() => setPlanLimitDetail({
+                            code: 'PLAN_LIMIT_REACHED',
+                            message: 'Управление аллергенами доступно только на тарифе Про.',
+                            upgrade_to: 'pro',
+                          })}
+                        >
+                          <Icon name="lock" size={14} />
+                          <span>Управление аллергенами — тариф Про</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 

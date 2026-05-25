@@ -6,9 +6,10 @@ import styles from './ItemGallery.module.css';
 interface ItemGalleryProps {
   items: MenuItem[];
   onItemClick: (item: MenuItem) => void;
+  flaggedItemIds?: Set<string>;
 }
 
-export default function ItemGallery({ items, onItemClick }: ItemGalleryProps) {
+export default function ItemGallery({ items, onItemClick, flaggedItemIds }: ItemGalleryProps) {
   return (
     <div className={styles.grid}>
       {items.map((item, i) => (
@@ -20,7 +21,7 @@ export default function ItemGallery({ items, onItemClick }: ItemGalleryProps) {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.3) }}
         >
-          <ItemCard item={item} mode="gallery" onClick={() => onItemClick(item)} />
+          <ItemCard item={item} mode="gallery" onClick={() => onItemClick(item)} isFlagged={flaggedItemIds?.has(item.id)} />
         </motion.div>
       ))}
     </div>

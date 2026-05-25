@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 # ─── Menu ─────────────────────────────────────────────────────────────────────
@@ -97,6 +97,7 @@ class ItemCreate(BaseModel):
     protein: float | None = None
     fat: float | None = None
     carbs: float | None = None
+    allergens: list[str] | None = None
 
 
 class ItemUpdate(BaseModel):
@@ -112,6 +113,7 @@ class ItemUpdate(BaseModel):
     protein: float | None = None
     fat: float | None = None
     carbs: float | None = None
+    allergens: list[str] | None = None
 
 
 class ItemReorderItem(BaseModel):
@@ -135,10 +137,21 @@ class ItemResponse(BaseModel):
     protein: float | None = None
     fat: float | None = None
     carbs: float | None = None
+    allergens: list[str] = []
     created_at: datetime
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+    @field_validator("allergens", mode="before")
+    @classmethod
+    def coerce_allergens(cls, v: object) -> list[str]:
+        if not v:
+            return []
+        items = list(v)
+        if items and not isinstance(items[0], str):
+            return [a.allergen_code for a in items]
+        return items
 
 
 # ─── Upload ───────────────────────────────────────────────────────────────────

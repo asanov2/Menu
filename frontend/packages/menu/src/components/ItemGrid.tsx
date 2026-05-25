@@ -6,9 +6,10 @@ import styles from './ItemGrid.module.css';
 interface ItemGridProps {
   items: MenuItem[];
   onItemClick: (item: MenuItem) => void;
+  flaggedItemIds?: Set<string>;
 }
 
-export default function ItemGrid({ items, onItemClick }: ItemGridProps) {
+export default function ItemGrid({ items, onItemClick, flaggedItemIds }: ItemGridProps) {
   return (
     <div className={styles.grid}>
       {items.map((item, i) => (
@@ -20,7 +21,7 @@ export default function ItemGrid({ items, onItemClick }: ItemGridProps) {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25, delay: Math.min(i * 0.04, 0.4) }}
         >
-          <ItemCard item={item} mode="card" onClick={() => onItemClick(item)} />
+          <ItemCard item={item} mode="card" onClick={() => onItemClick(item)} isFlagged={flaggedItemIds?.has(item.id)} />
         </motion.div>
       ))}
     </div>
