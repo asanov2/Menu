@@ -19,14 +19,11 @@ services:
     image: nginx:1.25-alpine
     ports:
       - "80:80"
-      - "443:443"
       - "8080:8080"
       - "8081:8081"
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
       - ./frontend/landing:/usr/share/nginx/landing:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /var/www/certbot:/var/www/certbot:ro
     depends_on:
       - auth-service
       - menu-service
@@ -243,8 +240,8 @@ services:
       context: ./frontend
       dockerfile: packages/admin/Dockerfile
       args:
-        VITE_APP_URL: "https://qrmenus.kz"
-        VITE_API_URL: "https://qrmenus.kz"
+        VITE_APP_URL: "http://185.4.180.201"
+        VITE_API_URL: "http://185.4.180.201"
     networks:
       - qrmenu-network
     restart: always

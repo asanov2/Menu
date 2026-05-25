@@ -1,16 +1,23 @@
 #!/bin/bash
-set -euo pipefail
+set -e
 
-COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env.production"
-
-echo "▶ Pulling latest code..."
+echo "Pulling latest code..."
 git pull origin main
 
-echo "▶ Building images (no cache)..."
-$COMPOSE build --no-cache
+echo "Building images..."
+docker compose -f docker-compose.prod.yml --env-file .env.production build --no-cache
 
-echo "▶ Starting services..."
-$COMPOSE up -d
+echo "Starting services..."
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d
 
-echo "▶ Service status:"
-$COMPOSE ps
+echo "Running migrations..."
+docker compose -f docker-compose.prod.yml exec -T admin-service alembic upgrade head
+docker compose -f docker-compose.prod.yml exec -T auth-service alembic upgrade head
+docker compose -f docker-compose.prod.yml exec -T billing-service alembic upgrade head
+docker compose -f docker-compose.prod.yml exec -T analytics-service alembic upgrade head
+docker compose -f docker-compose.prod.yml exec -T menu-service alembic upgrade head
+
+echo "Checking services..."
+docker compose -f docker-compose.prod.yml ps
+
+echo "Done!"
