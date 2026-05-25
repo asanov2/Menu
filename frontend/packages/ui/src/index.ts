@@ -30,6 +30,7 @@ export { useInputFocus } from './hooks/useInputStyle';
 
 // Components
 export { Icon } from './components/Icon';
+export { PhoneInput, validatePhone, normalizePhone } from './components/PhoneInput';
 export { default as TagBadge } from './components/TagBadge';
 export { ToastProvider, useToast } from './components/Toast';
 export { default as ConfirmModal } from './components/ConfirmModal';

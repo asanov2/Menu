@@ -79,6 +79,7 @@ export default function ItemModal({ item, onClose, onAddToCart }: ItemModalProps
   };
 
   const isFullscreen = snapPoint === 'fullscreen';
+  const showCartBtn = !!(onAddToCart && item?.is_available);
 
   return (
     <AnimatePresence>
@@ -112,6 +113,7 @@ export default function ItemModal({ item, onClose, onAddToCart }: ItemModalProps
                 transition: isDragging ? 'none' : SNAP_TRANSITION,
               }}
             >
+              {/* ─── Drag zone + photo ─── */}
               <div
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
@@ -131,10 +133,10 @@ export default function ItemModal({ item, onClose, onAddToCart }: ItemModalProps
                     title={isFullscreen ? 'Свернуть' : 'На весь экран'}
                     className={styles.iconBtn}
                   >
-                    {isFullscreen ? '⊡' : '⊞'}
+                    <Icon name={isFullscreen ? 'minimize' : 'maximize'} size={15} />
                   </button>
                   <button onClick={onClose} className={`${styles.iconBtn} ${styles.iconBtnClose}`}>
-                    <i className="ti ti-x" style={{ fontSize: 16 }} />
+                    <Icon name="x" size={16} />
                   </button>
                 </div>
 
@@ -154,10 +156,13 @@ export default function ItemModal({ item, onClose, onAddToCart }: ItemModalProps
                     />
                   </div>
                 ) : (
-                  <div className={styles.photoPlaceholder}><i className="ti ti-tools-kitchen-2" style={{ fontSize: 48 }} /></div>
+                  <div className={styles.photoPlaceholder}>
+                    <Icon name="tools-kitchen-2" size={48} />
+                  </div>
                 )}
               </div>
 
+              {/* ─── Scrollable content ─── */}
               <div className={styles.scrollBody}>
                 <div className={styles.content}>
                   {(item.tags ?? []).length > 0 && (
@@ -176,7 +181,7 @@ export default function ItemModal({ item, onClose, onAddToCart }: ItemModalProps
 
                   {item.calories != null && (
                     <div className={styles.nutritionRow}>
-                      <i className="ti ti-flame" style={{ fontSize: 12, flexShrink: 0 }} />
+                      <Icon name="flame" size={12} />
                       <span>~{item.calories} ккал</span>
                       {item.protein != null && (
                         <span className={styles.nutritionChip}>Б {item.protein} г</span>
@@ -216,7 +221,7 @@ export default function ItemModal({ item, onClose, onAddToCart }: ItemModalProps
                   <div className={styles.bottomRow}>
                     {item.preparation_time ? (
                       <div className={styles.prepTime}>
-                        <span>⏱</span>
+                        <Icon name="clock" size={12} />
                         <span>~{item.preparation_time} {t('menu.minutes')}</span>
                       </div>
                     ) : <div />}
@@ -229,19 +234,22 @@ export default function ItemModal({ item, onClose, onAddToCart }: ItemModalProps
                       {t('menu.temporarilyUnavailable')}
                     </div>
                   )}
-
-                  {onAddToCart && item.is_available && (
-                    <button
-                      onClick={() => onAddToCart(item)}
-                      className={styles.addToCartBtn}
-                    >
-                      Добавить в корзину
-                    </button>
-                  )}
-
-                  <div className={styles.safeArea} />
                 </div>
               </div>
+
+              {/* ─── Sticky cart button — always outside scroll ─── */}
+              {showCartBtn && (
+                <div className={styles.cartFooter}>
+                  <button
+                    onClick={() => onAddToCart!(item)}
+                    className={styles.addToCartBtn}
+                  >
+                    Добавить в корзину
+                  </button>
+                  <div className={styles.safeArea} />
+                </div>
+              )}
+              {!showCartBtn && <div className={styles.safeArea} />}
             </div>
           </motion.div>
         </>

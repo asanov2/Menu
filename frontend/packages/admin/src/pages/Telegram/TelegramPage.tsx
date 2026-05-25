@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { SectionHeading, Icon, useToast, getApiErrorMessage } from '@qrmenu/ui';
-import AdminLayout from '../../layout/AdminLayout';
+import { Icon, useToast, getApiErrorMessage } from '@qrmenu/ui';
 import { useAuth } from '../../hooks/useAuth';
 import {
   getTelegramStatus,
@@ -24,7 +23,7 @@ function CountdownTimer({ expiresIn, onExpire }: { expiresIn: number; onExpire: 
 
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
   const s = (seconds % 60).toString().padStart(2, '0');
-  return <span className={styles.timer}>{m}:{s}</span>;
+  return <span className={styles.timerValue}>{m}:{s}</span>;
 }
 
 function formatCode(code: string) {
@@ -59,6 +58,8 @@ export default function TelegramPage() {
     }
   }, [status]);
 
+  const handleExpire = useCallback(() => setGeneratedCode(null), []);
+
   const generateMutation = useMutation({
     mutationFn: generateTelegramCode,
     onSuccess: (data) => {
@@ -90,106 +91,158 @@ export default function TelegramPage() {
   const isPro = restaurant?.plan === 'pro';
   const isBusiness = restaurant?.plan === 'business' || isPro;
   const connected = status?.connected ?? false;
+  const botUsername = status?.bot_username ?? 'qrmenuskz_bot';
 
   return (
-    <AdminLayout>
-      <div className={styles.page}>
+    <div className={styles.page}>
         <div className={common.pageHeader}>
-          <h1 className={common.pageTitle}>Telegram</h1>
+          <div className={styles.titleRow}>
+            <div className={styles.titleIconWrap}>
+              <Icon name="brand-telegram" size={20} />
+            </div>
+            <h1 className={common.pageTitle}>Telegram</h1>
+          </div>
         </div>
 
         {isLoading ? (
-          <div className={styles.loading}>Загрузка...</div>
+          <div className={styles.skeletons}>
+            <div className={styles.skeletonCard} />
+            <div className={`${styles.skeletonCard} ${styles.skeletonCardShort}`} />
+          </div>
         ) : (
           <div className={styles.blocks}>
-            {/* Block 1 — Connection */}
-            <div className={common.card}>
-              <SectionHeading>Подключение</SectionHeading>
 
+            {/* ─── Блок 1: Подключение ─── */}
+            <div className={common.card}>
               {connected ? (
-                <div className={styles.connectedRow}>
-                  <div className={styles.connectedBadge}>
-                    <Icon name="circle-check-filled" size={18} />
-                    <span>Подключено</span>
+                <div className={styles.connectedState}>
+                  <div className={styles.connectedIconWrap}>
+                    <Icon name="circle-check" size={32} />
+                  </div>
+                  <div className={styles.connectedText}>
+                    <div className={styles.connectedTitle}>Telegram подключён</div>
+                    <div className={styles.connectedDesc}>Уведомления будут приходить в ваш аккаунт</div>
                   </div>
                   <button
-                    className={common.btnSecondary}
+                    className={styles.disconnectBtn}
                     onClick={() => disconnectMutation.mutate()}
                     disabled={disconnectMutation.isPending}
                   >
+                    <Icon name="unlink" size={14} />
                     Отключить
                   </button>
                 </div>
+
               ) : generatedCode ? (
-                <div className={styles.codeBlock}>
-                  <div className={styles.codeLabel}>Ваш код подключения</div>
+                <div className={styles.codeState}>
+                  <div className={styles.codeSectionLabel}>Код подключения</div>
                   <div className={styles.codeDisplay}>{formatCode(generatedCode)}</div>
-                  <div className={styles.codeInstruction}>
-                    Найдите <strong>@{status?.bot_username ?? 'qrmenuskz_bot'}</strong> в Telegram и введите этот код
-                  </div>
+
                   <div className={styles.timerRow}>
-                    Код действителен:&nbsp;
-                    <CountdownTimer
-                      expiresIn={codeExpiresIn}
-                      onExpire={() => setGeneratedCode(null)}
-                    />
+                    <Icon name="clock" size={14} />
+                    <span>Код действителен ещё</span>
+                    <CountdownTimer expiresIn={codeExpiresIn} onExpire={handleExpire} />
                   </div>
+
+                  <div className={styles.steps}>
+                    <div className={styles.step}>
+                      <span className={styles.stepNum}>1</span>
+                      <Icon name="brand-telegram" size={15} />
+                      <span>Найдите <strong>@{botUsername}</strong> в Telegram</span>
+                    </div>
+                    <div className={styles.step}>
+                      <span className={styles.stepNum}>2</span>
+                      <Icon name="terminal-2" size={15} />
+                      <span>Нажмите /start</span>
+                    </div>
+                    <div className={styles.step}>
+                      <span className={styles.stepNum}>3</span>
+                      <Icon name="keyboard" size={15} />
+                      <span>Введите этот код</span>
+                    </div>
+                  </div>
+
                   <div className={styles.codeActions}>
                     <button
-                      className={common.btnSecondary}
+                      className={styles.btnOutline}
                       onClick={() => qc.invalidateQueries({ queryKey: ['telegram-status'] })}
                     >
+                      <Icon name="refresh" size={14} />
                       Обновить статус
                     </button>
                     <button
-                      className={common.btnSecondary}
+                      className={styles.btnGhost}
                       onClick={() => generateMutation.mutate()}
                       disabled={generateMutation.isPending}
                     >
-                      Новый код
+                      Сгенерировать новый код
                     </button>
                   </div>
                 </div>
+
               ) : (
-                <div className={styles.notConnected}>
-                  <div className={styles.notConnectedText}>
-                    Подключите Telegram-бота, чтобы получать уведомления о заказах
+                <div className={styles.notConnectedState}>
+                  <div className={styles.tgIconWrap}>
+                    <Icon name="brand-telegram" size={48} />
+                  </div>
+                  <div className={styles.notConnectedTitle}>Подключите Telegram-бот</div>
+                  <div className={styles.notConnectedDesc}>
+                    Получайте уведомления о заказах прямо в Telegram
                   </div>
                   <button
-                    className={common.btnPrimary}
+                    className={styles.btnGenerate}
                     onClick={() => generateMutation.mutate()}
                     disabled={generateMutation.isPending}
                   >
+                    <Icon name="refresh" size={16} />
                     {generateMutation.isPending ? 'Генерация...' : 'Сгенерировать код'}
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Block 2 — Order settings (business/pro only, and connected) */}
+            {/* ─── Блок 2: Настройки заказов ─── */}
             {connected && isBusiness && (
               <div className={common.card}>
-                <SectionHeading>Настройки заказов</SectionHeading>
+                <div className={styles.blockHeader}>
+                  <Icon name="settings" size={18} />
+                  <span className={styles.blockTitle}>Настройки заказов</span>
+                </div>
 
                 <div className={styles.settingsForm}>
-                  <label className={styles.toggle}>
-                    <input
-                      type="checkbox"
-                      checked={localSettings.orders_enabled}
-                      onChange={(e) =>
-                        setLocalSettings((s) => ({ ...s, orders_enabled: e.target.checked }))
-                      }
-                    />
-                    <span className={styles.toggleLabel}>Заказ за столом</span>
-                  </label>
+                  <div className={styles.toggleRow}>
+                    <div className={styles.toggleLeft}>
+                      <div className={styles.toggleIconWrap}>
+                        <Icon name="armchair" size={18} />
+                      </div>
+                      <div className={styles.toggleInfo}>
+                        <div className={styles.toggleTitle}>Заказ за столом</div>
+                        <div className={styles.toggleDesc}>Гости смогут оформить заказ прямо за столом</div>
+                      </div>
+                    </div>
+                    <label className={styles.switchLabel}>
+                      <input
+                        type="checkbox"
+                        className={styles.switchInput}
+                        checked={localSettings.orders_enabled}
+                        onChange={(e) =>
+                          setLocalSettings((s) => ({ ...s, orders_enabled: e.target.checked }))
+                        }
+                      />
+                      <span className={styles.switchTrack} />
+                    </label>
+                  </div>
 
-                  {localSettings.orders_enabled && (
-                    <div className={styles.field}>
-                      <label className={styles.fieldLabel}>Количество столов</label>
+                  <div className={`${styles.tablesField} ${localSettings.orders_enabled ? styles.tablesFieldVisible : ''}`}>
+                    <div className={styles.tablesFieldInner}>
+                      <div className={styles.tablesIcon}>
+                        <Icon name="table" size={16} />
+                      </div>
+                      <label className={styles.tablesLabel}>Количество столов</label>
                       <input
                         type="number"
                         min={1}
-                        max={200}
+                        max={100}
                         value={localSettings.tables_count}
                         onChange={(e) =>
                           setLocalSettings((s) => ({
@@ -197,47 +250,63 @@ export default function TelegramPage() {
                             tables_count: Math.max(1, parseInt(e.target.value) || 1),
                           }))
                         }
-                        className={styles.numInput}
+                        className={styles.tablesInput}
                       />
                     </div>
-                  )}
+                  </div>
 
-                  <label className={styles.toggle}>
-                    <input
-                      type="checkbox"
-                      checked={localSettings.preorders_enabled}
-                      onChange={(e) =>
-                        setLocalSettings((s) => ({ ...s, preorders_enabled: e.target.checked }))
-                      }
-                    />
-                    <span className={styles.toggleLabel}>Предзаказ</span>
-                  </label>
+                  <div className={styles.toggleRow}>
+                    <div className={styles.toggleLeft}>
+                      <div className={styles.toggleIconWrap}>
+                        <Icon name="package" size={18} />
+                      </div>
+                      <div className={styles.toggleInfo}>
+                        <div className={styles.toggleTitle}>Предзаказ</div>
+                        <div className={styles.toggleDesc}>Гости смогут заказать заранее по телефону</div>
+                      </div>
+                    </div>
+                    <label className={styles.switchLabel}>
+                      <input
+                        type="checkbox"
+                        className={styles.switchInput}
+                        checked={localSettings.preorders_enabled}
+                        onChange={(e) =>
+                          setLocalSettings((s) => ({ ...s, preorders_enabled: e.target.checked }))
+                        }
+                      />
+                      <span className={styles.switchTrack} />
+                    </label>
+                  </div>
 
                   <button
-                    className={common.btnPrimary}
-                    style={{ marginTop: 8, alignSelf: 'flex-start' }}
+                    className={styles.btnSave}
                     onClick={() => settingsMutation.mutate(localSettings)}
                     disabled={settingsMutation.isPending}
                   >
-                    {settingsMutation.isPending ? 'Сохранение...' : 'Сохранить'}
+                    <Icon name="device-floppy" size={16} />
+                    {settingsMutation.isPending ? 'Сохранение...' : 'Сохранить настройки'}
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Block 3 — Pro info */}
+            {/* ─── Блок 3: Ежедневная сводка (только Pro) ─── */}
             {isPro && (
-              <div className={common.card}>
-                <SectionHeading>Аналитика</SectionHeading>
-                <div className={styles.infoText}>
-                  <Icon name="clock" size={16} />
-                  Ежедневная сводка приходит в 09:00 по времени Алматы
+              <div className={`${common.card} ${styles.proCard}`}>
+                <div className={styles.proBadge}>Про</div>
+                <div className={styles.proIconWrap}>
+                  <Icon name="chart-bar" size={32} />
+                </div>
+                <div className={styles.proTitle}>Ежедневная сводка</div>
+                <div className={styles.proDesc}>
+                  Каждый день в 09:00 по времени Алматы вы будете получать в Telegram сводку:
+                  просмотры меню, топ блюда, пиковое время.
                 </div>
               </div>
             )}
+
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }

@@ -71,6 +71,16 @@ async def approve_application(
     return await RestaurantService(db).approve_restaurant(restaurant_id)
 
 
+@router.delete("/restaurants/{restaurant_id}")
+async def delete_restaurant(
+    restaurant_id: UUID,
+    owner: str = Depends(get_current_owner),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    await RestaurantService(db).delete_restaurant(restaurant_id)
+    return {"message": "Ресторан удалён"}
+
+
 @router.post("/applications/{restaurant_id}/reject", response_model=RestaurantItem)
 async def reject_application(
     restaurant_id: UUID,

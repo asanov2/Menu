@@ -154,3 +154,7 @@ export async function approveApplication(id: string): Promise<void> {
 export async function rejectApplication(id: string): Promise<void> {
   await ownerApi.post(`/api/v1/owner/applications/${id}/reject`)
 }
+
+export async function deleteRestaurant(id: string): Promise<void> {
+  await ownerApi.delete(`/api/v1/owner/restaurants/${id}`)
+}

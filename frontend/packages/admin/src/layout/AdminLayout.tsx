@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import Sidebar from './Sidebar';
-import Topbar from './Topbar';
 import MobileTabBar from './MobileTabBar';
 import TrialBanner from '../components/TrialBanner';
 import styles from './AdminLayout.module.css';
@@ -11,7 +10,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <Sidebar />
       <div className={styles.main}>
         <TrialBanner />
-        <Topbar />
         <main className={styles.content}>
           {children}
         </main>

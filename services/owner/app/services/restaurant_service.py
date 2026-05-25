@@ -74,7 +74,7 @@ class RestaurantService:
     ) -> RestaurantList:
         offset = (page - 1) * limit
 
-        filters = ["1=1"]
+        filters = ["r.deleted_at IS NULL"]
         params: dict = {"limit": limit, "offset": offset}
 
         if search:
@@ -345,9 +345,33 @@ class RestaurantService:
         await self._db.commit()
         return await self._fetch_one(restaurant_id)
 
+    async def delete_restaurant(self, restaurant_id: UUID) -> None:
+        result = await self._db.execute(
+            text("""
+                UPDATE restaurants
+                SET deleted_at = NOW(), is_active = false, status = 'inactive', updated_at = NOW()
+                WHERE id = :id AND deleted_at IS NULL
+            """),
+            {"id": restaurant_id},
+        )
+        if result.rowcount == 0:
+            raise HTTPException(
+                status_code=http_status.HTTP_404_NOT_FOUND,
+                detail="Restaurant not found",
+            )
+        await self._db.execute(
+            text("""
+                UPDATE billing.subscriptions
+                SET status = 'cancelled', updated_at = NOW()
+                WHERE restaurant_id = :id AND status IN ('active', 'trial')
+            """),
+            {"id": restaurant_id},
+        )
+        await self._db.commit()
+
     async def _fetch_one(self, restaurant_id: UUID) -> RestaurantItem:
         row_result = await self._db.execute(
-            text(f"{_RESTAURANT_SELECT} WHERE r.id = :id"),
+            text(f"{_RESTAURANT_SELECT} WHERE r.id = :id AND r.deleted_at IS NULL"),
             {"id": restaurant_id},
         )
         row = row_result.mappings().one_or_none()

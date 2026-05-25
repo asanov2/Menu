@@ -81,6 +81,25 @@
   margin-top: 2px;
 }
 
+.inputField {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: var(--font-ui);
+  color: var(--ink-primary);
+  background: var(--cream-surface);
+  outline: none;
+  box-sizing: border-box;
+  min-height: 44px;
+  transition: border-color 0.15s;
+}
+
+.inputField:focus {
+  border-color: var(--ink-primary);
+}
+
 .select {
   appearance: none;
   -webkit-appearance: none;

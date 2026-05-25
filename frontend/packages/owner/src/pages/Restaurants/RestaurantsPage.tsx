@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { ConfirmModal, useToast, Skeleton, PLAN, PLAN_STATUS } from '@qrmenu/ui';
-import { getRestaurants, updateRestaurant, type OwnerRestaurant } from '../../api/owner';
+import { getRestaurants, updateRestaurant, deleteRestaurant, type OwnerRestaurant } from '../../api/owner';
 import RestaurantsFilters from './components/RestaurantsFilters';
 import RestaurantRow from './components/RestaurantRow';
 import PaginationBar from './components/PaginationBar';
@@ -11,7 +11,7 @@ import styles from './RestaurantsPage.module.css';
 const LIMIT = 20;
 
 const COLUMNS = ['Название', 'План', 'Статус', 'Создан', 'Триал до', 'Действия'];
-const WIDTHS   = ['',        '110px', '80px', '100px', '100px',  '140px'];
+const WIDTHS   = ['',        '110px', '80px', '100px', '100px',  '180px'];
 
 const PLAN_LABELS: Record<string, string> = {
   starter: 'Старт',
@@ -37,6 +37,7 @@ export default function RestaurantsPage() {
   const [page, setPage] = useState(1);
   const [confirmTarget, setConfirmTarget] = useState<OwnerRestaurant | null>(null);
   const [planConfirmTarget, setPlanConfirmTarget] = useState<PlanConfirmTarget | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<OwnerRestaurant | null>(null);
   const qc = useQueryClient();
   const { showToast } = useToast();
 
@@ -51,6 +52,12 @@ export default function RestaurantsPage() {
       updateRestaurant(id, patch),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['restaurants'] }); showToast('Изменения сохранены', 'success'); },
     onError: () => showToast('Ошибка при сохранении', 'error'),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => deleteRestaurant(id),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['restaurants'] }); showToast('Ресторан удалён', 'success'); },
+    onError: () => showToast('Ошибка при удалении', 'error'),
   });
 
   const handleSearchChange = useCallback((val: string) => { setSearch(val); setPage(1); }, []);
@@ -77,6 +84,11 @@ export default function RestaurantsPage() {
     if (confirmTarget) updateMut.mutate({ id: confirmTarget.id, patch: { is_active: false } });
     setConfirmTarget(null);
   }, [confirmTarget, updateMut]);
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (deleteTarget) deleteMut.mutate(deleteTarget.id);
+    setDeleteTarget(null);
+  }, [deleteTarget, deleteMut]);
 
   const total = data?.total ?? 0;
   const pages = data?.pages ?? 1;
@@ -115,6 +127,7 @@ export default function RestaurantsPage() {
                     restaurant={r}
                     onPlanChange={handlePlanChange}
                     onToggleActive={handleToggleActive}
+                    onDelete={setDeleteTarget}
                     isPending={updateMut.isPending}
                   />
                 ))}
@@ -146,6 +159,17 @@ export default function RestaurantsPage() {
         danger={false}
         onConfirm={handleConfirmPlanChange}
         onCancel={() => setPlanConfirmTarget(null)}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Удалить ресторан?"
+        message={`Вы уверены что хотите удалить «${deleteTarget?.name}»? Это действие нельзя отменить. Все данные ресторана будут деактивированы.`}
+        confirmText="Удалить"
+        cancelText="Отмена"
+        danger
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   );

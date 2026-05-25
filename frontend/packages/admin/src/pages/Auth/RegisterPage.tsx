@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useToast, INPUT_STYLE, FormField, Icon } from '@qrmenu/ui';
+import { useToast, FormField, Icon, PhoneInput, validatePhone } from '@qrmenu/ui';
 import { register as registerRestaurant } from '../../api/auth';
 import styles from './RegisterPage.module.css';
+
+const INPUT_CLASS = styles.inputField;
 
 const generateSlug = (name: string) =>
   name
@@ -27,7 +29,13 @@ const schema = z
     email: z.string().email('Введите корректный email'),
     password: z.string().min(8, 'Минимум 8 символов').max(100),
     confirmPassword: z.string(),
-    phone: z.string().max(20).optional().or(z.literal('')),
+    phone: z
+      .string()
+      .optional()
+      .refine(
+        (v) => !v || validatePhone(v),
+        'Введите корректный номер в формате +7 (XXX) XXX-XX-XX',
+      ),
     city: z.string().max(100).optional().or(z.literal('')),
     type: z.string().optional(),
   })
@@ -57,10 +65,11 @@ export default function RegisterPage() {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { type: '' },
+    defaultValues: { type: '', phone: '' },
   });
 
   const nameValue = watch('name');
@@ -105,7 +114,9 @@ export default function RegisterPage() {
     return (
       <div className={styles.page}>
         <div className={styles.card}>
-          <div className={styles.successIcon}><Icon name="circle-check" size={48} style={{ color: 'var(--tag-green-text)' }} /></div>
+          <div className={styles.successIcon}>
+            <Icon name="circle-check" size={48} />
+          </div>
           <div className={styles.successTitle}>Заявка отправлена!</div>
           <p className={styles.successText}>
             Мы рассмотрим заявку для «{submittedName}» в течение 24 часов.
@@ -133,7 +144,7 @@ export default function RegisterPage() {
             <input
               {...register('name')}
               placeholder="Кафе «Аромат»"
-              style={INPUT_STYLE}
+              className={INPUT_CLASS}
             />
           </FormField>
 
@@ -141,7 +152,7 @@ export default function RegisterPage() {
             <input
               {...register('slug', { onChange: () => setSlugEdited(true) })}
               placeholder="cafe-aromat"
-              style={INPUT_STYLE}
+              className={INPUT_CLASS}
             />
             {slugValue && (
               <div className={styles.slugPreview}>
@@ -155,7 +166,7 @@ export default function RegisterPage() {
               {...register('email')}
               type="email"
               placeholder="cafe@example.com"
-              style={INPUT_STYLE}
+              className={INPUT_CLASS}
             />
           </FormField>
 
@@ -165,7 +176,7 @@ export default function RegisterPage() {
                 {...register('password')}
                 type="password"
                 placeholder="Минимум 8 символов"
-                style={INPUT_STYLE}
+                className={INPUT_CLASS}
               />
             </FormField>
             <FormField label="Подтверждение" error={errors.confirmPassword?.message} required>
@@ -173,7 +184,7 @@ export default function RegisterPage() {
                 {...register('confirmPassword')}
                 type="password"
                 placeholder="Повторите пароль"
-                style={INPUT_STYLE}
+                className={INPUT_CLASS}
               />
             </FormField>
           </div>
@@ -182,23 +193,28 @@ export default function RegisterPage() {
 
           <div className={styles.row}>
             <FormField label="Телефон" error={errors.phone?.message}>
-              <input
-                {...register('phone')}
-                placeholder="+7 701 123 4567"
-                style={INPUT_STYLE}
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <PhoneInput
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                  />
+                )}
               />
             </FormField>
             <FormField label="Город" error={errors.city?.message}>
               <input
                 {...register('city')}
                 placeholder="Алматы"
-                style={INPUT_STYLE}
+                className={INPUT_CLASS}
               />
             </FormField>
           </div>
 
           <FormField label="Тип заведения" error={errors.type?.message}>
-            <select {...register('type')} style={INPUT_STYLE} className={styles.select}>
+            <select {...register('type')} className={`${INPUT_CLASS} ${styles.select}`}>
               <option value="">Выберите тип</option>
               {VENUE_TYPES.map((t) => (
                 <option key={t.value} value={t.value}>

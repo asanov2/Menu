@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { StatusBadge, formatDate } from '@qrmenu/ui';
+import { StatusBadge, formatDate, Icon } from '@qrmenu/ui';
 import type { OwnerRestaurant } from '../../../api/owner';
 import common from '../../../styles/common.module.css';
 import styles from './RestaurantRow.module.css';
@@ -8,10 +8,11 @@ interface RestaurantRowProps {
   restaurant: OwnerRestaurant;
   onPlanChange: (id: string, plan: string, name: string) => void;
   onToggleActive: (restaurant: OwnerRestaurant) => void;
+  onDelete: (restaurant: OwnerRestaurant) => void;
   isPending: boolean;
 }
 
-function RestaurantRow({ restaurant: r, onPlanChange, onToggleActive, isPending }: RestaurantRowProps) {
+function RestaurantRow({ restaurant: r, onPlanChange, onToggleActive, onDelete, isPending }: RestaurantRowProps) {
   return (
     <tr className={styles.tr}>
       <td className={styles.tdName}>
@@ -38,13 +39,23 @@ function RestaurantRow({ restaurant: r, onPlanChange, onToggleActive, isPending 
       <td className={common.td}>{formatDate(r.created_at)}</td>
       <td className={common.td}>{r.trial_ends_at ? formatDate(r.trial_ends_at) : '—'}</td>
       <td className={common.td}>
-        <button
-          onClick={e => { e.stopPropagation(); onToggleActive(r); }}
-          disabled={isPending}
-          className={`${styles.toggleBtn} ${r.is_active ? styles.toggleBtnDeactivate : styles.toggleBtnActivate} ${isPending ? styles.toggleBtnPending : ''}`}
-        >
-          {r.is_active ? 'Деактивировать' : 'Активировать'}
-        </button>
+        <div className={styles.actions}>
+          <button
+            onClick={e => { e.stopPropagation(); onToggleActive(r); }}
+            disabled={isPending}
+            className={`${styles.toggleBtn} ${r.is_active ? styles.toggleBtnDeactivate : styles.toggleBtnActivate} ${isPending ? styles.toggleBtnPending : ''}`}
+          >
+            {r.is_active ? 'Деактивировать' : 'Активировать'}
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); onDelete(r); }}
+            disabled={isPending}
+            className={styles.deleteBtn}
+            title="Удалить ресторан"
+          >
+            <Icon name="trash" size={14} />
+          </button>
+        </div>
       </td>
     </tr>
   );

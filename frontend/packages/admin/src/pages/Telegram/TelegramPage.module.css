@@ -1,13 +1,57 @@
 .page {
-  padding: 24px;
-  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.loading {
-  color: var(--ink-secondary);
-  font-size: 13px;
-  font-family: var(--font-ui);
+/* ─── Page header ─── */
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+
+.titleIconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--accent-gold-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-gold);
+  flex-shrink: 0;
+}
+
+/* ─── Loading skeleton ─── */
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeletonCard {
+  height: 180px;
+  background: var(--cream-muted);
+  border-radius: var(--radius-xl);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.skeletonCardShort {
+  height: 120px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ─── Blocks container ─── */
 
 .blocks {
   display: flex;
@@ -15,163 +59,552 @@
   gap: 20px;
 }
 
-/* Connected state */
-.connectedRow {
+/* ─── Block 1: Connected state ─── */
+
+.connectedState {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
+  padding: 8px 0;
+  flex-wrap: wrap;
 }
 
-.connectedBadge {
+.connectedIconWrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--success-bg);
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #22863a;
-  font-size: 14px;
+  justify-content: center;
+  color: var(--success-text);
+  flex-shrink: 0;
+}
+
+.connectedText {
+  flex: 1;
+  min-width: 0;
+}
+
+.connectedTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--ink-primary);
+  margin-bottom: 4px;
+}
+
+.connectedDesc {
+  font-size: 13px;
+  color: var(--ink-secondary);
   font-family: var(--font-ui);
-  font-weight: 500;
 }
 
-/* Code display */
-.notConnected {
+.disconnectBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--error-text);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--error-text);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  min-height: 36px;
+}
+
+.disconnectBtn:hover:not(:disabled) {
+  background: var(--error-bg);
+}
+
+.disconnectBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Block 1: Code state ─── */
+
+.codeState {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.notConnectedText {
-  font-size: 13px;
-  color: var(--ink-secondary);
-  font-family: var(--font-ui);
-  line-height: 1.5;
-}
-
-.codeBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.codeLabel {
-  font-size: 12px;
-  font-weight: 500;
+.codeSectionLabel {
+  font-size: 11px;
+  font-weight: 600;
   color: var(--ink-secondary);
   font-family: var(--font-ui);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
 .codeDisplay {
-  font-family: var(--font-display);
-  font-size: 48px;
-  color: var(--ink-primary);
-  letter-spacing: 0.12em;
-  line-height: 1;
-}
-
-.codeInstruction {
-  font-size: 13px;
-  color: var(--ink-secondary);
   font-family: var(--font-ui);
-  line-height: 1.5;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  letter-spacing: 8px;
+  line-height: 1;
+  padding: 20px;
+  background: var(--cream-muted);
+  border-radius: var(--radius-md);
+  text-align: center;
+  border: 1px solid var(--cream-border);
+  font-variant-numeric: tabular-nums;
 }
 
 .timerRow {
   display: flex;
   align-items: center;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 13px;
   color: var(--ink-secondary);
   font-family: var(--font-ui);
 }
 
-.timer {
+.timerValue {
   font-weight: 600;
   color: var(--ink-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--cream-warm);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--cream-border);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 13px;
+  color: var(--ink-secondary);
+  font-family: var(--font-ui);
+  line-height: 1.4;
+}
+
+.stepNum {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  color: var(--cream-surface);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-ui);
 }
 
 .codeActions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
-/* Settings form */
+.btnOutline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 1px solid var(--cream-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  min-height: 44px;
+}
+
+.btnOutline:hover {
+  border-color: var(--ink-primary);
+  color: var(--ink-primary);
+}
+
+.btnGhost {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-tertiary);
+  font-size: 12px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: color 0.15s;
+  min-height: 44px;
+}
+
+.btnGhost:hover:not(:disabled) {
+  color: var(--ink-secondary);
+}
+
+.btnGhost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Block 1: Not connected state ─── */
+
+.notConnectedState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0 8px;
+  text-align: center;
+}
+
+.tgIconWrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--accent-gold-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-gold);
+  margin-bottom: 4px;
+}
+
+.notConnectedTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--ink-primary);
+}
+
+.notConnectedDesc {
+  font-size: 14px;
+  color: var(--ink-secondary);
+  font-family: var(--font-ui);
+  max-width: 320px;
+  line-height: 1.55;
+}
+
+.btnGenerate {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  height: 48px;
+  background: var(--accent-gold);
+  color: var(--cream-surface);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.18s;
+  margin-top: 8px;
+}
+
+.btnGenerate:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.btnGenerate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Block 2: Settings header ─── */
+
+.blockHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-secondary);
+  margin-bottom: 4px;
+}
+
+.blockTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--ink-primary);
+}
+
 .settingsForm {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 4px;
 }
 
-.toggle {
+/* ─── Toggle row ─── */
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--cream-border);
+}
+
+.toggleLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.toggleIconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--cream-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-secondary);
+  flex-shrink: 0;
+}
+
+.toggleInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.toggleTitle {
+  font-size: 14px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  color: var(--ink-primary);
+  margin-bottom: 2px;
+}
+
+.toggleDesc {
+  font-size: 12px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  line-height: 1.4;
+}
+
+/* ─── iOS-style toggle switch ─── */
+
+.switchLabel {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+  display: block;
+}
+
+.switchInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switchTrack {
+  position: absolute;
+  inset: 0;
+  background: var(--cream-border);
+  border-radius: 12px;
+  transition: background 0.2s ease;
+  display: block;
+}
+
+.switchTrack::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: var(--cream-surface);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(26, 18, 8, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.switchInput:checked + .switchTrack {
+  background: var(--accent-gold);
+}
+
+.switchInput:checked + .switchTrack::after {
+  transform: translateX(20px);
+}
+
+/* ─── Tables count field ─── */
+
+.tablesField {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.25s ease;
+}
+
+.tablesFieldVisible {
+  max-height: 72px;
+  opacity: 1;
+}
+
+.tablesFieldInner {
   display: flex;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
+  padding: 10px 0 10px 48px;
+  border-bottom: 1px solid var(--cream-border);
 }
 
-.toggle input[type='checkbox'] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--ink-primary);
-}
-
-.toggleLabel {
-  font-size: 14px;
-  font-family: var(--font-ui);
-  color: var(--ink-primary);
-  user-select: none;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-left: 26px;
-}
-
-.fieldLabel {
-  font-size: 12px;
+.tablesIcon {
   color: var(--ink-secondary);
-  font-family: var(--font-ui);
-  font-weight: 500;
+  flex-shrink: 0;
 }
 
-.numInput {
-  width: 100px;
+.tablesLabel {
+  font-size: 13px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  flex: 1;
+}
+
+.tablesInput {
+  width: 80px;
   padding: 7px 10px;
   border: 1px solid var(--cream-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   font-size: 14px;
   font-family: var(--font-ui);
   color: var(--ink-primary);
   background: var(--cream-bg);
   outline: none;
+  text-align: center;
 }
 
-.numInput:focus {
-  border-color: var(--ink-primary);
+.tablesInput:focus {
+  border-color: var(--accent-gold);
 }
 
-/* Info block */
-.infoText {
+/* ─── Save button ─── */
+
+.btnSave {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  width: 100%;
+  height: 48px;
+  background: var(--accent-gold);
+  color: var(--cream-surface);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.18s;
+  margin-top: 20px;
+}
+
+.btnSave:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.btnSave:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Block 3: Pro daily digest ─── */
+
+.proCard {
+  position: relative;
+  overflow: hidden;
+}
+
+.proBadge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 3px 10px;
+  background: var(--accent-gold);
+  color: var(--cream-surface);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.proIconWrap {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  background: var(--accent-gold-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-gold);
+  margin-bottom: 12px;
+}
+
+.proTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--ink-primary);
+  margin-bottom: 8px;
+}
+
+.proDesc {
   font-size: 13px;
   color: var(--ink-secondary);
   font-family: var(--font-ui);
+  line-height: 1.65;
+  max-width: 480px;
 }
+
+/* ─── Mobile ─── */
 
 @media (max-width: 768px) {
   .page {
-    padding: 16px;
+    padding: 0;
   }
 
   .codeDisplay {
-    font-size: 36px;
+    font-size: 28px;
+    letter-spacing: 6px;
+    padding: 16px;
+  }
+
+  .notConnectedState {
+    padding: 8px 0 4px;
+  }
+
+  .connectedState {
+    gap: 12px;
+  }
+
+  .codeActions {
+    flex-direction: column;
+  }
+
+  .codeActions > * {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tablesFieldInner {
+    padding-left: 0;
   }
 }
