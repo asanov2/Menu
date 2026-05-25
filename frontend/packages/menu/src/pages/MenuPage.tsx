@@ -140,6 +140,7 @@ export default function MenuPage() {
           onSearchToggle={() => setShowSearch((prev) => !prev)}
           cartCount={ordersAvailable ? cart.totalCount : 0}
           onCartOpen={ordersAvailable ? () => setCartOpen(true) : undefined}
+          plan={data.restaurant.plan}
         />
 
         <AnimatePresence>
@@ -157,6 +158,7 @@ export default function MenuPage() {
                 foundCount={filteredItems ? filteredItems.length : null}
                 selectedAllergens={selectedAllergens}
                 onAllergenToggle={toggleAllergen}
+                showAllergenFilter={data.restaurant.plan === 'pro'}
               />
             </motion.div>
           )}

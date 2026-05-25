@@ -35,7 +35,8 @@
 }
 
 .value {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
+  font-weight: 600;
   font-size: 30px;
   color: var(--ink-primary);
   line-height: 1.1;

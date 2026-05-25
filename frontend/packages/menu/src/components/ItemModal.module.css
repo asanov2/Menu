@@ -164,7 +164,7 @@
 }
 
 .itemPrice {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 21px;
   font-weight: 600;
   color: var(--ink-primary);

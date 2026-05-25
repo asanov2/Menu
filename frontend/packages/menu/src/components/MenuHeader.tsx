@@ -19,6 +19,7 @@ interface MenuHeaderProps {
   onSearchToggle?: () => void;
   cartCount?: number;
   onCartOpen?: () => void;
+  plan: 'starter' | 'business' | 'pro';
 }
 
 const LANGS: { code: Language; label: string }[] = [
@@ -40,6 +41,7 @@ export default function MenuHeader({
   onSearchToggle,
   cartCount = 0,
   onCartOpen,
+  plan,
 }: MenuHeaderProps) {
   const { t } = useTranslation();
 
@@ -69,25 +71,29 @@ export default function MenuHeader({
             </button>
           )}
 
-          <button
-            onClick={onSearchToggle}
-            className={styles.searchBtn}
-            aria-label="Поиск"
-          >
-            <i className="ti ti-search" style={{ fontSize: 18 }} />
-          </button>
+          {plan !== 'starter' && (
+            <button
+              onClick={onSearchToggle}
+              className={styles.searchBtn}
+              aria-label="Поиск"
+            >
+              <i className="ti ti-search" style={{ fontSize: 18 }} />
+            </button>
+          )}
 
-          <div className={styles.langSwitcher}>
-            {LANGS.map(({ code, label }) => (
-              <button
-                key={code}
-                onClick={() => onLangChange(code)}
-                className={`${styles.langBtn} ${lang === code ? styles.langBtnActive : ''}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          {plan !== 'starter' && (
+            <div className={styles.langSwitcher}>
+              {LANGS.map(({ code, label }) => (
+                <button
+                  key={code}
+                  onClick={() => onLangChange(code)}
+                  className={`${styles.langBtn} ${lang === code ? styles.langBtnActive : ''}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

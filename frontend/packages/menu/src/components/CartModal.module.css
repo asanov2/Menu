@@ -424,7 +424,7 @@
 }
 
 .totalAmount {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 20px;
   font-weight: 600;
   color: var(--ink-primary);

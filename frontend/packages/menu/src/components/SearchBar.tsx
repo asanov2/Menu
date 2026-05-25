@@ -10,6 +10,7 @@ interface SearchBarProps {
   foundCount: number | null;
   selectedAllergens?: string[];
   onAllergenToggle?: (code: string) => void;
+  showAllergenFilter?: boolean;
 }
 
 export default function SearchBar({
@@ -18,6 +19,7 @@ export default function SearchBar({
   foundCount,
   selectedAllergens = [],
   onAllergenToggle,
+  showAllergenFilter = false,
 }: SearchBarProps) {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -45,19 +47,21 @@ export default function SearchBar({
             <i className="ti ti-x" style={{ fontSize: 14 }} />
           </button>
         )}
-        <button
-          className={`${styles.filterBtn} ${filterOpen ? styles.filterBtnOpen : ''} ${activeCount > 0 ? styles.filterBtnActive : ''}`}
-          onClick={() => setFilterOpen((v) => !v)}
-          aria-label="Фильтр по аллергенам"
-        >
-          <Icon name="adjustments-horizontal" size={15} />
-          {activeCount > 0 && (
-            <span className={styles.filterCount}>{activeCount}</span>
-          )}
-        </button>
+        {showAllergenFilter && (
+          <button
+            className={`${styles.filterBtn} ${filterOpen ? styles.filterBtnOpen : ''} ${activeCount > 0 ? styles.filterBtnActive : ''}`}
+            onClick={() => setFilterOpen((v) => !v)}
+            aria-label="Фильтр по аллергенам"
+          >
+            <Icon name="adjustments-horizontal" size={15} />
+            {activeCount > 0 && (
+              <span className={styles.filterCount}>{activeCount}</span>
+            )}
+          </button>
+        )}
       </div>
 
-      {filterOpen && (
+      {showAllergenFilter && filterOpen && (
         <div className={styles.filterDropdown}>
           <div className={styles.filterTitle}>Фильтр по аллергенам</div>
           <div className={styles.filterGrid}>
