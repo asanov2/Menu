@@ -156,7 +156,7 @@ export default function RegisterPage() {
             />
             {slugValue && (
               <div className={styles.slugPreview}>
-                qrmenu.kz/menu/<strong>{slugValue}</strong>
+                {(import.meta.env.VITE_APP_URL ?? 'https://qrmenus.kz')}/menu/<strong>{slugValue}</strong>
               </div>
             )}
           </FormField>
