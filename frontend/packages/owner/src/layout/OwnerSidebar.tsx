@@ -27,7 +27,7 @@ export default function OwnerSidebar() {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logoSection}>
-        <div className={styles.logoText}>qrmenu.kz</div>
+        <div className={styles.logoText}>qrmenus.kz</div>
         <div className={styles.logoSubtext}>Платформа</div>
       </div>
 

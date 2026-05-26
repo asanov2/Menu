@@ -18,7 +18,7 @@ export default function Sidebar() {
     <div className={styles.sidebar}>
       {/* Logo */}
       <div className={styles.logoSection}>
-        <div className={styles.logoText}>qrmenu.kz</div>
+        <div className={styles.logoText}>qrmenus.kz</div>
         <div className={styles.logoDivider} />
       </div>
 

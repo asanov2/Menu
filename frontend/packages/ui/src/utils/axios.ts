@@ -14,13 +14,13 @@ export function createApiClient(baseURL: string) {
 }
 
 export const menuApi = axios.create({
-  baseURL: '',
+  baseURL: import.meta.env.VITE_API_URL ?? '',
   headers: { 'Content-Type': 'application/json' },
 });
 
 export const adminApi = (() => {
   const client = axios.create({
-    baseURL: '',
+    baseURL: import.meta.env.VITE_API_URL ?? '',
     headers: { 'Content-Type': 'application/json' },
   });
   client.interceptors.request.use((config) => {

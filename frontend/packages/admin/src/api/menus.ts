@@ -39,9 +39,9 @@ export async function deleteMenu(id: string): Promise<void> {
 }
 
 export function getMenuUrl(slug: string): string {
-  return `${import.meta.env.VITE_APP_URL ?? ''}/m/${slug}`;
+  return `${import.meta.env.VITE_APP_URL ?? ''}/menu/${slug}`;
 }
 
-export function generateQR(menuId: string): string {
-  return `${import.meta.env.VITE_APP_URL ?? ''}/m/${menuId}`;
+export function generateQR(slug: string, menuId: string): string {
+  return `${import.meta.env.VITE_APP_URL ?? ''}/menu/${slug}?menu_id=${menuId}`;
 }
