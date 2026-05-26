@@ -229,6 +229,9 @@ services:
     build:
       context: ./frontend
       dockerfile: packages/menu/Dockerfile
+      args:
+        VITE_APP_URL: "https://qrmenus.kz"
+        VITE_API_URL: "https://qrmenus.kz"
     networks:
       - qrmenu-network
     restart: always
@@ -240,8 +243,8 @@ services:
       context: ./frontend
       dockerfile: packages/admin/Dockerfile
       args:
-        VITE_APP_URL: "http://185.4.180.201"
-        VITE_API_URL: "http://185.4.180.201"
+        VITE_APP_URL: "https://qrmenus.kz"
+        VITE_API_URL: "https://admin.qrmenus.kz"
     networks:
       - qrmenu-network
     restart: always
@@ -252,6 +255,9 @@ services:
     build:
       context: ./frontend
       dockerfile: packages/owner/Dockerfile
+      args:
+        VITE_APP_URL: "https://qrmenus.kz"
+        VITE_API_URL: "https://owner.qrmenus.kz"
     networks:
       - qrmenu-network
     restart: always

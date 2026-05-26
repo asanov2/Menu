@@ -14,8 +14,8 @@ COPY packages/admin ./packages/admin
 
 RUN pnpm install --frozen-lockfile
 
-ARG VITE_API_URL=https://qrmenu.kz
-ARG VITE_APP_URL=https://qrmenu.kz
+ARG VITE_API_URL=https://admin.qrmenus.kz
+ARG VITE_APP_URL=https://qrmenus.kz
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_APP_URL=$VITE_APP_URL
 

@@ -13,6 +13,12 @@ COPY packages/ui ./packages/ui
 COPY packages/menu ./packages/menu
 
 RUN pnpm install --frozen-lockfile
+
+ARG VITE_API_URL=https://qrmenus.kz
+ARG VITE_APP_URL=https://qrmenus.kz
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_APP_URL=$VITE_APP_URL
+
 RUN pnpm --filter @qrmenu/menu build
 
 # Stage 2: Serve
