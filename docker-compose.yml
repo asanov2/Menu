@@ -214,6 +214,9 @@ services:
     build:
       context: ./frontend
       dockerfile: packages/menu/Dockerfile
+      args:
+        VITE_APP_URL: "${VITE_APP_URL:-http://localhost}"
+        VITE_API_URL: "${VITE_APP_URL:-http://localhost}"
     networks:
       - qrmenu-network
     restart: unless-stopped
@@ -243,6 +246,9 @@ services:
     build:
       context: ./frontend
       dockerfile: packages/owner/Dockerfile
+      args:
+        VITE_APP_URL: "${VITE_APP_URL:-http://localhost}"
+        VITE_API_URL: "${VITE_OWNER_API_URL:-http://localhost:8081}"
     networks:
       - qrmenu-network
     restart: unless-stopped
