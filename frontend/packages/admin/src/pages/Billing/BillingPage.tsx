@@ -10,6 +10,8 @@ import {
   type Subscription,
   type UpgradeResult,
 } from '../../api/billing';
+import { getMe } from '../../api/auth';
+import { useAuthStore } from '../../store/authStore';
 import styles from './BillingPage.module.css';
 import common from '../../styles/common.module.css';
 
@@ -65,6 +67,7 @@ function getPlanButton(
 export default function BillingPage() {
   const { showToast } = useToast();
   const qc = useQueryClient();
+  const { token, setAuth } = useAuthStore();
 
   const [upgradeTarget, setUpgradeTarget] = useState<string | null>(null);
   const [mockPaymentData, setMockPaymentData] = useState<UpgradeResult | null>(null);
@@ -105,6 +108,10 @@ export default function BillingPage() {
       setMockPaymentData(null);
       qc.invalidateQueries({ queryKey: ['subscription'] });
       qc.invalidateQueries({ queryKey: ['menuUsage'] });
+      if (token) {
+        const freshRestaurant = await getMe();
+        setAuth(token, freshRestaurant);
+      }
       showToast('Оплата прошла успешно! Тариф обновлён.', 'success');
     } catch (err) {
       showToast(getApiErrorMessage(err, 'Ошибка при симуляции оплаты'), 'error');
