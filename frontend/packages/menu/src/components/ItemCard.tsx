@@ -82,12 +82,15 @@ function ItemImage({
   );
 }
 
-function NutritionBadge({ item }: { item: MenuItem }) {
+function NutritionBadge({ item, compact = false }: { item: MenuItem; compact?: boolean }) {
   if (item.calories == null) return null;
-  const parts: string[] = [`~${item.calories} ккал`];
-  if (item.protein != null) parts.push(`Б ${item.protein}`);
-  if (item.fat != null) parts.push(`Ж ${item.fat}`);
-  if (item.carbs != null) parts.push(`У ${item.carbs}`);
+  const cal = compact ? Math.round(item.calories) : item.calories;
+  const parts: string[] = [`~${cal} ккал`];
+  if (!compact) {
+    if (item.protein != null) parts.push(`Б ${item.protein}`);
+    if (item.fat != null) parts.push(`Ж ${item.fat}`);
+    if (item.carbs != null) parts.push(`У ${item.carbs}`);
+  }
   return (
     <span className={styles.nutritionBadge}>
       <i className="ti ti-flame" style={{ fontSize: 9 }} />
@@ -177,6 +180,20 @@ function CardCard({ item, onClick, isFlagged, onAddToCart }: { item: MenuItem; o
         ) : (
           <div className={styles.cardNoImg}><i className="ti ti-tools-kitchen-2" style={{ fontSize: 24 }} /></div>
         )}
+        {item.tags?.[0] && (
+          <div className={styles.photoTagOverlay}>
+            <TagBadge tag={item.tags[0]} />
+          </div>
+        )}
+        {onAddToCart && item.is_available && (
+          <button
+            className={styles.photoAddBtn}
+            onClick={(e) => { e.stopPropagation(); onAddToCart(item); }}
+            aria-label="Добавить в корзину"
+          >
+            <i className="ti ti-plus" style={{ fontSize: 14 }} />
+          </button>
+        )}
         {!item.is_available && (
           <div className={styles.cardUnavailableOverlay}>
             <StopBadge />
@@ -185,39 +202,25 @@ function CardCard({ item, onClick, isFlagged, onAddToCart }: { item: MenuItem; o
       </div>
 
       <div className={styles.cardTextArea}>
-        <div className={styles.cardTagRow}>
-          {item.tags?.[0] && <TagBadge tag={item.tags[0]} />}
-        </div>
         <div className={styles.cardName}>{item.name}</div>
 
-        {/* Fixed-height slot — always reserves space for nutrition */}
-        <div className={styles.cardNutritionSlot}>
-          <NutritionBadge item={item} />
-        </div>
+        {item.calories != null && <NutritionBadge item={item} compact />}
 
-        {/* Fixed-height slot — always reserves space for allergens + warning */}
-        <div className={styles.cardAllergenSlot}>
-          <AllergenIcons allergens={item.allergens ?? []} />
-          {isFlagged && (
-            <div className={styles.allergenWarning}>
-              <Icon name="alert-triangle" size={11} />
-              <span>аллерген</span>
-            </div>
-          )}
-        </div>
+        {((item.allergens ?? []).length > 0 || isFlagged) && (
+          <div className={styles.cardAllergenRow}>
+            <AllergenIcons allergens={item.allergens ?? []} />
+            {isFlagged && (
+              <div className={styles.allergenWarning}>
+                <Icon name="alert-triangle" size={11} />
+                <span>аллерген</span>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className={styles.cardPriceRow}>
           <span className={styles.cardPrice}>{formatPrice(item.price)}</span>
           {item.preparation_time && <PrepBadge minutes={item.preparation_time} />}
-          {onAddToCart && item.is_available && (
-            <button
-              className={styles.addBtn}
-              onClick={(e) => { e.stopPropagation(); onAddToCart(item); }}
-              aria-label="Добавить в корзину"
-            >
-              <i className="ti ti-plus" style={{ fontSize: 14 }} />
-            </button>
-          )}
         </div>
       </div>
     </div>
@@ -243,46 +246,42 @@ function GalleryCard({ item, onClick, isFlagged, onAddToCart }: { item: MenuItem
         ) : (
           <div className={styles.galleryNoImg}><i className="ti ti-tools-kitchen-2" style={{ fontSize: 24 }} /></div>
         )}
-        {(item.tags ?? []).length > 0 && (
-          <div className={styles.galleryTagsOverlay}>
-            {(item.tags ?? []).slice(0, 2).map((tag) => (
-              <TagBadge key={tag} tag={tag} />
-            ))}
+        {item.tags?.[0] && (
+          <div className={styles.photoTagOverlay}>
+            <TagBadge tag={item.tags[0]} />
           </div>
+        )}
+        {onAddToCart && item.is_available && (
+          <button
+            className={styles.photoAddBtn}
+            onClick={(e) => { e.stopPropagation(); onAddToCart(item); }}
+            aria-label="Добавить в корзину"
+          >
+            <i className="ti ti-plus" style={{ fontSize: 13 }} />
+          </button>
         )}
       </div>
 
       <div className={styles.galleryTextArea}>
         <div className={styles.galleryName}>{item.name}</div>
 
-        {/* Fixed-height slot — always reserves space for nutrition */}
-        <div className={styles.galleryNutritionSlot}>
-          <NutritionBadge item={item} />
-        </div>
+        {item.calories != null && <NutritionBadge item={item} compact />}
 
-        {/* Fixed-height slot — always reserves space for allergens + warning */}
-        <div className={styles.galleryAllergenSlot}>
-          <AllergenIcons allergens={item.allergens ?? []} />
-          {isFlagged && (
-            <div className={styles.allergenWarning}>
-              <Icon name="alert-triangle" size={10} />
-              <span>аллерген</span>
-            </div>
-          )}
-        </div>
+        {((item.allergens ?? []).length > 0 || isFlagged) && (
+          <div className={styles.galleryAllergenRow}>
+            <AllergenIcons allergens={item.allergens ?? []} />
+            {isFlagged && (
+              <div className={styles.allergenWarning}>
+                <Icon name="alert-triangle" size={10} />
+                <span>аллерген</span>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className={styles.galleryPriceRow}>
           <span className={styles.galleryPrice}>{formatPrice(item.price)}</span>
           {item.preparation_time && <PrepBadge minutes={item.preparation_time} />}
-          {onAddToCart && item.is_available && (
-            <button
-              className={styles.addBtn}
-              onClick={(e) => { e.stopPropagation(); onAddToCart(item); }}
-              aria-label="Добавить в корзину"
-            >
-              <i className="ti ti-plus" style={{ fontSize: 14 }} />
-            </button>
-          )}
         </div>
       </div>
     </div>
