@@ -89,3 +89,21 @@ async def disconnect(db: AsyncSession, restaurant_id: UUID) -> None:
     row.telegram_code_expires_at = None
     row.updated_at = datetime.utcnow()
     await db.commit()
+
+
+async def disconnect_by_chat_id(db: AsyncSession, chat_id: int) -> bool:
+    """Find restaurant by chat_id and disconnect. Returns True if a row was found."""
+    result = await db.execute(
+        select(RestaurantTelegramSettings).where(
+            RestaurantTelegramSettings.telegram_chat_id == chat_id
+        )
+    )
+    row = result.scalar_one_or_none()
+    if not row:
+        return False
+    row.telegram_chat_id = None
+    row.telegram_connect_code = None
+    row.telegram_code_expires_at = None
+    row.updated_at = datetime.utcnow()
+    await db.commit()
+    return True

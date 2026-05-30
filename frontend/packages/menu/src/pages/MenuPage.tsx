@@ -24,7 +24,7 @@ import styles from './MenuPage.module.css';
 type Language = 'ru' | 'kz' | 'en';
 const VIEW_PREF_KEY = 'menu_view_preference';
 
-const DEFAULT_CONFIG: OrderConfig = { orders_enabled: false, preorders_enabled: false, tables_count: 10 };
+const DEFAULT_CONFIG: OrderConfig = { orders_enabled: false, preorders_enabled: false, tables_count: 10, telegram_connected: false };
 
 export default function MenuPage() {
   const { data, isLoading, error, slug, lang, setLang, table } = useMenu();
@@ -48,7 +48,7 @@ export default function MenuPage() {
     retry: false,
   });
 
-  const ordersAvailable = orderConfig.orders_enabled || orderConfig.preorders_enabled;
+  const ordersAvailable = orderConfig.telegram_connected && (orderConfig.orders_enabled || orderConfig.preorders_enabled);
 
   const visibleCategories = useMemo(
     () => (data?.categories ?? []).filter((c) => c.is_visible),

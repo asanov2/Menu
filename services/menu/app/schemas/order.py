@@ -27,3 +27,4 @@ class OrderConfigResponse(BaseModel):
     orders_enabled: bool
     preorders_enabled: bool
     tables_count: int
+    telegram_connected: bool = False

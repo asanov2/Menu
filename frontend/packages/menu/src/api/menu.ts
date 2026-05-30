@@ -24,6 +24,7 @@ export interface OrderConfig {
   orders_enabled: boolean;
   preorders_enabled: boolean;
   tables_count: number;
+  telegram_connected: boolean;
 }
 
 export interface OrderItemPayload {

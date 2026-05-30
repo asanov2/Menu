@@ -106,11 +106,25 @@ async def telegram_webhook(
     update: WebhookUpdate,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
+    # Bot was blocked / kicked / removed — auto-disconnect the restaurant
+    if update.my_chat_member:
+        mcm = update.my_chat_member
+        new_status = mcm.get("new_chat_member", {}).get("status", "")
+        chat_id: int | None = mcm.get("chat", {}).get("id")
+        if chat_id and new_status in ("kicked", "left", "banned"):
+            disconnected = await telegram_service.disconnect_by_chat_id(db, chat_id)
+            if disconnected:
+                logger.info(
+                    "Auto-disconnected restaurant via my_chat_member status=%s chat_id=%s",
+                    new_status, chat_id,
+                )
+        return {"ok": True}
+
     message = update.message
     if not message:
         return {"ok": True}
 
-    chat_id: int = message.get("chat", {}).get("id")
+    chat_id = message.get("chat", {}).get("id")
     text: str = message.get("text", "").strip().replace(" ", "")
 
     if not chat_id:

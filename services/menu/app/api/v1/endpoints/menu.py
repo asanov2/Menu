@@ -182,11 +182,13 @@ async def get_order_config(
     restaurant, _ = await service.get_full_menu(slug)
     tg_settings = await _get_order_config(db, restaurant)
     if not tg_settings or restaurant.plan not in ("business", "pro"):
-        return OrderConfigResponse(orders_enabled=False, preorders_enabled=False, tables_count=10)
+        return OrderConfigResponse(orders_enabled=False, preorders_enabled=False, tables_count=10, telegram_connected=False)
+    telegram_connected = tg_settings.telegram_chat_id is not None
     return OrderConfigResponse(
-        orders_enabled=tg_settings.orders_enabled,
-        preorders_enabled=tg_settings.preorders_enabled,
+        orders_enabled=tg_settings.orders_enabled if telegram_connected else False,
+        preorders_enabled=tg_settings.preorders_enabled if telegram_connected else False,
         tables_count=tg_settings.tables_count,
+        telegram_connected=telegram_connected,
     )
 
 

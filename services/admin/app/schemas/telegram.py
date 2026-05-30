@@ -25,3 +25,4 @@ class TelegramSettingsUpdate(BaseModel):
 class WebhookUpdate(BaseModel):
     update_id: int
     message: dict | None = None
+    my_chat_member: dict | None = None

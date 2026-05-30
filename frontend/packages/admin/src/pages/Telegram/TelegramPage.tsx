@@ -46,6 +46,8 @@ export default function TelegramPage() {
   const { data: status, isLoading } = useQuery<TelegramStatus>({
     queryKey: ['telegram-status'],
     queryFn: getTelegramStatus,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   useEffect(() => {

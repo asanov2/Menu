@@ -1,8 +1,10 @@
+import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 
 import httpx
 from fastapi import HTTPException, status as http_status
+from sqlalchemy import update as sql_update
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,21 +17,83 @@ logger = logging.getLogger(__name__)
 
 _TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
 
+# 400-body phrases that mean the chat is permanently unreachable
+_FATAL_400_PHRASES = (
+    "chat not found",
+    "chat_id is empty",
+    "user not found",
+    "deactivated",
+    "bot was blocked by the user",
+    "user is deactivated",
+    "group chat was upgraded",
+)
 
-async def _send_telegram(chat_id: int, text: str) -> None:
+
+def _is_fatal_error(status_code: int, body: str) -> bool:
+    """Return True only for errors that mean the bot can never reach this chat again."""
+    if status_code == 403:
+        return True
+    if status_code == 400:
+        body_lower = body.lower()
+        return any(phrase in body_lower for phrase in _FATAL_400_PHRASES)
+    return False
+
+
+async def _send_telegram(chat_id: int, text: str) -> bool | None:
+    """
+    Send a Telegram message. Returns:
+      True  — delivered successfully
+      False — temporary failure (429 / 5xx / network), binding kept
+      None  — fatal failure (403 / chat not found), caller must disconnect
+    """
     token = getattr(settings, "telegram_bot_token", "")
     if not token:
-        return
+        return False
     url = _TELEGRAM_API.format(token=token)
-    try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            resp = await client.post(
-                url, json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+    for attempt in range(2):
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.post(
+                    url, json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+                )
+            if resp.status_code == 200:
+                return True
+            if _is_fatal_error(resp.status_code, resp.text):
+                logger.error(
+                    "Fatal Telegram error chat_id=%s: %s %s",
+                    chat_id, resp.status_code, resp.text,
+                )
+                return None  # signal fatal to caller
+            # temporary (429, 5xx, etc.)
+            logger.warning(
+                "Temporary Telegram error attempt=%d chat_id=%s: %s %s",
+                attempt + 1, chat_id, resp.status_code, resp.text,
             )
-            if resp.status_code != 200:
-                logger.error("Telegram API error %s: %s", resp.status_code, resp.text)
+        except Exception as exc:
+            logger.warning(
+                "Telegram network error attempt=%d chat_id=%s: %s",
+                attempt + 1, chat_id, exc,
+            )
+        if attempt == 0:
+            await asyncio.sleep(1)
+    return False  # exhausted retries, temporary failure
+
+
+async def _auto_disconnect(db: AsyncSession, tg_settings: RestaurantTelegramSettings) -> None:
+    """Clear telegram_chat_id after a fatal delivery failure."""
+    try:
+        await db.execute(
+            sql_update(RestaurantTelegramSettings)
+            .where(RestaurantTelegramSettings.restaurant_id == tg_settings.restaurant_id)
+            .values(telegram_chat_id=None)
+        )
+        await db.commit()
+        logger.info(
+            "Auto-disconnected Telegram for restaurant_id=%s after fatal send error",
+            tg_settings.restaurant_id,
+        )
     except Exception as exc:
-        logger.error("Failed to send Telegram notification: %s", exc)
+        logger.error("Failed to auto-disconnect Telegram: %s", exc)
 
 
 def _format_table_order(table_number: int, items: list, total_price: int, now_str: str) -> str:
@@ -133,6 +197,13 @@ async def create_order(
                 data.comment,
                 now_str,
             )
-        await _send_telegram(tg_settings.telegram_chat_id, msg)
+        result = await _send_telegram(tg_settings.telegram_chat_id, msg)
+        if result is None:
+            # Fatal error — bot is blocked/kicked. Best-effort warning before clearing.
+            await _send_telegram(
+                tg_settings.telegram_chat_id,
+                "⚠️ Связь с ботом потеряна. Пожалуйста, переподключите Telegram в панели администратора qrmenus.kz",
+            )
+            await _auto_disconnect(db, tg_settings)
 
     return order
