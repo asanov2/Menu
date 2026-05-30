@@ -96,14 +96,17 @@ async def _auto_disconnect(db: AsyncSession, tg_settings: RestaurantTelegramSett
         logger.error("Failed to auto-disconnect Telegram: %s", exc)
 
 
-def _format_table_order(table_number: int, menu_name: str, items: list, total_price: int, now_str: str) -> str:
+def _format_table_order(table_number: int, menu_name: str, items: list, total_price: int, comment: str | None, now_str: str) -> str:
     lines = [f"<b>🍽 Новый заказ — Стол №{table_number}</b>", f"📋 Меню: {menu_name}", ""]
     for item in items:
         name = item.get("name", "—")
         qty = item.get("quantity", 1)
         price = item.get("price", 0)
         lines.append(f"{name} x{qty} — {price}₸")
-    lines += ["", f"💰 Итого: {total_price}₸", f"⏰ {now_str}"]
+    lines += ["", f"💰 Итого: {total_price}₸"]
+    if comment:
+        lines.append(f"💬 {comment}")
+    lines.append(f"⏰ {now_str}")
     return "\n".join(lines)
 
 
@@ -187,7 +190,7 @@ async def create_order(
 
     now_str = datetime.now(tz=timezone(timedelta(hours=5))).strftime("%H:%M")
     if data.order_type == "table" and data.table_number is not None:
-        msg = _format_table_order(data.table_number, menu.name, items_data, data.total_price, now_str)
+        msg = _format_table_order(data.table_number, menu.name, items_data, data.total_price, data.comment, now_str)
     else:
         msg = _format_preorder(
             data.customer_name or "—",
