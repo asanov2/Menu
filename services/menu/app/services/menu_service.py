@@ -81,7 +81,7 @@ class MenuService:
                 )
             ).order_by(Menu.is_default.desc(), Menu.created_at)
         )
-        return result.scalar_one_or_none()
+        return result.scalars().first()
 
     async def get_full_menu(
         self, slug: str, menu_id: UUID | None = None, lang: str | None = None
