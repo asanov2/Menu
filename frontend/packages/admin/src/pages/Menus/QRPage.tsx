@@ -6,6 +6,7 @@ import { Skeleton, Icon } from '@qrmenu/ui';
 import { getMenu } from '../../api/menus';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './QRPage.module.css';
+import common from '../../styles/common.module.css';
 
 const QR_BG = '#FFFFFF';
 const QR_FG = '#1A1208';
@@ -57,7 +58,7 @@ export default function QRPage() {
   }
 
   return (
-    <>
+    <div className={common.pageWrapper}>
       <div className={`${styles.noPrint} ${styles.backRow}`}>
         <div>
           <Link to={`/menus/${id}`} className={styles.backLink}>← Назад</Link>
@@ -96,6 +97,6 @@ export default function QRPage() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

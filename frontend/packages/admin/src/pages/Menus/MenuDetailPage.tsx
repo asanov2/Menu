@@ -85,7 +85,7 @@ export default function MenuDetailPage() {
 
   if (menuLoading || catsLoading) {
     return (
-      <div className={styles.loadingSkeleton}>
+      <div className={`${common.pageWrapper} ${styles.loadingSkeleton}`}>
         <Skeleton height="28px" width="200px" />
         {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} height="120px" borderRadius="var(--radius-lg)" />)}
       </div>
@@ -93,7 +93,7 @@ export default function MenuDetailPage() {
   }
 
   return (
-    <div>
+    <div className={common.pageWrapper}>
       {/* Breadcrumb + actions */}
       <div className={common.pageHeader}>
         <div className={styles.breadcrumb}>

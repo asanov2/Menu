@@ -1,8 +1,3 @@
-.wrapper {
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
 .tabBar {
   display: flex;
   border-bottom: 1px solid var(--cream-border);

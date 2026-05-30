@@ -2,6 +2,11 @@
    Shared patterns used across multiple admin pages
 ─────────────────────────────────────────────────────────────── */
 
+.pageWrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
 .card {
   background: var(--cream-surface);
   border: 1px solid var(--cream-border);

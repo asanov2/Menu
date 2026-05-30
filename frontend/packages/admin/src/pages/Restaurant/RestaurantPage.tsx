@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import { EmptyState, Icon } from '@qrmenu/ui';
 import MenusPage from '../Menus/MenusPage';
 import styles from './RestaurantPage.module.css';
+import common from '../../styles/common.module.css';
 
 const RESTAURANT_TABS = [
   { to: 'menus',  label: 'Меню',    icon: 'tools-kitchen-2' },
@@ -31,7 +32,7 @@ function CallsStub() {
 
 export default function RestaurantPage() {
   return (
-    <div className={styles.wrapper}>
+    <div className={common.pageWrapper}>
       <div className={styles.tabBar}>
         {RESTAURANT_TABS.map((tab) => (
           <NavLink
