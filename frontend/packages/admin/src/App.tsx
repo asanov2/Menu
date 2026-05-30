@@ -5,7 +5,7 @@ import PrivateRoute from './components/PrivateRoute';
 import LoginPage from './pages/Login/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
-import MenusPage from './pages/Menus/MenusPage';
+import RestaurantPage from './pages/Restaurant/RestaurantPage';
 import MenuDetailPage from './pages/Menus/MenuDetailPage';
 import QRPage from './pages/Menus/QRPage';
 import BillingPage from './pages/Billing/BillingPage';
@@ -20,7 +20,8 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
-        <Route path="/menus" element={<PrivateRoute><MenusPage /></PrivateRoute>} />
+        <Route path="/restaurant/*" element={<PrivateRoute><RestaurantPage /></PrivateRoute>} />
+        <Route path="/menus" element={<Navigate to="/restaurant/menus" replace />} />
         <Route path="/menus/:id" element={<PrivateRoute><MenuDetailPage /></PrivateRoute>} />
         <Route path="/menus/:id/qr" element={<PrivateRoute><QRPage /></PrivateRoute>} />
         <Route path="/billing" element={<PrivateRoute><BillingPage /></PrivateRoute>} />

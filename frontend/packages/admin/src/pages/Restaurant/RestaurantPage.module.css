@@ -1,0 +1,53 @@
+.wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.tabBar {
+  display: flex;
+  border-bottom: 1px solid var(--cream-border);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabBar::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab:hover {
+  color: var(--ink-primary);
+}
+
+.tabActive {
+  color: var(--ink-primary);
+  border-bottom-color: var(--accent-gold);
+}
+
+@media (max-width: 768px) {
+  .tabBar {
+    margin-bottom: 16px;
+  }
+
+  .tab {
+    padding: 10px 14px;
+  }
+}
