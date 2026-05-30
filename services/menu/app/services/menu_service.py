@@ -43,9 +43,9 @@ class MenuService:
                         Menu.restaurant_id == restaurant_id,
                         Menu.deleted_at == None,  # noqa: E711
                     )
-                ).order_by(Menu.created_at)
+                ).order_by(Menu.created_at).limit(1)
             )
-            menu = result.scalar_one_or_none()
+            menu = result.scalars().first()
         if not menu:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

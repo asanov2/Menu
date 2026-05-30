@@ -38,6 +38,17 @@ export async function deleteMenu(id: string): Promise<void> {
   await adminApi.delete(`/api/v1/admin/menus/${id}`);
 }
 
+export interface MenuOrderSettings {
+  orders_enabled: boolean;
+  preorders_enabled: boolean;
+  tables_count: number;
+}
+
+export async function updateMenuOrderSettings(id: string, payload: MenuOrderSettings): Promise<Menu> {
+  const { data } = await adminApi.patch(`/api/v1/admin/menus/${id}/order-settings`, payload);
+  return data;
+}
+
 export function getMenuUrl(slug: string): string {
   return `${import.meta.env.VITE_APP_URL ?? ''}/menu/${slug}`;
 }

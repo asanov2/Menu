@@ -176,18 +176,33 @@ async def get_items(
 @router.get("/{slug}/order-config", response_model=OrderConfigResponse)
 async def get_order_config(
     slug: str,
+    menu_id: UUID | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ) -> OrderConfigResponse:
     service = MenuService(db)
-    restaurant, _ = await service.get_full_menu(slug)
-    tg_settings = await _get_order_config(db, restaurant)
-    if not tg_settings or restaurant.plan not in ("business", "pro"):
+    restaurant = await service.get_restaurant_by_slug(slug)
+
+    if restaurant.plan not in ("business", "pro"):
         return OrderConfigResponse(orders_enabled=False, preorders_enabled=False, tables_count=10, telegram_connected=False)
-    telegram_connected = tg_settings.telegram_chat_id is not None
+
+    if menu_id is not None:
+        try:
+            menu = await service.get_menu_by_id(restaurant.id, menu_id)
+        except Exception:
+            return OrderConfigResponse(orders_enabled=False, preorders_enabled=False, tables_count=10, telegram_connected=False)
+    else:
+        try:
+            menu = await service.get_default_menu(restaurant.id)
+        except Exception:
+            return OrderConfigResponse(orders_enabled=False, preorders_enabled=False, tables_count=10, telegram_connected=False)
+
+    tg_settings = await _get_order_config(db, restaurant)
+    telegram_connected = tg_settings is not None and tg_settings.telegram_chat_id is not None
+
     return OrderConfigResponse(
-        orders_enabled=tg_settings.orders_enabled if telegram_connected else False,
-        preorders_enabled=tg_settings.preorders_enabled if telegram_connected else False,
-        tables_count=tg_settings.tables_count,
+        orders_enabled=menu.orders_enabled if telegram_connected else False,
+        preorders_enabled=menu.preorders_enabled if telegram_connected else False,
+        tables_count=menu.tables_count,
         telegram_connected=telegram_connected,
     )
 
@@ -196,10 +211,15 @@ async def get_order_config(
 async def create_order(
     slug: str,
     body: OrderCreate,
+    menu_id: UUID | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ) -> OrderResponse:
     service = MenuService(db)
-    restaurant, menu = await service.get_full_menu(slug)
-    order = await _create_order(db, restaurant, menu.id, body)
+    restaurant = await service.get_restaurant_by_slug(slug)
+    if menu_id is not None:
+        menu = await service.get_menu_by_id(restaurant.id, menu_id)
+    else:
+        menu = await service.get_default_menu(restaurant.id)
+    order = await _create_order(db, restaurant, menu, body)
     msg = "Заказ принят! Ожидайте звонка" if body.order_type == "preorder" else "Заказ передан на кухню"
     return OrderResponse(order_id=str(order.id), message=msg)

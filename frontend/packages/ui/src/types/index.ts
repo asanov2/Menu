@@ -15,6 +15,9 @@ export interface Menu {
   language: 'ru' | 'kz' | 'en';
   is_default: boolean;
   items_count: number;
+  orders_enabled: boolean;
+  preorders_enabled: boolean;
+  tables_count: number;
 }
 
 export interface Category {

@@ -27,5 +27,5 @@ export const useMenu = () => {
     },
   });
 
-  return { ...query, slug: slug!, lang, setLang, table };
+  return { ...query, slug: slug!, lang, setLang, table, menuId };
 };

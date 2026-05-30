@@ -244,3 +244,143 @@
   font-family: var(--font-ui);
   cursor: pointer;
 }
+
+.btnSettings {
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 0.5px solid var(--cream-border);
+  color: var(--ink-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnSettingsActive {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: var(--accent-gold-bg);
+}
+
+.orderSettings {
+  border-top: 0.5px solid var(--cream-border);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.orderSettingsTitle {
+  font-size: 12px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--ink-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.toggleInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  color: var(--ink-primary);
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.switchTrack {
+  position: absolute;
+  inset: 0;
+  background: var(--cream-border);
+  border-radius: 20px;
+  transition: background 0.2s;
+}
+
+.switchTrack::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s;
+}
+
+.switch input:checked + .switchTrack {
+  background: var(--accent-gold);
+}
+
+.switch input:checked + .switchTrack::before {
+  transform: translateX(16px);
+}
+
+.tablesRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  color: var(--ink-secondary);
+  padding-left: 4px;
+}
+
+.tablesLabel {
+  flex: 1;
+}
+
+.tablesInput {
+  width: 56px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--cream-border);
+  background: var(--cream-surface);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  color: var(--ink-primary);
+  text-align: center;
+  outline: none;
+}
+
+.btnSaveSettings {
+  margin-top: 2px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background: var(--ink-primary);
+  color: var(--cream-surface);
+  border: none;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  align-self: flex-start;
+}

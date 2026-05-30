@@ -16,13 +16,14 @@ interface CartModalProps {
   onClear: () => void;
   config: OrderConfig;
   slug: string;
+  menuId?: string;
 }
 
 type Tab = 'table' | 'preorder';
 type Stage = 'cart' | 'success';
 
 export default function CartModal({
-  open, onClose, items, totalPrice, onUpdateQty, onRemove, onClear, config, slug,
+  open, onClose, items, totalPrice, onUpdateQty, onRemove, onClear, config, slug, menuId,
 }: CartModalProps) {
   const bothEnabled = config.orders_enabled && config.preorders_enabled;
   const defaultTab: Tab = config.orders_enabled ? 'table' : 'preorder';
@@ -101,7 +102,7 @@ export default function CartModal({
 
     setIsSubmitting(true);
     try {
-      const result = await submitOrder(slug, payload);
+      const result = await submitOrder(slug, payload, menuId);
       setSuccessMsg(result.message);
       onClear();
       setStage('success');

@@ -49,12 +49,16 @@ export interface OrderResult {
   message: string;
 }
 
-export const getOrderConfig = async (slug: string): Promise<OrderConfig> => {
-  const { data } = await menuApi.get<OrderConfig>(`/api/v1/menu/${slug}/order-config`);
+export const getOrderConfig = async (slug: string, menuId?: string): Promise<OrderConfig> => {
+  const params: Record<string, string> = {};
+  if (menuId) params.menu_id = menuId;
+  const { data } = await menuApi.get<OrderConfig>(`/api/v1/menu/${slug}/order-config`, { params });
   return data;
 };
 
-export const submitOrder = async (slug: string, payload: OrderPayload): Promise<OrderResult> => {
-  const { data } = await menuApi.post<OrderResult>(`/api/v1/menu/${slug}/order`, payload);
+export const submitOrder = async (slug: string, payload: OrderPayload, menuId?: string): Promise<OrderResult> => {
+  const params: Record<string, string> = {};
+  if (menuId) params.menu_id = menuId;
+  const { data } = await menuApi.post<OrderResult>(`/api/v1/menu/${slug}/order`, payload, { params });
   return data;
 };

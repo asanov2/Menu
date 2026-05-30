@@ -1,12 +1,13 @@
+from datetime import datetime
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cache_invalidator import invalidate_menu_cache
 from app.core.database import get_db
 from app.core.dependencies import CurrentRestaurant, get_current_restaurant
-from app.schemas.menu import MenuCreate, MenuListWithUsageResponse, MenuResponse, MenuUpdate
+from app.schemas.menu import MenuCreate, MenuListWithUsageResponse, MenuOrderSettingsUpdate, MenuResponse, MenuUpdate
 from app.services.menu_service import MenuService
 
 router = APIRouter()
@@ -59,6 +60,26 @@ async def update_menu(
     service = MenuService(db)
     menu = await service.update_menu(current.id, menu_id, current.plan, data)
     await invalidate_menu_cache(current.slug)
+    return MenuResponse.model_validate(menu)
+
+
+@router.patch("/{menu_id}/order-settings", response_model=MenuResponse)
+async def update_order_settings(
+    menu_id: UUID,
+    data: MenuOrderSettingsUpdate,
+    current: CurrentRestaurant = Depends(get_current_restaurant),
+    db: AsyncSession = Depends(get_db),
+) -> MenuResponse:
+    if current.plan not in ("business", "pro"):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Order features require Business or Pro plan")
+    service = MenuService(db)
+    menu = await service.get_menu(current.id, menu_id)
+    menu.orders_enabled = data.orders_enabled
+    menu.preorders_enabled = data.preorders_enabled
+    menu.tables_count = max(1, data.tables_count)
+    menu.updated_at = datetime.utcnow()
+    await db.commit()
+    await db.refresh(menu)
     return MenuResponse.model_validate(menu)
 
 

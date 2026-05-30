@@ -27,7 +27,7 @@ const VIEW_PREF_KEY = 'menu_view_preference';
 const DEFAULT_CONFIG: OrderConfig = { orders_enabled: false, preorders_enabled: false, tables_count: 10, telegram_connected: false };
 
 export default function MenuPage() {
-  const { data, isLoading, error, slug, lang, setLang, table } = useMenu();
+  const { data, isLoading, error, slug, lang, setLang, table, menuId } = useMenu();
   const { i18n } = useTranslation();
 
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -41,8 +41,8 @@ export default function MenuPage() {
   const cart = useCart(slug ?? '');
 
   const { data: orderConfig = DEFAULT_CONFIG } = useQuery<OrderConfig>({
-    queryKey: ['order-config', slug],
-    queryFn: () => getOrderConfig(slug!),
+    queryKey: ['order-config', slug, menuId],
+    queryFn: () => getOrderConfig(slug!, menuId),
     enabled: !!slug,
     staleTime: 5 * 60 * 1000,
     retry: false,
@@ -205,6 +205,7 @@ export default function MenuPage() {
           onClear={cart.clearCart}
           config={orderConfig}
           slug={slug ?? ''}
+          menuId={menuId}
         />
       )}
 

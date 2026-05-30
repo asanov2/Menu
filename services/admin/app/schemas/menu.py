@@ -20,12 +20,21 @@ class MenuUpdate(BaseModel):
     language: str | None = None
 
 
+class MenuOrderSettingsUpdate(BaseModel):
+    orders_enabled: bool
+    preorders_enabled: bool
+    tables_count: int
+
+
 class MenuResponse(BaseModel):
     id: UUID
     restaurant_id: UUID
     name: str
     is_default: bool
     language: str
+    orders_enabled: bool = False
+    preorders_enabled: bool = False
+    tables_count: int = 10
     items_count: int = 0
     created_at: datetime
     updated_at: datetime

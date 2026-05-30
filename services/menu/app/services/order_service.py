@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.models.menu import Restaurant
+from app.models.menu import Menu, Restaurant
 from app.models.order import Order, RestaurantTelegramSettings
 from app.schemas.order import OrderCreate
 
@@ -96,8 +96,8 @@ async def _auto_disconnect(db: AsyncSession, tg_settings: RestaurantTelegramSett
         logger.error("Failed to auto-disconnect Telegram: %s", exc)
 
 
-def _format_table_order(table_number: int, items: list, total_price: int, now_str: str) -> str:
-    lines = [f"<b>🍽 Новый заказ — Стол №{table_number}</b>", ""]
+def _format_table_order(table_number: int, menu_name: str, items: list, total_price: int, now_str: str) -> str:
+    lines = [f"<b>🍽 Новый заказ — Стол №{table_number}</b>", f"📋 Меню: {menu_name}", ""]
     for item in items:
         name = item.get("name", "—")
         qty = item.get("quantity", 1)
@@ -107,11 +107,12 @@ def _format_table_order(table_number: int, items: list, total_price: int, now_st
     return "\n".join(lines)
 
 
-def _format_preorder(customer_name: str, customer_phone: str, items: list,
+def _format_preorder(customer_name: str, customer_phone: str, menu_name: str, items: list,
                      total_price: int, comment: str | None, now_str: str) -> str:
     lines = [
         f"<b>📦 Предзаказ — {customer_name}</b>",
         f"📞 {customer_phone}",
+        f"📋 Меню: {menu_name}",
         "",
     ]
     for item in items:
@@ -140,7 +141,7 @@ async def get_order_config(
 async def create_order(
     db: AsyncSession,
     restaurant: Restaurant,
-    menu_id,
+    menu: Menu,
     data: OrderCreate,
 ) -> Order:
     if restaurant.plan not in ("business", "pro"):
@@ -150,28 +151,28 @@ async def create_order(
         )
 
     tg_settings = await get_order_config(db, restaurant)
-    if not tg_settings:
+    if not tg_settings or tg_settings.telegram_chat_id is None:
         raise HTTPException(
             status_code=http_status.HTTP_400_BAD_REQUEST,
             detail="Order feature not configured",
         )
 
-    if data.order_type == "table" and not tg_settings.orders_enabled:
+    if data.order_type == "table" and not menu.orders_enabled:
         raise HTTPException(
             status_code=http_status.HTTP_400_BAD_REQUEST,
-            detail="Table orders are not enabled for this restaurant",
+            detail="Table orders are not enabled for this menu",
         )
-    if data.order_type == "preorder" and not tg_settings.preorders_enabled:
+    if data.order_type == "preorder" and not menu.preorders_enabled:
         raise HTTPException(
             status_code=http_status.HTTP_400_BAD_REQUEST,
-            detail="Pre-orders are not enabled for this restaurant",
+            detail="Pre-orders are not enabled for this menu",
         )
 
     items_data = [item.model_dump() for item in data.items]
 
     order = Order(
         restaurant_id=restaurant.id,
-        menu_id=menu_id,
+        menu_id=menu.id,
         order_type=data.order_type,
         table_number=data.table_number,
         customer_name=data.customer_name,
@@ -184,26 +185,26 @@ async def create_order(
     await db.commit()
     await db.refresh(order)
 
-    if tg_settings.telegram_chat_id:
-        now_str = datetime.now(tz=timezone(timedelta(hours=5))).strftime("%H:%M")
-        if data.order_type == "table" and data.table_number is not None:
-            msg = _format_table_order(data.table_number, items_data, data.total_price, now_str)
-        else:
-            msg = _format_preorder(
-                data.customer_name or "—",
-                data.customer_phone or "—",
-                items_data,
-                data.total_price,
-                data.comment,
-                now_str,
-            )
-        result = await _send_telegram(tg_settings.telegram_chat_id, msg)
-        if result is None:
-            # Fatal error — bot is blocked/kicked. Best-effort warning before clearing.
-            await _send_telegram(
-                tg_settings.telegram_chat_id,
-                "⚠️ Связь с ботом потеряна. Пожалуйста, переподключите Telegram в панели администратора qrmenus.kz",
-            )
-            await _auto_disconnect(db, tg_settings)
+    now_str = datetime.now(tz=timezone(timedelta(hours=5))).strftime("%H:%M")
+    if data.order_type == "table" and data.table_number is not None:
+        msg = _format_table_order(data.table_number, menu.name, items_data, data.total_price, now_str)
+    else:
+        msg = _format_preorder(
+            data.customer_name or "—",
+            data.customer_phone or "—",
+            menu.name,
+            items_data,
+            data.total_price,
+            data.comment,
+            now_str,
+        )
+    result = await _send_telegram(tg_settings.telegram_chat_id, msg)
+    if result is None:
+        # Fatal error — bot is blocked/kicked. Best-effort warning before clearing.
+        await _send_telegram(
+            tg_settings.telegram_chat_id,
+            "⚠️ Связь с ботом потеряна. Пожалуйста, переподключите Telegram в панели администратора qrmenus.kz",
+        )
+        await _auto_disconnect(db, tg_settings)
 
     return order

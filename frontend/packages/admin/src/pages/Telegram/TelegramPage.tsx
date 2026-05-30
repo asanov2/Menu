@@ -1,11 +1,10 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Icon, useToast, getApiErrorMessage } from '@qrmenu/ui';
 import { useAuth } from '../../hooks/useAuth';
 import {
   getTelegramStatus,
   generateTelegramCode,
-  saveTelegramSettings,
   disconnectTelegram,
   type TelegramStatus,
 } from '../../api/telegram';
@@ -37,11 +36,6 @@ export default function TelegramPage() {
 
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [codeExpiresIn, setCodeExpiresIn] = useState(0);
-  const [localSettings, setLocalSettings] = useState({
-    orders_enabled: false,
-    preorders_enabled: false,
-    tables_count: 10,
-  });
 
   const { data: status, isLoading } = useQuery<TelegramStatus>({
     queryKey: ['telegram-status'],
@@ -50,16 +44,6 @@ export default function TelegramPage() {
     refetchOnWindowFocus: true,
   });
 
-  useEffect(() => {
-    if (status) {
-      setLocalSettings({
-        orders_enabled: status.orders_enabled,
-        preorders_enabled: status.preorders_enabled,
-        tables_count: status.tables_count,
-      });
-    }
-  }, [status]);
-
   const handleExpire = useCallback(() => setGeneratedCode(null), []);
 
   const generateMutation = useMutation({
@@ -67,15 +51,6 @@ export default function TelegramPage() {
     onSuccess: (data) => {
       setGeneratedCode(data.code);
       setCodeExpiresIn(data.expires_in);
-    },
-    onError: (err) => showToast(getApiErrorMessage(err), 'error'),
-  });
-
-  const settingsMutation = useMutation({
-    mutationFn: saveTelegramSettings,
-    onSuccess: () => {
-      showToast('Настройки сохранены', 'success');
-      qc.invalidateQueries({ queryKey: ['telegram-status'] });
     },
     onError: (err) => showToast(getApiErrorMessage(err), 'error'),
   });
@@ -91,7 +66,6 @@ export default function TelegramPage() {
   });
 
   const isPro = restaurant?.plan === 'pro';
-  const isBusiness = restaurant?.plan === 'business' || isPro;
   const connected = status?.connected ?? false;
   const botUsername = status?.bot_username ?? 'qrmenuskz_bot';
 
@@ -203,96 +177,7 @@ export default function TelegramPage() {
               )}
             </div>
 
-            {/* ─── Блок 2: Настройки заказов ─── */}
-            {connected && isBusiness && (
-              <div className={common.card}>
-                <div className={styles.blockHeader}>
-                  <Icon name="settings" size={18} />
-                  <span className={styles.blockTitle}>Настройки заказов</span>
-                </div>
-
-                <div className={styles.settingsForm}>
-                  <div className={styles.toggleRow}>
-                    <div className={styles.toggleLeft}>
-                      <div className={styles.toggleIconWrap}>
-                        <Icon name="armchair" size={18} />
-                      </div>
-                      <div className={styles.toggleInfo}>
-                        <div className={styles.toggleTitle}>Заказ за столом</div>
-                        <div className={styles.toggleDesc}>Гости смогут оформить заказ прямо за столом</div>
-                      </div>
-                    </div>
-                    <label className={styles.switchLabel}>
-                      <input
-                        type="checkbox"
-                        className={styles.switchInput}
-                        checked={localSettings.orders_enabled}
-                        onChange={(e) =>
-                          setLocalSettings((s) => ({ ...s, orders_enabled: e.target.checked }))
-                        }
-                      />
-                      <span className={styles.switchTrack} />
-                    </label>
-                  </div>
-
-                  <div className={`${styles.tablesField} ${localSettings.orders_enabled ? styles.tablesFieldVisible : ''}`}>
-                    <div className={styles.tablesFieldInner}>
-                      <div className={styles.tablesIcon}>
-                        <Icon name="table" size={16} />
-                      </div>
-                      <label className={styles.tablesLabel}>Количество столов</label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={100}
-                        value={localSettings.tables_count}
-                        onChange={(e) =>
-                          setLocalSettings((s) => ({
-                            ...s,
-                            tables_count: Math.max(1, parseInt(e.target.value) || 1),
-                          }))
-                        }
-                        className={styles.tablesInput}
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.toggleRow}>
-                    <div className={styles.toggleLeft}>
-                      <div className={styles.toggleIconWrap}>
-                        <Icon name="package" size={18} />
-                      </div>
-                      <div className={styles.toggleInfo}>
-                        <div className={styles.toggleTitle}>Предзаказ</div>
-                        <div className={styles.toggleDesc}>Гости смогут заказать заранее по телефону</div>
-                      </div>
-                    </div>
-                    <label className={styles.switchLabel}>
-                      <input
-                        type="checkbox"
-                        className={styles.switchInput}
-                        checked={localSettings.preorders_enabled}
-                        onChange={(e) =>
-                          setLocalSettings((s) => ({ ...s, preorders_enabled: e.target.checked }))
-                        }
-                      />
-                      <span className={styles.switchTrack} />
-                    </label>
-                  </div>
-
-                  <button
-                    className={styles.btnSave}
-                    onClick={() => settingsMutation.mutate(localSettings)}
-                    disabled={settingsMutation.isPending}
-                  >
-                    <Icon name="device-floppy" size={16} />
-                    {settingsMutation.isPending ? 'Сохранение...' : 'Сохранить настройки'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* ─── Блок 3: Ежедневная сводка (только Pro) ─── */}
+            {/* ─── Блок 2: Ежедневная сводка (только Pro) ─── */}
             {isPro && (
               <div className={`${common.card} ${styles.proCard}`}>
                 <div className={styles.proBadge}>Про</div>

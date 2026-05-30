@@ -1,10 +1,11 @@
 // === FILE: frontend/packages/admin/src/pages/Menus/components/MenuCard.tsx ===
 import { useState, useRef, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { ConfirmModal, useToast, Icon } from '@qrmenu/ui';
 import type { Menu } from '@qrmenu/ui';
-import { deleteMenu, updateMenu } from '../../../api/menus';
+import { deleteMenu, updateMenu, updateMenuOrderSettings } from '../../../api/menus';
+import { useAuth } from '../../../hooks/useAuth';
 import styles from './MenuCard.module.css';
 
 interface MenuCardProps {
@@ -18,11 +19,20 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const { restaurant } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
   const [editName, setEditName] = useState(false);
   const [nameValue, setNameValue] = useState(menu.name);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [orderSettings, setOrderSettings] = useState({
+    orders_enabled: menu.orders_enabled ?? false,
+    preorders_enabled: menu.preorders_enabled ?? false,
+    tables_count: menu.tables_count ?? 10,
+  });
+  const [tablesRaw, setTablesRaw] = useState(String(menu.tables_count ?? 10));
   const menuRef = useRef<HTMLDivElement>(null);
+  const isBusiness = restaurant?.plan === 'business' || restaurant?.plan === 'pro';
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -56,6 +66,15 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
       setEditName(false);
     }
   };
+
+  const orderSettingsMutation = useMutation({
+    mutationFn: () => updateMenuOrderSettings(menu.id, orderSettings),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menus'] });
+      showToast('Настройки заказа сохранены', 'success');
+    },
+    onError: () => showToast('Ошибка сохранения настроек', 'error'),
+  });
 
   return (
     <>
@@ -148,7 +167,85 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
           >
             QR-код
           </button>
+          {isBusiness && (
+            <button
+              onClick={() => setSettingsOpen((v) => !v)}
+              className={`${styles.btnSettings} ${settingsOpen ? styles.btnSettingsActive : ''}`}
+              title="Настройки заказа"
+            >
+              <Icon name="settings" size={14} />
+            </button>
+          )}
         </div>
+
+        {/* Order settings (expandable) */}
+        {isBusiness && settingsOpen && (
+          <div className={styles.orderSettings}>
+            <div className={styles.orderSettingsTitle}>Настройки заказа</div>
+
+            <div className={styles.toggleRow}>
+              <div className={styles.toggleInfo}>
+                <Icon name="armchair" size={15} />
+                <span>Заказ за столом</span>
+              </div>
+              <label className={styles.switch}>
+                <input
+                  type="checkbox"
+                  checked={orderSettings.orders_enabled}
+                  onChange={(e) => setOrderSettings((s) => ({ ...s, orders_enabled: e.target.checked }))}
+                />
+                <span className={styles.switchTrack} />
+              </label>
+            </div>
+
+            {orderSettings.orders_enabled && (
+              <div className={styles.tablesRow}>
+                <Icon name="table" size={14} />
+                <label className={styles.tablesLabel}>Столов</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={tablesRaw}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/[^\d]/g, '');
+                    setTablesRaw(v);
+                    if (v !== '') setOrderSettings((s) => ({ ...s, tables_count: Math.max(1, parseInt(v)) }));
+                  }}
+                  onBlur={() => {
+                    const n = Math.max(1, parseInt(tablesRaw) || 1);
+                    setTablesRaw(String(n));
+                    setOrderSettings((s) => ({ ...s, tables_count: n }));
+                  }}
+                  className={styles.tablesInput}
+                />
+              </div>
+            )}
+
+            <div className={styles.toggleRow}>
+              <div className={styles.toggleInfo}>
+                <Icon name="package" size={15} />
+                <span>Предзаказ</span>
+              </div>
+              <label className={styles.switch}>
+                <input
+                  type="checkbox"
+                  checked={orderSettings.preorders_enabled}
+                  onChange={(e) => setOrderSettings((s) => ({ ...s, preorders_enabled: e.target.checked }))}
+                />
+                <span className={styles.switchTrack} />
+              </label>
+            </div>
+
+            <button
+              className={styles.btnSaveSettings}
+              onClick={() => orderSettingsMutation.mutate()}
+              disabled={orderSettingsMutation.isPending}
+            >
+              <Icon name="device-floppy" size={14} />
+              {orderSettingsMutation.isPending ? 'Сохранение...' : 'Сохранить'}
+            </button>
+          </div>
+        )}
       </div>
 
       <ConfirmModal
