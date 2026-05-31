@@ -23,6 +23,7 @@ class Order(Base):
     items: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
     total_price: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(10), nullable=False, server_default="new")
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )

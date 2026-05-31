@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import { EmptyState, Icon } from '@qrmenu/ui';
 import MenusPage from '../Menus/MenusPage';
+import OrdersPage from './OrdersPage';
 import styles from './RestaurantPage.module.css';
 import common from '../../styles/common.module.css';
 
@@ -9,16 +10,6 @@ const RESTAURANT_TABS = [
   { to: 'orders', label: 'Заказы',  icon: 'receipt' },
   { to: 'calls',  label: 'Вызовы',  icon: 'bell-ringing' },
 ];
-
-function OrdersStub() {
-  return (
-    <EmptyState
-      icon={<Icon name="receipt" size={40} />}
-      title="Заказы столов"
-      description="Здесь скоро появятся заказы от гостей. Раздел находится в разработке."
-    />
-  );
-}
 
 function CallsStub() {
   return (
@@ -49,7 +40,7 @@ export default function RestaurantPage() {
       <Routes>
         <Route index element={<Navigate to="menus" replace />} />
         <Route path="menus" element={<MenusPage />} />
-        <Route path="orders" element={<OrdersStub />} />
+        <Route path="orders" element={<OrdersPage />} />
         <Route path="calls" element={<CallsStub />} />
       </Routes>
     </div>
