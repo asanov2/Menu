@@ -39,3 +39,17 @@ class RestaurantTelegramSettings(Base):
     orders_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     preorders_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     tables_count: Mapped[int] = mapped_column(Integer, default=10, nullable=False)
+
+
+class TelegramRecipient(Base):
+    """Read-only mirror — managed by admin service migrations."""
+
+    __tablename__ = "telegram_recipients"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    restaurant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    chat_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    label: Mapped[str] = mapped_column(String(100), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )

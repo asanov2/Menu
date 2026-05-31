@@ -25,7 +25,7 @@ from app.services.cache_service import (
     set_cached_menu,
 )
 from app.services.menu_service import MenuService
-from app.services.order_service import create_order as _create_order, get_order_config as _get_order_config
+from app.services.order_service import create_order as _create_order, get_order_config as _get_order_config, get_recipients as _get_recipients
 
 router = APIRouter()
 
@@ -197,7 +197,11 @@ async def get_order_config(
             return OrderConfigResponse(orders_enabled=False, preorders_enabled=False, tables_count=10, telegram_connected=False)
 
     tg_settings = await _get_order_config(db, restaurant)
-    telegram_connected = tg_settings is not None and tg_settings.telegram_chat_id is not None
+    if tg_settings is None:
+        telegram_connected = False
+    else:
+        recipients = await _get_recipients(db, restaurant.id)
+        telegram_connected = len(recipients) > 0
 
     return OrderConfigResponse(
         orders_enabled=menu.orders_enabled if telegram_connected else False,

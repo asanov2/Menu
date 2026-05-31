@@ -1,4 +1,5 @@
 import logging
+import uuid
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -10,7 +11,9 @@ from app.core.database import get_db
 from app.core.dependencies import CurrentRestaurant, get_current_restaurant
 from app.models.telegram import RestaurantTelegramSettings
 from app.schemas.telegram import (
+    GenerateCodeRequest,
     GenerateCodeResponse,
+    TelegramRecipientOut,
     TelegramSettingsUpdate,
     TelegramStatusResponse,
     WebhookUpdate,
@@ -29,10 +32,14 @@ _CODE_TTL_SECONDS = 600  # 10 minutes
 
 @router_admin.post("/generate-code", response_model=GenerateCodeResponse)
 async def generate_code(
+    body: GenerateCodeRequest,
     current: CurrentRestaurant = Depends(get_current_restaurant),
     db: AsyncSession = Depends(get_db),
 ) -> GenerateCodeResponse:
-    code = await telegram_service.generate_connect_code(db, current.id)
+    try:
+        code = await telegram_service.generate_connect_code(db, current.id, body.label)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     return GenerateCodeResponse(
         code=code,
         expires_in=_CODE_TTL_SECONDS,
@@ -51,18 +58,21 @@ async def get_status(
         )
     )
     row = result.scalar_one_or_none()
+    recipients = await telegram_service.get_recipients(db, current.id)
+    recipients_out = [TelegramRecipientOut.model_validate(r) for r in recipients]
+
     if not row:
         return TelegramStatusResponse(
             connected=False,
-            chat_id=None,
+            recipients=[],
             orders_enabled=False,
             preorders_enabled=False,
             tables_count=10,
             bot_username=settings.telegram_bot_username,
         )
     return TelegramStatusResponse(
-        connected=row.telegram_chat_id is not None,
-        chat_id=row.telegram_chat_id,
+        connected=len(recipients) > 0,
+        recipients=recipients_out,
         orders_enabled=row.orders_enabled,
         preorders_enabled=row.preorders_enabled,
         tables_count=row.tables_count,
@@ -90,6 +100,18 @@ async def update_settings(
     return {"ok": True}
 
 
+@router_admin.delete("/recipients/{recipient_id}", status_code=status.HTTP_200_OK)
+async def delete_recipient(
+    recipient_id: uuid.UUID,
+    current: CurrentRestaurant = Depends(get_current_restaurant),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    removed = await telegram_service.disconnect_recipient(db, current.id, recipient_id)
+    if not removed:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recipient not found")
+    return {"ok": True}
+
+
 @router_admin.delete("/disconnect", status_code=status.HTTP_200_OK)
 async def disconnect_telegram(
     current: CurrentRestaurant = Depends(get_current_restaurant),
@@ -106,7 +128,7 @@ async def telegram_webhook(
     update: WebhookUpdate,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    # Bot was blocked / kicked / removed — auto-disconnect the restaurant
+    # Bot was blocked / kicked — remove only this specific recipient
     if update.my_chat_member:
         mcm = update.my_chat_member
         new_status = mcm.get("new_chat_member", {}).get("status", "")
@@ -115,7 +137,7 @@ async def telegram_webhook(
             disconnected = await telegram_service.disconnect_by_chat_id(db, chat_id)
             if disconnected:
                 logger.info(
-                    "Auto-disconnected restaurant via my_chat_member status=%s chat_id=%s",
+                    "Auto-removed recipient via my_chat_member status=%s chat_id=%s",
                     new_status, chat_id,
                 )
         return {"ok": True}
@@ -142,7 +164,7 @@ async def telegram_webhook(
         if activated:
             await telegram_service.send_message(
                 chat_id,
-                "✅ Ресторан подключён! Теперь вы будете получать уведомления.",
+                "✅ Вы подключены! Теперь вы будете получать уведомления о заказах.",
             )
         else:
             await telegram_service.send_message(
