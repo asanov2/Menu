@@ -1,3 +1,5 @@
+/* ── FAB ──────────────────────────────────────────────────────────────────── */
+
 .btn {
   position: fixed;
   bottom: calc(24px + env(safe-area-inset-bottom, 0px));
@@ -12,21 +14,188 @@
   box-shadow: 0 4px 20px rgba(26, 18, 8, 0.35);
   border: none;
   z-index: 50;
-  transition: background 0.3s;
+  transition: background 0.25s;
   -webkit-tap-highlight-color: transparent;
   cursor: pointer;
 }
 
 .btnCalled {
-  background: var(--tag-green-text);
+  background: #2a8a4a;
   cursor: default;
 }
 
 .btnLoading {
+  opacity: 0.7;
   cursor: default;
 }
 
 .checkmark {
-  font-size: 22px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+/* ── Backdrop ─────────────────────────────────────────────────────────────── */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 18, 8, 0.45);
+  z-index: 200;
+}
+
+/* ── Modal ────────────────────────────────────────────────────────────────── */
+
+.modal {
+  position: fixed;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  right: 16px;
+  width: min(320px, calc(100vw - 32px));
+  background: var(--cream-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-modal);
+  z-index: 201;
+  overflow: hidden;
+}
+
+@media (max-width: 400px) {
+  .modal {
+    right: 50%;
+    transform: translateX(50%);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--cream-border);
+  color: var(--ink-primary);
+}
+
+.modalTitle {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.closeBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.closeBtn:hover {
+  background: var(--cream-muted);
+}
+
+.modalBody {
+  padding: 16px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Table stepper ────────────────────────────────────────────────────────── */
+
+.tableLabel {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--ink-secondary);
+  font-weight: 500;
+}
+
+.tableStepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: var(--cream-muted);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 8px;
+}
+
+.stepBtn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--cream-surface);
+  border-radius: var(--radius-sm);
+  color: var(--ink-primary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.stepBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.stepBtn:not(:disabled):active {
+  background: var(--cream-warm);
+}
+
+.tableValue {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ── Confirm button ───────────────────────────────────────────────────────── */
+
+.btnConfirm {
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--accent-gold);
+  color: var(--ink-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 48px;
+  transition: opacity 0.18s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btnConfirm:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.btnConfirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Error ────────────────────────────────────────────────────────────────── */
+
+.errorText {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: #c0392b;
+  margin: 0;
+  text-align: center;
 }

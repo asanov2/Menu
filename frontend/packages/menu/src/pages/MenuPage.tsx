@@ -24,7 +24,7 @@ import styles from './MenuPage.module.css';
 type Language = 'ru' | 'kz' | 'en';
 const VIEW_PREF_KEY = 'menu_view_preference';
 
-const DEFAULT_CONFIG: OrderConfig = { orders_enabled: false, preorders_enabled: false, tables_count: 10, telegram_connected: false };
+const DEFAULT_CONFIG: OrderConfig = { orders_enabled: false, preorders_enabled: false, tables_count: 10, telegram_connected: false, waiter_call_enabled: false };
 
 export default function MenuPage() {
   const { data, isLoading, error, slug, lang, setLang, table, menuId } = useMenu();
@@ -209,8 +209,12 @@ export default function MenuPage() {
         />
       )}
 
-      {table && slug && (
-        <WaiterButton slug={slug} table={parseInt(table, 10)} />
+      {orderConfig.waiter_call_enabled && slug && (
+        <WaiterButton
+          slug={slug}
+          menuId={menuId}
+          tablesCount={orderConfig.tables_count}
+        />
       )}
 
       {data.restaurant.plan !== 'pro' && (

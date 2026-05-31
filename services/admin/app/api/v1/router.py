@@ -11,6 +11,7 @@ from app.api.v1.endpoints.telegram import router_admin as telegram_admin_router
 from app.api.v1.endpoints.telegram import router_webhook as telegram_webhook_router
 from app.api.v1.endpoints.translate import router as translate_router
 from app.api.v1.endpoints.upload import router as upload_router
+from app.api.v1.endpoints.waiter_calls import router as waiter_calls_router
 
 router = APIRouter()
 router.include_router(menus_router, prefix="/admin/menus", tags=["admin-menus"])
@@ -22,5 +23,6 @@ router.include_router(nutrition_router, prefix="/admin", tags=["admin-nutrition"
 router.include_router(description_router, prefix="/admin", tags=["admin-description"])
 router.include_router(allergens_router, prefix="/admin/allergens", tags=["admin-allergens"])
 router.include_router(orders_router, prefix="/admin/orders", tags=["admin-orders"])
+router.include_router(waiter_calls_router, prefix="/admin/waiter-calls", tags=["admin-waiter-calls"])
 router.include_router(telegram_admin_router, prefix="/admin/telegram", tags=["admin-telegram"])
 router.include_router(telegram_webhook_router, prefix="/telegram", tags=["telegram-webhook"])

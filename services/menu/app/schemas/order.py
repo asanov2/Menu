@@ -28,3 +28,8 @@ class OrderConfigResponse(BaseModel):
     preorders_enabled: bool
     tables_count: int
     telegram_connected: bool = False
+    waiter_call_enabled: bool = False
+
+
+class WaiterCallCreate(BaseModel):
+    table_number: int

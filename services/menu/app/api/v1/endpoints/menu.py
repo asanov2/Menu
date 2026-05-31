@@ -15,7 +15,7 @@ from app.schemas.menu import (
     MenuPageResponse,
     RestaurantInfo,
 )
-from app.schemas.order import OrderConfigResponse, OrderCreate, OrderResponse
+from app.schemas.order import OrderConfigResponse, OrderCreate, OrderResponse, WaiterCallCreate
 from app.services.cache_service import (
     get_cached_categories,
     get_cached_items,
@@ -25,7 +25,12 @@ from app.services.cache_service import (
     set_cached_menu,
 )
 from app.services.menu_service import MenuService
-from app.services.order_service import create_order as _create_order, get_order_config as _get_order_config, get_recipients as _get_recipients
+from app.services.order_service import (
+    create_order as _create_order,
+    create_waiter_call as _create_waiter_call,
+    get_order_config as _get_order_config,
+    get_recipients as _get_recipients,
+)
 
 router = APIRouter()
 
@@ -45,8 +50,6 @@ def detect_device_type(user_agent: str) -> str:
     return "mobile" if any(kw in ua for kw in _MOBILE_KEYWORDS) else "desktop"
 
 
-class WaiterCallRequest(BaseModel):
-    table: int
 
 
 @router.get("/{slug}", response_model=MenuPageResponse)
@@ -109,9 +112,17 @@ async def get_menu(
 @router.post("/{slug}/call-waiter", status_code=status.HTTP_204_NO_CONTENT)
 async def call_waiter(
     slug: str,
-    body: WaiterCallRequest,
+    body: WaiterCallCreate,
+    menu_id: UUID | None = Query(default=None),
+    db: AsyncSession = Depends(get_db),
 ) -> None:
-    pass
+    service = MenuService(db)
+    restaurant = await service.get_restaurant_by_slug(slug)
+    if menu_id is not None:
+        menu = await service.get_menu_by_id(restaurant.id, menu_id)
+    else:
+        menu = await service.get_default_menu(restaurant.id)
+    await _create_waiter_call(db, restaurant, menu, body.table_number)
 
 
 @router.post("/{slug}/items/{item_id}/view", status_code=status.HTTP_204_NO_CONTENT)
@@ -208,6 +219,7 @@ async def get_order_config(
         preorders_enabled=menu.preorders_enabled if telegram_connected else False,
         tables_count=menu.tables_count,
         telegram_connected=telegram_connected,
+        waiter_call_enabled=menu.waiter_call_enabled if telegram_connected else False,
     )
 
 

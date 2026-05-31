@@ -77,6 +77,7 @@ async def update_order_settings(
     menu.orders_enabled = data.orders_enabled
     menu.preorders_enabled = data.preorders_enabled
     menu.tables_count = max(1, data.tables_count)
+    menu.waiter_call_enabled = data.waiter_call_enabled
     menu.updated_at = datetime.utcnow()
     await db.commit()
     await db.refresh(menu)

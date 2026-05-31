@@ -71,6 +71,7 @@ class Menu(Base):
     orders_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     preorders_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     tables_count: Mapped[int] = mapped_column(Integer, default=10, nullable=False)
+    waiter_call_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -133,3 +134,14 @@ class Item(Base):
         primaryjoin="Item.id == ItemAllergen.item_id",
         foreign_keys="ItemAllergen.item_id",
     )
+
+
+class WaiterCall(Base):
+    __tablename__ = "waiter_calls"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    restaurant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True, nullable=False)
+    menu_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    table_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(String(10), default="new", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

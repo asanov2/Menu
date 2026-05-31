@@ -24,6 +24,7 @@ class MenuOrderSettingsUpdate(BaseModel):
     orders_enabled: bool
     preorders_enabled: bool
     tables_count: int
+    waiter_call_enabled: bool = False
 
 
 class MenuResponse(BaseModel):
@@ -35,11 +36,32 @@ class MenuResponse(BaseModel):
     orders_enabled: bool = False
     preorders_enabled: bool = False
     tables_count: int = 10
+    waiter_call_enabled: bool = False
     items_count: int = 0
     created_at: datetime
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class WaiterCallOut(BaseModel):
+    id: str
+    table_number: int
+    menu_id: str
+    menu_name: str
+    status: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class WaiterCallsResponse(BaseModel):
+    calls: list[WaiterCallOut]
+    has_more: bool
+
+
+class WaiterCallStatusUpdate(BaseModel):
+    status: str
 
 
 class PlanUsageResponse(BaseModel):

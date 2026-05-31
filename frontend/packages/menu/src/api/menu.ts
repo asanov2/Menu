@@ -12,8 +12,10 @@ export const getMenu = async (
   return data;
 };
 
-export const callWaiter = async (slug: string, table: number): Promise<void> => {
-  await menuApi.post(`/api/v1/menu/${slug}/call-waiter`, { table });
+export const callWaiter = async (slug: string, tableNumber: number, menuId?: string): Promise<void> => {
+  const params: Record<string, string> = {};
+  if (menuId) params.menu_id = menuId;
+  await menuApi.post(`/api/v1/menu/${slug}/call-waiter`, { table_number: tableNumber }, { params });
 };
 
 export const trackItemView = (slug: string, itemId: string): void => {
@@ -25,6 +27,7 @@ export interface OrderConfig {
   preorders_enabled: boolean;
   tables_count: number;
   telegram_connected: boolean;
+  waiter_call_enabled: boolean;
 }
 
 export interface OrderItemPayload {

@@ -29,6 +29,7 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
     orders_enabled: menu.orders_enabled ?? false,
     preorders_enabled: menu.preorders_enabled ?? false,
     tables_count: menu.tables_count ?? 10,
+    waiter_call_enabled: menu.waiter_call_enabled ?? false,
   });
   const [tablesRaw, setTablesRaw] = useState(String(menu.tables_count ?? 10));
   const menuRef = useRef<HTMLDivElement>(null);
@@ -231,6 +232,21 @@ function MenuCard({ menu, itemCount = 0 }: MenuCardProps) {
                   type="checkbox"
                   checked={orderSettings.preorders_enabled}
                   onChange={(e) => setOrderSettings((s) => ({ ...s, preorders_enabled: e.target.checked }))}
+                />
+                <span className={styles.switchTrack} />
+              </label>
+            </div>
+
+            <div className={styles.toggleRow}>
+              <div className={styles.toggleInfo}>
+                <Icon name="bell-ringing" size={15} />
+                <span>Вызов официанта</span>
+              </div>
+              <label className={styles.switch}>
+                <input
+                  type="checkbox"
+                  checked={orderSettings.waiter_call_enabled}
+                  onChange={(e) => setOrderSettings((s) => ({ ...s, waiter_call_enabled: e.target.checked }))}
                 />
                 <span className={styles.switchTrack} />
               </label>

@@ -18,6 +18,7 @@ export interface Menu {
   orders_enabled: boolean;
   preorders_enabled: boolean;
   tables_count: number;
+  waiter_call_enabled: boolean;
 }
 
 export interface Category {

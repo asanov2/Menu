@@ -8,7 +8,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.models.menu import Menu, Restaurant
+from app.models.menu import Menu, Restaurant, WaiterCall
 from app.models.order import Order, RestaurantTelegramSettings, TelegramRecipient
 from app.schemas.order import OrderCreate
 
@@ -222,3 +222,53 @@ async def create_order(
             await _auto_disconnect_recipient(db, recipient.chat_id)
 
     return order
+
+
+def _format_waiter_call(table_number: int, menu_name: str, now_str: str) -> str:
+    return f"<b>🔔 Вызов официанта — Стол №{table_number}</b>\n📋 Меню: {menu_name}\n⏰ {now_str}"
+
+
+async def create_waiter_call(
+    db: AsyncSession,
+    restaurant: Restaurant,
+    menu: Menu,
+    table_number: int,
+) -> WaiterCall:
+    if restaurant.plan not in ("business", "pro"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Waiter call requires Business or Pro plan")
+
+    if not menu.waiter_call_enabled:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Waiter call is not enabled for this menu")
+
+    recipients = await get_recipients(db, restaurant.id)
+    if not recipients:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Waiter call not configured: no Telegram recipients")
+
+    if table_number < 1 or table_number > menu.tables_count:
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=400,
+            detail=f"table_number must be between 1 and {menu.tables_count}",
+        )
+
+    call = WaiterCall(
+        restaurant_id=restaurant.id,
+        menu_id=menu.id,
+        table_number=table_number,
+    )
+    db.add(call)
+    await db.commit()
+    await db.refresh(call)
+
+    now_str = datetime.now(tz=timezone(timedelta(hours=5))).strftime("%H:%M")
+    msg = _format_waiter_call(table_number, menu.name, now_str)
+
+    for recipient in recipients:
+        result = await _send_telegram(recipient.chat_id, msg)
+        if result is None:
+            await _auto_disconnect_recipient(db, recipient.chat_id)
+
+    return call
