@@ -169,10 +169,10 @@ function OrderCard({ order, onStatusChange, isPending }: OrderCardProps) {
 export default function OrdersPage() {
   const queryClient = useQueryClient();
 
-  // Sound state
+  // Sound state — persisted in localStorage so banner doesn't reappear after reload
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const [soundEnabled, setSoundEnabled] = useState(false);
-  const [showSoundBanner, setShowSoundBanner] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('orders_sound_enabled') === 'true');
+  const [showSoundBanner, setShowSoundBanner] = useState(() => localStorage.getItem('orders_sound_enabled') !== 'true');
 
   // Track known order IDs to detect new arrivals
   const knownIdsRef = useRef<Set<string> | null>(null);
@@ -213,14 +213,31 @@ export default function OrdersPage() {
     }
   }, [data, soundEnabled]);
 
+  // If consent was previously stored, wake up AudioContext on first user click (browser autoplay policy)
+  useEffect(() => {
+    if (localStorage.getItem('orders_sound_enabled') !== 'true') return;
+
+    const wakeUp = () => {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new AudioContext();
+      }
+      audioCtxRef.current.resume().catch(() => {});
+      document.removeEventListener('click', wakeUp);
+    };
+
+    document.addEventListener('click', wakeUp);
+    return () => document.removeEventListener('click', wakeUp);
+  }, []);
+
   // Enable sound on explicit button click
   const enableSound = useCallback(() => {
     if (!audioCtxRef.current) {
       audioCtxRef.current = new AudioContext();
     }
     if (audioCtxRef.current.state === 'suspended') {
-      audioCtxRef.current.resume();
+      audioCtxRef.current.resume().catch(() => {});
     }
+    localStorage.setItem('orders_sound_enabled', 'true');
     setSoundEnabled(true);
     setShowSoundBanner(false);
     playBeep(audioCtxRef.current); // test beep
