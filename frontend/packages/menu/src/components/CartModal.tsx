@@ -255,27 +255,15 @@ export default function CartModal({
                         {tab === 'table' && config.orders_enabled ? (
                           <>
                             <label className={styles.formLabel}>Номер стола</label>
-                            <div className={styles.tableStepper}>
-                              <button
-                                type="button"
-                                className={styles.tableStepBtn}
-                                onClick={() => setTableNumber((n) => Math.max(1, n - 1))}
-                                disabled={tableNumber <= 1}
-                                aria-label="Предыдущий стол"
-                              >
-                                <Icon name="chevron-left" size={18} />
-                              </button>
-                              <span className={styles.tableStepValue}>Стол {tableNumber}</span>
-                              <button
-                                type="button"
-                                className={styles.tableStepBtn}
-                                onClick={() => setTableNumber((n) => Math.min(config.tables_count, n + 1))}
-                                disabled={tableNumber >= config.tables_count}
-                                aria-label="Следующий стол"
-                              >
-                                <Icon name="chevron-right" size={18} />
-                              </button>
-                            </div>
+                            <select
+                              className={styles.select}
+                              value={tableNumber}
+                              onChange={(e) => setTableNumber(Number(e.target.value))}
+                            >
+                              {Array.from({ length: config.tables_count }, (_, i) => i + 1).map((n) => (
+                                <option key={n} value={n}>Стол {n}</option>
+                              ))}
+                            </select>
                           </>
                         ) : (
                           <>

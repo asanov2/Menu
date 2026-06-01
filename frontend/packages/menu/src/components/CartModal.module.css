@@ -333,65 +333,6 @@
   min-height: auto;
 }
 
-/* ─── Table number stepper ─── */
-
-.tableStepper {
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--cream-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--cream-surface);
-  height: 48px;
-}
-
-.tableStepBtn {
-  width: 52px;
-  height: 100%;
-  flex-shrink: 0;
-  background: var(--cream-muted);
-  border: none;
-  color: var(--ink-primary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.14s;
-  touch-action: manipulation;
-}
-
-.tableStepBtn:hover:not(:disabled) {
-  background: var(--cream-border);
-}
-
-.tableStepBtn:disabled {
-  color: var(--ink-tertiary);
-  cursor: not-allowed;
-}
-
-.tableStepValue {
-  flex: 1;
-  text-align: center;
-  font-size: 16px;
-  font-family: var(--font-ui);
-  font-weight: 500;
-  color: var(--ink-primary);
-  user-select: none;
-}
-
-@media (max-width: 768px) {
-  .tableStepper {
-    height: 52px;
-  }
-
-  .tableStepBtn {
-    width: 60px;
-  }
-
-  .tableStepValue {
-    font-size: 17px;
-  }
-}
 
 .errorMsg {
   font-size: 12px;

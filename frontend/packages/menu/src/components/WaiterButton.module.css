@@ -45,24 +45,40 @@
   z-index: 200;
 }
 
+/* ── Modal wrapper (centering) ────────────────────────────────────────────── */
+
+.modalWrapper {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 201;
+}
+
+@media (min-width: 769px) {
+  .modalWrapper {
+    align-items: center;
+  }
+}
+
 /* ── Modal ────────────────────────────────────────────────────────────────── */
 
 .modal {
-  position: fixed;
-  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
-  right: 16px;
-  width: min(320px, calc(100vw - 32px));
+  pointer-events: all;
+  width: min(360px, calc(100vw - 32px));
   background: var(--cream-surface);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   box-shadow: var(--shadow-modal);
-  z-index: 201;
   overflow: hidden;
+  margin-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-@media (max-width: 400px) {
+@media (min-width: 769px) {
   .modal {
-    right: 50%;
-    transform: translateX(50%);
+    border-radius: var(--radius-xl);
+    margin-bottom: 0;
   }
 }
 
@@ -108,7 +124,7 @@
   gap: 14px;
 }
 
-/* ── Table stepper ────────────────────────────────────────────────────────── */
+/* ── Table select ─────────────────────────────────────────────────────────── */
 
 .tableLabel {
   font-family: var(--font-ui);
@@ -117,50 +133,27 @@
   font-weight: 500;
 }
 
-.tableStepper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  background: var(--cream-muted);
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--cream-border);
   border-radius: var(--radius-md);
-  padding: 4px;
-  gap: 8px;
-}
-
-.stepBtn {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
+  font-size: 14px;
+  font-family: var(--font-ui);
+  color: var(--ink-primary);
   background: var(--cream-surface);
-  border-radius: var(--radius-sm);
-  color: var(--ink-primary);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.15s;
-  flex-shrink: 0;
+  outline: none;
+  box-sizing: border-box;
+  min-height: 44px;
 }
 
-.stepBtn:disabled {
-  opacity: 0.3;
+.select:focus {
+  border-color: var(--ink-primary);
+}
+
+.select:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
-}
-
-.stepBtn:not(:disabled):active {
-  background: var(--cream-warm);
-}
-
-.tableValue {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--ink-primary);
-  flex: 1;
-  text-align: center;
-  white-space: nowrap;
 }
 
 /* ── Confirm button ───────────────────────────────────────────────────────── */

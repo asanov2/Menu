@@ -47,6 +47,7 @@ class MenuService:
                 "orders_enabled": menu.orders_enabled,
                 "preorders_enabled": menu.preorders_enabled,
                 "tables_count": menu.tables_count,
+                "waiter_call_enabled": menu.waiter_call_enabled,
                 "items_count": count or 0,
                 "created_at": menu.created_at,
                 "updated_at": menu.updated_at,

@@ -48,7 +48,7 @@ export default function MenuPage() {
     retry: false,
   });
 
-  const ordersAvailable = orderConfig.telegram_connected && (orderConfig.orders_enabled || orderConfig.preorders_enabled);
+  const ordersAvailable = orderConfig.orders_enabled || orderConfig.preorders_enabled;
 
   const visibleCategories = useMemo(
     () => (data?.categories ?? []).filter((c) => c.is_visible),

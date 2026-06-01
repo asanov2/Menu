@@ -8,6 +8,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.redis_client import get_redis
 from app.models.menu import Menu, Restaurant, WaiterCall
 from app.models.order import Order, RestaurantTelegramSettings, TelegramRecipient
 from app.schemas.order import OrderCreate
@@ -160,13 +161,6 @@ async def create_order(
             detail="Orders require Business or Pro plan",
         )
 
-    recipients = await get_recipients(db, restaurant.id)
-    if not recipients:
-        raise HTTPException(
-            status_code=http_status.HTTP_400_BAD_REQUEST,
-            detail="Order feature not configured",
-        )
-
     if data.order_type == "table" and not menu.orders_enabled:
         raise HTTPException(
             status_code=http_status.HTTP_400_BAD_REQUEST,
@@ -195,6 +189,7 @@ async def create_order(
     await db.commit()
     await db.refresh(order)
 
+    recipients = await get_recipients(db, restaurant.id)
     now_str = datetime.now(tz=timezone(timedelta(hours=5))).strftime("%H:%M")
     if data.order_type == "table" and data.table_number is not None:
         msg = _format_table_order(
@@ -228,6 +223,24 @@ def _format_waiter_call(table_number: int, menu_name: str, now_str: str) -> str:
     return f"<b>🔔 Вызов официанта — Стол №{table_number}</b>\n📋 Меню: {menu_name}\n⏰ {now_str}"
 
 
+async def check_waiter_cooldown(menu_id: object, table_number: int) -> None:
+    """Block duplicate waiter calls within 60 s per (menu, table) via Redis NX key."""
+    key = f"waiter_call:{menu_id}:{table_number}"
+    try:
+        redis = await get_redis()
+        set_ok = await redis.set(key, 1, nx=True, ex=60)
+        if set_ok is None:
+            ttl = await redis.ttl(key)
+            raise HTTPException(
+                status_code=http_status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Официант уже вызван, подождите {max(ttl, 1)} сек",
+            )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.warning("Redis waiter cooldown check failed: %s", exc)
+
+
 async def create_waiter_call(
     db: AsyncSession,
     restaurant: Restaurant,
@@ -242,17 +255,14 @@ async def create_waiter_call(
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail="Waiter call is not enabled for this menu")
 
-    recipients = await get_recipients(db, restaurant.id)
-    if not recipients:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=400, detail="Waiter call not configured: no Telegram recipients")
-
     if table_number < 1 or table_number > menu.tables_count:
         from fastapi import HTTPException
         raise HTTPException(
             status_code=400,
             detail=f"table_number must be between 1 and {menu.tables_count}",
         )
+
+    await check_waiter_cooldown(menu.id, table_number)
 
     call = WaiterCall(
         restaurant_id=restaurant.id,
@@ -263,6 +273,7 @@ async def create_waiter_call(
     await db.commit()
     await db.refresh(call)
 
+    recipients = await get_recipients(db, restaurant.id)
     now_str = datetime.now(tz=timezone(timedelta(hours=5))).strftime("%H:%M")
     msg = _format_waiter_call(table_number, menu.name, now_str)
 

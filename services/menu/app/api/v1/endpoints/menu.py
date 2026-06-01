@@ -215,11 +215,11 @@ async def get_order_config(
         telegram_connected = len(recipients) > 0
 
     return OrderConfigResponse(
-        orders_enabled=menu.orders_enabled if telegram_connected else False,
-        preorders_enabled=menu.preorders_enabled if telegram_connected else False,
+        orders_enabled=menu.orders_enabled,
+        preorders_enabled=menu.preorders_enabled,
         tables_count=menu.tables_count,
         telegram_connected=telegram_connected,
-        waiter_call_enabled=menu.waiter_call_enabled if telegram_connected else False,
+        waiter_call_enabled=menu.waiter_call_enabled,
     )
 
 
