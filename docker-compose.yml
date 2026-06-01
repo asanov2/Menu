@@ -32,6 +32,7 @@ services:
       - billing-service
       - analytics-service
       - owner-service
+      - notification-service
       - menu-frontend
       - admin-frontend
       - owner-frontend
@@ -201,6 +202,26 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    networks:
+      - qrmenu-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  notification-service:
+    build:
+      context: ./services/notification
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
     networks:
       - qrmenu-network
     restart: unless-stopped
