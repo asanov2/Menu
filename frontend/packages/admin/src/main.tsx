@@ -8,6 +8,14 @@ import { adminApi } from '@qrmenu/ui';
 import { useAuthStore } from './store/authStore';
 import App from './App';
 
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('[SW] Registration failed:', err);
+    });
+  });
+}
+
 adminApi.interceptors.response.use(
   (res) => res,
   async (err) => {

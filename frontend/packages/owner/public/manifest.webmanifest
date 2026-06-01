@@ -1,0 +1,30 @@
+{
+  "name": "QR Menu — Владелец",
+  "short_name": "QR Владелец",
+  "description": "Панель владельца платформы qrmenus.kz",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFAF5",
+  "theme_color": "#1A1208",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

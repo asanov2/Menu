@@ -73,6 +73,10 @@ media/
 *.mp4
 *.mp3
 
+# PWA icons in public/ are tracked despite *.png rule above
+!frontend/packages/admin/public/*.png
+!frontend/packages/owner/public/*.png
+
 # Logs
 *.log
 logs/
