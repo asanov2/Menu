@@ -9,6 +9,7 @@ import {
   type TelegramRecipient,
   type GenerateCodeResult,
 } from '../../api/telegram';
+import PushBlock from './PushBlock';
 import styles from './TelegramPage.module.css';
 import common from '../../styles/common.module.css';
 
@@ -311,6 +312,9 @@ export default function TelegramPage() {
               </div>
             </div>
           )}
+
+          {/* ─── Блок 3: Push-уведомления на этом устройстве ─── */}
+          <PushBlock />
 
         </div>
       )}

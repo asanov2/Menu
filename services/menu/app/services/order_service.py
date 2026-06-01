@@ -17,6 +17,28 @@ logger = logging.getLogger(__name__)
 
 _TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
 
+
+async def _fire_push(subject_type: str, subject_id: str, title: str, body: str, data: dict) -> None:
+    """Send push notification via notification-service. Catches all errors — never propagates."""
+    ntf_url = settings.notification_service_url
+    if not ntf_url:
+        return
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            await client.post(
+                f"{ntf_url}/api/v1/push/internal/send-push",
+                json={
+                    "subject_type": subject_type,
+                    "subject_id": subject_id,
+                    "title": title,
+                    "body": body,
+                    "data": data,
+                },
+                headers={"X-Internal-Secret": settings.internal_secret},
+            )
+    except Exception as exc:
+        logger.warning("Push notification skipped: %s", exc)
+
 # 400-body phrases that mean the chat is permanently unreachable
 _FATAL_400_PHRASES = (
     "chat not found",
@@ -216,6 +238,17 @@ async def create_order(
             )
             await _auto_disconnect_recipient(db, recipient.chat_id)
 
+    item_count = len(items_data)
+    if data.order_type == "table" and data.table_number is not None:
+        push_body = f"Стол №{data.table_number} · {item_count} поз. · {data.total_price}₸"
+    else:
+        push_body = f"Предзаказ: {data.customer_name or '—'} · {item_count} поз. · {data.total_price}₸"
+    await _fire_push(
+        "restaurant", str(restaurant.id),
+        "Новый заказ", push_body,
+        {"type": "order", "order_id": str(order.id)},
+    )
+
     return order
 
 
@@ -281,5 +314,11 @@ async def create_waiter_call(
         result = await _send_telegram(recipient.chat_id, msg)
         if result is None:
             await _auto_disconnect_recipient(db, recipient.chat_id)
+
+    await _fire_push(
+        "restaurant", str(restaurant.id),
+        "Вызов официанта", f"Стол №{table_number}",
+        {"type": "waiter_call"},
+    )
 
     return call

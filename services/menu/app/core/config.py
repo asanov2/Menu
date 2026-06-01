@@ -20,5 +20,8 @@ class Settings(BaseSettings):
 
     telegram_bot_token: str = ""
 
+    notification_service_url: str = "http://notification-service:8007"
+    internal_secret: str = "changeme"
+
 
 settings = Settings()

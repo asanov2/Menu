@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@qrmenu/ui'
 import { getSystemHealth } from '../../api/owner'
 import StatusDot from '../../components/StatusDot'
+import OwnerPushBlock from './OwnerPushBlock'
 import common from '../../styles/common.module.css'
 import styles from './SystemPage.module.css'
 
@@ -37,6 +38,8 @@ export default function SystemPage() {
           <i className="ti ti-alert-triangle" style={{ fontSize: 16, lineHeight: 1 }} /> Обнаружены проблемы с сервисами
         </div>
       )}
+
+      <OwnerPushBlock />
 
       <div className={styles.servicesGrid}>
         {health

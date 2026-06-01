@@ -1,3 +1,6 @@
+import logging
+
+import httpx
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from slowapi import Limiter
@@ -6,6 +9,28 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+
+logger = logging.getLogger(__name__)
+
+
+async def _push_owner_new_restaurant(name: str, city: str | None) -> None:
+    """Notify platform owner of a new restaurant registration. Catches all errors."""
+    body = f"{name} · {city}" if city else name
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            await client.post(
+                f"{settings.notification_service_url}/api/v1/push/internal/send-push",
+                json={
+                    "subject_type": "owner",
+                    "subject_id": "1",
+                    "title": "Новая заявка ресторана",
+                    "body": body,
+                    "data": {"type": "restaurant_request"},
+                },
+                headers={"X-Internal-Secret": settings.internal_secret},
+            )
+    except Exception as exc:
+        logger.warning("Push to owner skipped (new restaurant): %s", exc)
 from app.core.dependencies import get_current_restaurant
 from app.models.restaurant import Restaurant
 from app.schemas.auth import (
@@ -31,6 +56,7 @@ async def register(
 ) -> RestaurantResponse:
     service = AuthService(db)
     restaurant = await service.register(data)
+    await _push_owner_new_restaurant(restaurant.name, restaurant.city)
     return RestaurantResponse.model_validate(restaurant)
 
 

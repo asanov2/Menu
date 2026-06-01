@@ -21,5 +21,8 @@ class Settings(BaseSettings):
 
     frontend_url: str = "http://localhost:5173"
 
+    notification_service_url: str = "http://notification-service:8007"
+    internal_secret: str = "changeme"
+
 
 settings = Settings()
