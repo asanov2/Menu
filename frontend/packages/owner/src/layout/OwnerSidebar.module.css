@@ -8,15 +8,14 @@
 }
 
 .logoSection {
-  padding: 24px 20px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.logoText {
-  font-family: var(--font-display);
-  font-size: 20px;
-  color: var(--sidebar-text);
-  letter-spacing: -0.02em;
+.logoImg {
+  height: auto;
+  width: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .logoSubtext {
