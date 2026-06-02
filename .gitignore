@@ -76,6 +76,10 @@ media/
 # PWA icons in public/ are tracked despite *.png rule above
 !frontend/packages/admin/public/*.png
 !frontend/packages/owner/public/*.png
+!frontend/packages/menu/public/*.png
+!frontend/landing/*.png
+# Brand source assets
+!frontend/packages/ui/src/assets/brand/*.PNG
 
 # Logs
 *.log
