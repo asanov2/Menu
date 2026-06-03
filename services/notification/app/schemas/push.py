@@ -26,3 +26,7 @@ class SendPushRequest(BaseModel):
 
 class VapidPublicKeyResponse(BaseModel):
     public_key: str
+
+
+class PushStatusResponse(BaseModel):
+    subscribed: bool

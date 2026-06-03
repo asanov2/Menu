@@ -1,14 +1,15 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 
 from app.core.config import settings
 from app.core.dependencies import get_db, get_current_subject, verify_internal_secret
 from app.models.push_subscription import PushSubscription
 from app.schemas.push import (
+    PushStatusResponse,
     SendPushRequest,
     SubscribeRequest,
     UnsubscribeRequest,
@@ -23,6 +24,22 @@ router = APIRouter()
 @router.get("/vapid-public-key", response_model=VapidPublicKeyResponse)
 async def get_vapid_public_key() -> VapidPublicKeyResponse:
     return VapidPublicKeyResponse(public_key=settings.VAPID_PUBLIC_KEY)
+
+
+@router.get("/status", response_model=PushStatusResponse)
+async def get_push_status(
+    endpoint: str = Query(..., description="Browser push endpoint URL"),
+    subject: dict = Depends(get_current_subject),
+    db: AsyncSession = Depends(get_db),
+) -> PushStatusResponse:
+    row = await db.execute(
+        select(PushSubscription).where(
+            PushSubscription.endpoint == endpoint,
+            PushSubscription.subject_type == subject["subject_type"],
+            PushSubscription.subject_id == subject["subject_id"],
+        )
+    )
+    return PushStatusResponse(subscribed=row.scalar_one_or_none() is not None)
 
 
 @router.post("/subscribe", status_code=status.HTTP_201_CREATED)
