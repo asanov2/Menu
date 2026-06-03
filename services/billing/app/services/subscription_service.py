@@ -38,6 +38,16 @@ async def get_subscription_with_payments(
     sub.payments = sorted(sub.payments, key=lambda p: p.created_at, reverse=True)[:6]
 
     now = datetime.now(timezone.utc)
+
+    # Lazy expiry: if trial period has passed, mark subscription as expired
+    if (
+        sub.status == SubscriptionStatus.trial
+        and sub.trial_ends_at is not None
+        and sub.trial_ends_at < now
+    ):
+        sub.status = SubscriptionStatus.expired
+        await db.commit()
+
     trial_remaining_days = None
     warning_banner = False
     warning_message = None
@@ -155,7 +165,7 @@ async def activate_trial(
 
     sub = Subscription(
         restaurant_id=restaurant_id,
-        plan=PlanEnum.starter,
+        plan=PlanEnum.business,
         status=SubscriptionStatus.trial,
         current_period_start=now,
         current_period_end=trial_end,

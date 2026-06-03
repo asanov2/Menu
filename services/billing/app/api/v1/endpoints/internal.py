@@ -59,6 +59,16 @@ async def check_subscription(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subscription not found")
 
     now = datetime.now(timezone.utc)
+
+    # Lazy expiry: trial past due → mark expired
+    if (
+        sub.status == SubscriptionStatus.trial
+        and sub.trial_ends_at is not None
+        and sub.trial_ends_at < now
+    ):
+        sub.status = SubscriptionStatus.expired
+        await db.commit()
+
     is_active = sub.status in (SubscriptionStatus.active, SubscriptionStatus.trial)
 
     trial_remaining_days: int | None = None

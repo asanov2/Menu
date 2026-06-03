@@ -36,7 +36,7 @@ class Restaurant(Base):
         String(100), unique=True, index=True, nullable=False
     )
     plan: Mapped[PlanType] = mapped_column(
-        SAEnum(PlanType), default=PlanType.starter, nullable=False
+        SAEnum(PlanType), default=PlanType.business, nullable=False
     )
     status: Mapped[RestaurantStatus] = mapped_column(
         SAEnum(RestaurantStatus, name="restaurant_status", create_constraint=True),
