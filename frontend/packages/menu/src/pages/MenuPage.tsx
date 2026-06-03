@@ -19,6 +19,7 @@ import SkeletonLoader from '../components/SkeletonLoader';
 import ViewToggle, { ViewMode } from '../components/ViewToggle';
 import MenuNotFound from './MenuNotFound';
 import MenuInactive from './MenuInactive';
+import MenuExpired from './MenuExpired';
 import styles from './MenuPage.module.css';
 
 type Language = 'ru' | 'kz' | 'en';
@@ -84,8 +85,9 @@ export default function MenuPage() {
   };
 
   if (error) {
-    const status = (error as { response?: { status?: number } })?.response?.status;
-    if (status === 403) return <MenuInactive />;
+    const httpStatus = (error as { response?: { status?: number } })?.response?.status;
+    if (httpStatus === 402) return <MenuExpired />;
+    if (httpStatus === 403) return <MenuInactive />;
     return <MenuNotFound />;
   }
 

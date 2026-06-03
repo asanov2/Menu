@@ -10,6 +10,18 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 
+class BillingSubscription(Base):
+    """Read-only view of billing.subscriptions for trial expiry checks."""
+
+    __tablename__ = "subscriptions"
+    __table_args__ = {"schema": "billing"}
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    restaurant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
+    status: Mapped[str] = mapped_column(String(50))
+    trial_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class LanguageType(str, enum.Enum):
     ru = "ru"
     kz = "kz"

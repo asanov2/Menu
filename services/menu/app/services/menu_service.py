@@ -1,10 +1,11 @@
+from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.menu import Category, CategoryTranslation, Item, ItemTranslation, Menu, Restaurant
+from app.models.menu import BillingSubscription, Category, CategoryTranslation, Item, ItemTranslation, Menu, Restaurant
 
 
 class MenuService:
@@ -83,10 +84,43 @@ class MenuService:
         )
         return result.scalars().first()
 
+    async def _check_subscription(self, restaurant_id: UUID, slug: str) -> None:
+        """Block expired trials. On first detection after cache TTL, also purges stale cache."""
+        from app.core.redis_client import get_redis
+
+        result = await self._db.execute(
+            select(BillingSubscription).where(BillingSubscription.restaurant_id == restaurant_id)
+        )
+        sub = result.scalar_one_or_none()
+        if sub is None:
+            return
+        now = datetime.now(timezone.utc)
+        expired = sub.status == "expired" or (
+            sub.status == "trial" and sub.trial_ends_at is not None and sub.trial_ends_at < now
+        )
+        if expired:
+            try:
+                redis = await get_redis()
+                keys = await redis.keys(f"menu:{slug}:*")
+                keys += await redis.keys(f"categories:{slug}")
+                keys += await redis.keys(f"items:{slug}:*")
+                if keys:
+                    await redis.delete(*keys)
+            except Exception:
+                pass
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail={
+                    "error": "subscription_expired",
+                    "message": "Меню временно недоступно",
+                },
+            )
+
     async def get_full_menu(
         self, slug: str, menu_id: UUID | None = None, lang: str | None = None
     ) -> tuple[Restaurant, Menu]:
         restaurant = await self.get_restaurant_by_slug(slug)
+        await self._check_subscription(restaurant.id, slug)
         if menu_id:
             menu = await self.get_menu_by_id(restaurant.id, menu_id)
         elif lang:
