@@ -1,17 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Icon, useToast, getApiErrorMessage } from '@qrmenu/ui';
+import { Icon, useToast, getApiErrorMessage, getDeviceLabel } from '@qrmenu/ui';
 import { getPushStatus, subscribeToPush, unsubscribeFromPush, type PushStatus } from '@qrmenu/ui';
-import { getVapidPublicKey, subscribePush, unsubscribePush } from '../../api/push';
+import { getVapidPublicKey, subscribePush, unsubscribePush, checkPushSubscription } from '../../api/push';
 import common from '../../styles/common.module.css';
 import styles from './PushBlock.module.css';
 
-function getDeviceLabel(): string {
-  const ua = navigator.userAgent;
-  if (/iPhone|iPad|iPod/.test(ua)) return 'iOS / Safari';
-  if (/Android/.test(ua)) return `Android / ${/Chrome/.test(ua) ? 'Chrome' : 'Browser'}`;
-  const b = /Edg/.test(ua) ? 'Edge' : /Chrome/.test(ua) ? 'Chrome' : /Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'Browser';
-  return `Desktop / ${b}`;
-}
 
 function isIosNotStandalone(): boolean {
   return (
@@ -26,7 +19,7 @@ export default function PushBlock() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getPushStatus().then(setStatus);
+    getPushStatus(checkPushSubscription).then(setStatus);
   }, []);
 
   const handleSubscribe = async () => {

@@ -23,6 +23,7 @@ export {
   subscribeToPush,
   unsubscribeFromPush,
   urlBase64ToUint8Array,
+  getDeviceLabel,
   type PushStatus,
   type WebPushSubscription,
 } from './utils/push';

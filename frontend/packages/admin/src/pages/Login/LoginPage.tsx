@@ -3,8 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { INPUT_STYLE, useInputFocus, FormField, Icon } from '@qrmenu/ui';
+import { INPUT_STYLE, useInputFocus, FormField, Icon, getDeviceLabel } from '@qrmenu/ui';
 import { login, getMe } from '../../api/auth';
+import { subscribePush } from '../../api/push';
 import { useAuthStore } from '../../store/authStore';
 import styles from './LoginPage.module.css';
 
@@ -35,6 +36,24 @@ export default function LoginPage() {
       const result = await login(data.email, data.password);
       const restaurant = await getMe(result.access_token);
       setAuth(result.access_token, restaurant);
+      // Re-bind existing browser push subscription to the newly logged-in account.
+      // setAuth already wrote the token to localStorage so adminApi will use it.
+      try {
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+          const reg = await navigator.serviceWorker.ready;
+          const existing = await reg.pushManager.getSubscription();
+          if (existing) {
+            const json = existing.toJSON();
+            const keys = json.keys as Record<string, string> | undefined;
+            if (json.endpoint && keys?.p256dh && keys?.auth) {
+              await subscribePush(
+                { endpoint: json.endpoint, keys: { p256dh: keys.p256dh, auth: keys.auth } },
+                getDeviceLabel(),
+              );
+            }
+          }
+        }
+      } catch { /* best-effort — push re-bind must not block login */ }
       navigate('/dashboard');
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;

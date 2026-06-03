@@ -17,3 +17,10 @@ export async function subscribePush(sub: WebPushSubscription, deviceLabel: strin
 export async function unsubscribePush(endpoint: string): Promise<void> {
   await adminApi.delete('/api/v1/push/unsubscribe', { data: { endpoint } });
 }
+
+export async function checkPushSubscription(endpoint: string): Promise<boolean> {
+  const { data } = await adminApi.get<{ subscribed: boolean }>('/api/v1/push/status', {
+    params: { endpoint },
+  });
+  return data.subscribed;
+}

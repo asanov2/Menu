@@ -1,5 +1,13 @@
 export type PushStatus = 'unsupported' | 'denied' | 'default' | 'subscribed';
 
+export function getDeviceLabel(): string {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua)) return 'iOS / Safari';
+  if (/Android/.test(ua)) return `Android / ${/Chrome/.test(ua) ? 'Chrome' : 'Browser'}`;
+  const b = /Edg/.test(ua) ? 'Edge' : /Chrome/.test(ua) ? 'Chrome' : /Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'Browser';
+  return `Desktop / ${b}`;
+}
+
 export interface WebPushSubscription {
   endpoint: string;
   keys: { p256dh: string; auth: string };
@@ -14,13 +22,25 @@ export function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuf
   return buf;
 }
 
-export async function getPushStatus(): Promise<PushStatus> {
+export async function getPushStatus(
+  checkSubscribed?: (endpoint: string) => Promise<boolean>,
+): Promise<PushStatus> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported';
   if (Notification.permission === 'denied') return 'denied';
   try {
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
-    if (sub) return 'subscribed';
+    if (sub) {
+      if (checkSubscribed) {
+        try {
+          return (await checkSubscribed(sub.endpoint)) ? 'subscribed' : 'default';
+        } catch {
+          // notification-service unreachable → fail-open, show Enable button
+          return 'default';
+        }
+      }
+      return 'subscribed';
+    }
   } catch {
     // SW not ready → treat as not subscribed
   }
