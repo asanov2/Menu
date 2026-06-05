@@ -9,34 +9,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
-
-logger = logging.getLogger(__name__)
-
-
-async def _push_owner_new_restaurant(name: str, city: str | None) -> None:
-    """Notify platform owner of a new restaurant registration. Catches all errors."""
-    body = f"{name} · {city}" if city else name
-    try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
-            await client.post(
-                f"{settings.notification_service_url}/api/v1/push/internal/send-push",
-                json={
-                    "subject_type": "owner",
-                    "subject_id": "1",
-                    "title": "Новая заявка ресторана",
-                    "body": body,
-                    "data": {"type": "restaurant_request"},
-                },
-                headers={"X-Internal-Secret": settings.internal_secret},
-            )
-    except Exception as exc:
-        logger.warning("Push to owner skipped (new restaurant): %s", exc)
 from app.core.dependencies import get_current_restaurant
+from app.core.redis import get_redis
 from app.models.restaurant import Restaurant
 from app.schemas.auth import (
     ChangePasswordRequest,
     LoginRequest,
     RegisterRequest,
+    RegisterRequestResponse,
+    RegisterVerifyRequest,
+    RegisterVerifyResponse,
     RestaurantResponse,
     TokenResponse,
     UpdateProfileRequest,
@@ -44,20 +26,67 @@ from app.schemas.auth import (
 )
 from app.services.auth_service import AuthService
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
-@router.post("/register", response_model=RestaurantResponse, status_code=status.HTTP_201_CREATED)
-async def register(
+async def _activate_trial(restaurant_id: str) -> None:
+    """Call billing-service to start 14-day trial. Fire-and-forget — catches all errors."""
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.post(
+                f"{settings.billing_service_url}/api/v1/billing/internal/activate-trial",
+                json={"restaurant_id": restaurant_id},
+                headers={"X-Internal-Secret": settings.internal_secret},
+            )
+            if resp.status_code not in (200, 201):
+                logger.error(
+                    "activate_trial failed restaurant=%s status=%d body=%s",
+                    restaurant_id, resp.status_code, resp.text,
+                )
+            else:
+                logger.info("activate_trial ok restaurant=%s", restaurant_id)
+    except Exception as exc:
+        logger.error("activate_trial unreachable restaurant=%s error=%s", restaurant_id, exc)
+
+
+@router.post("/register-request", response_model=RegisterRequestResponse)
+async def register_request(
     data: RegisterRequest,
     db: AsyncSession = Depends(get_db),
-) -> RestaurantResponse:
+    redis=Depends(get_redis),
+) -> RegisterRequestResponse:
     service = AuthService(db)
-    restaurant = await service.register(data)
-    await _push_owner_new_restaurant(restaurant.name, restaurant.city)
-    return RestaurantResponse.model_validate(restaurant)
+    await service.register_request(data, redis)
+    return RegisterRequestResponse(detail="Код подтверждения отправлен на ваш email")
+
+
+@router.post("/register-verify", response_model=RegisterVerifyResponse)
+async def register_verify(
+    data: RegisterVerifyRequest,
+    db: AsyncSession = Depends(get_db),
+) -> RegisterVerifyResponse:
+    service = AuthService(db)
+    restaurant = await service.register_verify(data)
+
+    # Generate tokens the same way login does
+    access_token, _ = service.create_tokens(restaurant)
+
+    # Start 14-day trial (fire-and-forget)
+    await _activate_trial(str(restaurant.id))
+
+    return RegisterVerifyResponse(
+        access_token=access_token,
+        id=restaurant.id,
+        email=restaurant.email,
+        name=restaurant.name,
+        slug=restaurant.slug,
+        plan=restaurant.plan.value,
+        is_active=restaurant.is_active,
+    )
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -128,9 +157,6 @@ async def change_password(
     await service.change_password(current_restaurant.id, data.old_password, data.new_password)
 
 
-# fix #16 + #12: db IS used now — verify_token_payload checks is_active in DB.
-# The previous audit found db was injected but never used (sync decode only).
-# Now it's async and does one DB lookup to catch deactivated restaurants.
 @router.get("/verify-token", response_model=VerifyTokenResponse)
 async def verify_token(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),

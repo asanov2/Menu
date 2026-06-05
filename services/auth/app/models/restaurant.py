@@ -28,12 +28,12 @@ class Restaurant(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     email: Mapped[str] = mapped_column(
-        String(255), unique=True, index=True, nullable=False
+        String(255), index=True, nullable=False
     )
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(
-        String(100), unique=True, index=True, nullable=False
+        String(100), index=True, nullable=False
     )
     plan: Mapped[PlanType] = mapped_column(
         SAEnum(PlanType), default=PlanType.business, nullable=False
@@ -56,4 +56,7 @@ class Restaurant(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, default=None
     )

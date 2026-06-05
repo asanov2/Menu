@@ -63,3 +63,23 @@ class UpdateProfileRequest(BaseModel):
 class ChangePasswordRequest(BaseModel):
     old_password: str
     new_password: str = Field(min_length=8, max_length=100)
+
+
+class RegisterVerifyRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
+
+
+class RegisterRequestResponse(BaseModel):
+    detail: str
+
+
+class RegisterVerifyResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    id: UUID
+    email: str
+    name: str
+    slug: str
+    plan: str
+    is_active: bool
