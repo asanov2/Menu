@@ -2,15 +2,11 @@ import logging
 from math import ceil
 from uuid import UUID
 
-import httpx
 from fastapi import HTTPException, status as http_status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
 from app.schemas.restaurants import (
-    ApplicationItem,
-    ApplicationsResponse,
     PlatformStats,
     RestaurantItem,
     RestaurantList,
@@ -248,117 +244,30 @@ class RestaurantService:
         await self._db.commit()
         return await self._fetch_one(restaurant_id)
 
-    async def get_applications(self, page: int, limit: int) -> ApplicationsResponse:
-        offset = (page - 1) * limit
-
-        count_result = await self._db.execute(
-            text("SELECT COUNT(*) FROM restaurants WHERE status = 'pending'")
-        )
-        total: int = count_result.scalar_one()
-
-        rows_result = await self._db.execute(
-            text("""
-                SELECT id, name, slug, email, phone, city, type, created_at
-                FROM restaurants
-                WHERE status = 'pending'
-                ORDER BY created_at ASC
-                LIMIT :limit OFFSET :offset
-            """),
-            {"limit": limit, "offset": offset},
-        )
-        rows = rows_result.mappings().all()
-
-        items = [
-            ApplicationItem(
-                id=row["id"],
-                name=row["name"],
-                slug=row["slug"],
-                email=row["email"],
-                phone=row["phone"],
-                city=row["city"],
-                type=row["type"],
-                created_at=row["created_at"],
-            )
-            for row in rows
-        ]
-
-        return ApplicationsResponse(
-            items=items,
-            total=total,
-            page=page,
-            pages=ceil(total / limit) if total else 1,
-        )
-
-    async def approve_restaurant(self, restaurant_id: UUID) -> RestaurantItem:
-        result = await self._db.execute(
-            text("""
-                UPDATE restaurants
-                SET status = 'active', is_active = true, updated_at = NOW()
-                WHERE id = :id AND status = 'pending'
-            """),
-            {"id": restaurant_id},
-        )
-        if result.rowcount == 0:
-            raise HTTPException(
-                status_code=http_status.HTTP_404_NOT_FOUND,
-                detail="Application not found or already processed",
-            )
-        await self._db.commit()
-
-        # Activate trial subscription in billing service (fire-and-forget — don't fail approval)
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                resp = await client.post(
-                    f"{settings.billing_service_url}/api/v1/billing/internal/activate-trial",
-                    json={"restaurant_id": str(restaurant_id)},
-                    headers={"X-Internal-Secret": settings.internal_secret},
-                )
-                if resp.status_code not in (200, 201):
-                    logger.error(
-                        "approve: billing trial activation failed restaurant=%s status=%d body=%s",
-                        restaurant_id, resp.status_code, resp.text,
-                    )
-                else:
-                    logger.info("approve: trial activated for restaurant=%s", restaurant_id)
-        except Exception as exc:
-            logger.error(
-                "approve: billing service unreachable for restaurant=%s error=%s",
-                restaurant_id, exc,
-            )
-
-        return await self._fetch_one(restaurant_id)
-
-    async def reject_restaurant(self, restaurant_id: UUID) -> RestaurantItem:
-        result = await self._db.execute(
-            text("""
-                UPDATE restaurants
-                SET status = 'inactive', is_active = false, updated_at = NOW()
-                WHERE id = :id AND status = 'pending'
-            """),
-            {"id": restaurant_id},
-        )
-        if result.rowcount == 0:
-            raise HTTPException(
-                status_code=http_status.HTTP_404_NOT_FOUND,
-                detail="Application not found or already processed",
-            )
-        await self._db.commit()
-        return await self._fetch_one(restaurant_id)
-
     async def delete_restaurant(self, restaurant_id: UUID) -> None:
-        result = await self._db.execute(
-            text("""
-                UPDATE restaurants
-                SET deleted_at = NOW(), is_active = false, status = 'inactive', updated_at = NOW()
-                WHERE id = :id AND deleted_at IS NULL
-            """),
+        # Get email before deleting (needed to clean email_verifications)
+        email_row = await self._db.execute(
+            text("SELECT email FROM restaurants WHERE id = :id AND deleted_at IS NULL"),
             {"id": restaurant_id},
         )
-        if result.rowcount == 0:
+        email_result = email_row.scalar_one_or_none()
+        if email_result is None:
             raise HTTPException(
                 status_code=http_status.HTTP_404_NOT_FOUND,
                 detail="Restaurant not found",
             )
+
+        # Soft-delete the restaurant
+        await self._db.execute(
+            text("""
+                UPDATE restaurants
+                SET deleted_at = NOW(), is_active = false, status = 'inactive', updated_at = NOW()
+                WHERE id = :id
+            """),
+            {"id": restaurant_id},
+        )
+
+        # Cancel active subscriptions
         await self._db.execute(
             text("""
                 UPDATE billing.subscriptions
@@ -367,6 +276,13 @@ class RestaurantService:
             """),
             {"id": restaurant_id},
         )
+
+        # Remove pending email verifications so email can be reused
+        await self._db.execute(
+            text("DELETE FROM email_verifications WHERE email = :email"),
+            {"email": email_result},
+        )
+
         await self._db.commit()
 
     async def _fetch_one(self, restaurant_id: UUID) -> RestaurantItem:

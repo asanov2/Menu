@@ -43,19 +43,3 @@ class PlatformStats(BaseModel):
     pro_count: int
 
 
-class ApplicationItem(BaseModel):
-    id: UUID
-    name: str
-    slug: str
-    email: str
-    phone: str | None
-    city: str | None
-    type: str | None
-    created_at: datetime
-
-
-class ApplicationsResponse(BaseModel):
-    items: list[ApplicationItem]
-    total: int
-    page: int
-    pages: int
