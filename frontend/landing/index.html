@@ -149,6 +149,7 @@
       background: var(--cream-bg);
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
+      transition: none;
     }
 
     .navbar-inner {
@@ -1327,6 +1328,11 @@
 
     function toggleDrawer(open) {
       drawerOpen = open;
+      // Set solid bg instantly (before backdrop appears) to avoid flash
+      navbar.style.transition = open ? 'none' : '';
+      navbar.style.background = open ? 'var(--cream-bg)' : '';
+      navbar.style.backdropFilter = open ? 'none' : '';
+      navbar.style.webkitBackdropFilter = open ? 'none' : '';
       drawer.classList.toggle('open', open);
       backdrop.classList.toggle('open', open);
       document.body.classList.toggle('drawer-open', open);
@@ -1334,6 +1340,8 @@
       hamIcon.className = open ? 'ti ti-x' : 'ti ti-menu-2';
       hamBtn.setAttribute('aria-expanded', String(open));
       drawer.setAttribute('aria-hidden', String(!open));
+      // Re-enable transition after bg is applied
+      if (open) requestAnimationFrame(() => { navbar.style.transition = ''; });
     }
 
     hamBtn.addEventListener('click', (e) => {
