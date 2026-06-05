@@ -34,23 +34,33 @@ bearer_scheme = HTTPBearer(auto_error=False)
 
 
 async def _activate_trial(restaurant_id: str) -> None:
-    """Call billing-service to start 14-day trial. Fire-and-forget — catches all errors."""
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.post(
-                f"{settings.billing_service_url}/api/v1/billing/internal/activate-trial",
-                json={"restaurant_id": restaurant_id},
-                headers={"X-Internal-Secret": settings.internal_secret},
-            )
-            if resp.status_code not in (200, 201):
-                logger.error(
-                    "activate_trial failed restaurant=%s status=%d body=%s",
-                    restaurant_id, resp.status_code, resp.text,
+    """Call billing-service to start 14-day trial. Retries 3 times before giving up."""
+    for attempt in range(1, 4):
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                resp = await client.post(
+                    f"{settings.billing_service_url}/api/v1/billing/internal/activate-trial",
+                    json={"restaurant_id": restaurant_id},
+                    headers={"X-Internal-Secret": settings.internal_secret},
                 )
-            else:
-                logger.info("activate_trial ok restaurant=%s", restaurant_id)
-    except Exception as exc:
-        logger.error("activate_trial unreachable restaurant=%s error=%s", restaurant_id, exc)
+            if resp.status_code in (200, 201):
+                logger.info("activate_trial ok restaurant=%s attempt=%d", restaurant_id, attempt)
+                return
+            logger.error(
+                "activate_trial failed restaurant=%s attempt=%d status=%d body=%s",
+                restaurant_id, attempt, resp.status_code, resp.text,
+            )
+        except Exception as exc:
+            logger.error(
+                "activate_trial unreachable restaurant=%s attempt=%d error=%s",
+                restaurant_id, attempt, exc,
+            )
+        if attempt < 3:
+            await __import__("asyncio").sleep(2 ** attempt)
+    logger.critical(
+        "activate_trial PERMANENTLY FAILED restaurant=%s — billing subscription NOT created",
+        restaurant_id,
+    )
 
 
 @router.post("/register-request", response_model=RegisterRequestResponse)
