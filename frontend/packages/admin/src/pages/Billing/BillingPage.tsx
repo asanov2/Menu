@@ -262,32 +262,25 @@ export default function BillingPage() {
             description="История платежей появится после первой оплаты"
           />
         ) : (
-          <div className={styles.paymentTableWrap}>
-            <table className={common.table}>
-              <thead>
-                <tr className={common.theadRow}>
-                  {['Дата', 'Сумма', 'План', 'Статус', 'Способ оплаты'].map(h => (
-                    <th key={h} className={common.th}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {payments.map(p => (
-                  <tr key={p.id} className={common.tr}>
-                    <td className={common.td}>{formatDate(p.created_at)}</td>
-                    <td className={styles.tdAmount}>{Number(p.amount).toLocaleString('ru-RU')} ₸</td>
-                    <td className={styles.tdPlan}>{p.target_plan ? (PLAN_NAMES[p.target_plan] ?? p.target_plan) : '—'}</td>
-                    <td className={styles.tdStatus}>
-                      <StatusBadge
-                        status={p.status === 'success' ? 'online' : (p.status as 'failed' | 'pending')}
-                        label={p.status === 'success' ? 'Оплачен' : p.status === 'pending' ? 'Ожидание' : 'Ошибка'}
-                      />
-                    </td>
-                    <td className={styles.tdProvider}>{p.provider}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className={styles.paymentList}>
+            {payments.map(p => (
+              <div key={p.id} className={styles.paymentCard}>
+                <div className={styles.paymentDate}>{formatDate(p.created_at)}</div>
+                <div className={styles.paymentMain}>
+                  <span className={styles.paymentAmount}>
+                    {Number(p.amount).toLocaleString('ru-RU')} ₸
+                  </span>
+                  <StatusBadge
+                    status={p.status === 'success' ? 'online' : (p.status as 'failed' | 'pending')}
+                    label={p.status === 'success' ? 'Оплачен' : p.status === 'pending' ? 'Ожидание' : 'Ошибка'}
+                  />
+                </div>
+                <div className={styles.paymentMeta}>
+                  <span>{p.target_plan ? (PLAN_NAMES[p.target_plan] ?? p.target_plan) : '—'}</span>
+                  {p.provider && <><span className={styles.paymentDot}>·</span><span>{p.provider}</span></>}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
