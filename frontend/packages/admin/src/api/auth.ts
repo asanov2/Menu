@@ -22,7 +22,7 @@ export async function changePassword(payload: { old_password: string; new_passwo
   await adminApi.put('/api/v1/auth/change-password', payload);
 }
 
-export async function register(data: {
+export async function registerRequest(data: {
   email: string;
   password: string;
   name: string;
@@ -31,5 +31,21 @@ export async function register(data: {
   city?: string;
   type?: string;
 }): Promise<void> {
-  await adminApi.post('/api/v1/auth/register', data);
+  await adminApi.post('/api/v1/auth/register-request', data);
+}
+
+export interface RegisterVerifyResponse {
+  access_token: string;
+  token_type: string;
+  id: string;
+  email: string;
+  name: string;
+  slug: string;
+  plan: string;
+  is_active: boolean;
+}
+
+export async function registerVerify(email: string, code: string): Promise<RegisterVerifyResponse> {
+  const { data } = await adminApi.post('/api/v1/auth/register-verify', { email, code });
+  return data;
 }
