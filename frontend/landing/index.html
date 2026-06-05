@@ -145,6 +145,12 @@
       box-shadow: 0 2px 20px rgba(26,18,8,0.07);
     }
 
+    .navbar.drawer-open {
+      background: var(--cream-bg);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
     .navbar-inner {
       display: flex;
       align-items: center;
@@ -1324,6 +1330,7 @@
       drawer.classList.toggle('open', open);
       backdrop.classList.toggle('open', open);
       document.body.classList.toggle('drawer-open', open);
+      navbar.classList.toggle('drawer-open', open);
       hamIcon.className = open ? 'ti ti-x' : 'ti ti-menu-2';
       hamBtn.setAttribute('aria-expanded', String(open));
       drawer.setAttribute('aria-hidden', String(!open));
