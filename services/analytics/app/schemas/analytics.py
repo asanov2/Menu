@@ -31,6 +31,7 @@ class TopItemSchema(BaseModel):
     image_url: str | None = None
     category_id: UUID | None = None
     category_name: str | None = None
+    is_deleted: bool = False
 
 
 class CategoryTopItemsSchema(BaseModel):
@@ -53,6 +54,7 @@ class OverviewResponse(BaseModel):
     period_days: int
     total_menu_views: int
     total_item_views: int
+    total_ordered_qty: int = 0
     device_breakdown: dict[str, int]
     top_items: list[TopItemSchema]
     most_common_peak_hour: int | None
@@ -62,6 +64,7 @@ class DailyResponse(BaseModel):
     date: date
     menu_views: int
     item_views: int
+    ordered_qty: int = 0
     peak_hour: int | None
 
 
