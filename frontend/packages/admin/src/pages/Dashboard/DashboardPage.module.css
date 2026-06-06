@@ -58,6 +58,9 @@
 }
 
 .statLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-size: 11px;
   color: var(--ink-secondary);
   font-family: var(--font-ui);
@@ -65,6 +68,11 @@
   letter-spacing: 0.08em;
   margin-bottom: 10px;
   font-weight: 500;
+}
+
+.statIcon {
+  flex-shrink: 0;
+  opacity: 0.7;
 }
 
 .statValue {

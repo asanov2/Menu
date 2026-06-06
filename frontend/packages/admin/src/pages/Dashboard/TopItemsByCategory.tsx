@@ -6,6 +6,7 @@ import styles from './TopItemsByCategory.module.css';
 interface Props {
   categories: CategoryTopItems[];
   isLoading: boolean;
+  mode?: 'views' | 'orders';
 }
 
 function ItemImage({ name, imageUrl }: { name: string | null; imageUrl: string | null }) {
@@ -31,7 +32,7 @@ function ItemImage({ name, imageUrl }: { name: string | null; imageUrl: string |
 
 const RANK_COLORS = ['#c9a227', '#8e9ba5', '#c07d4f'];
 
-function ItemRow({ item }: { item: TopItem }) {
+function ItemRow({ item, mode = 'views' }: { item: TopItem; mode?: 'views' | 'orders' }) {
   const isTopThree = item.rank <= 3;
   const rankDisplay = String(item.rank);
   const rankClass = isTopThree
@@ -49,16 +50,21 @@ function ItemRow({ item }: { item: TopItem }) {
       <div className={styles.imgWrap}>
         <ItemImage name={item.name} imageUrl={item.image_url} />
       </div>
-      {item.name ? (
-        <span className={styles.itemName}>{item.name}</span>
-      ) : (
-        <span className={`${styles.itemName} ${styles.deletedItem}`}>(блюдо удалено)</span>
-      )}
+      <span className={`${styles.itemName} ${item.is_deleted ? styles.deletedItem : ''}`}>
+        {item.name ?? '(блюдо удалено)'}
+        {item.is_deleted && (
+          <span className={styles.deletedBadge}>удалено</span>
+        )}
+      </span>
       <span className={styles.viewsBadge}>
-        <svg className={styles.eyeIcon} viewBox="0 0 16 16" fill="none">
-          <path d="M8 3C4.5 3 1.5 8 1.5 8s3 5 6.5 5 6.5-5 6.5-5-3-5-6.5-5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
-          <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.2"/>
-        </svg>
+        {mode === 'orders' ? (
+          <Icon name="shopping-cart" size={13} />
+        ) : (
+          <svg className={styles.eyeIcon} viewBox="0 0 16 16" fill="none">
+            <path d="M8 3C4.5 3 1.5 8 1.5 8s3 5 6.5 5 6.5-5 6.5-5-3-5-6.5-5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+            <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.2"/>
+          </svg>
+        )}
         {item.views.toLocaleString('ru-RU')}
       </span>
     </div>
@@ -86,7 +92,7 @@ function SkeletonCard() {
   );
 }
 
-export default function TopItemsByCategory({ categories, isLoading }: Props) {
+export default function TopItemsByCategory({ categories, isLoading, mode = 'views' }: Props) {
   if (isLoading) {
     return (
       <div className={styles.scroll}>
@@ -101,29 +107,46 @@ export default function TopItemsByCategory({ categories, isLoading }: Props) {
     return (
       <div className={styles.empty}>
         <Icon name="chart-bar-off" size={36} className={styles.emptyIcon} />
-        <p>Нет данных о просмотрах блюд</p>
-        <small>Открывайте карточки блюд в меню — статистика появится завтра</small>
+        {mode === 'orders' ? (
+          <>
+            <p>Пока нет заказов за выбранный период</p>
+            <small>Заказы появятся здесь после первого оформления</small>
+          </>
+        ) : (
+          <>
+            <p>Нет данных о просмотрах блюд</p>
+            <small>Открывайте карточки блюд в меню — статистика появится завтра</small>
+          </>
+        )}
       </div>
     );
   }
 
   return (
     <div className={styles.scroll}>
-      {categories.map((cat) => (
+      {categories.map((cat) => {
+        const allDeleted = cat.items.length > 0 && cat.items.every(item => item.is_deleted);
+        return (
         <div key={cat.category_id ?? '__none__'} className={styles.catCard}>
           <div className={styles.catHeader}>
             <span className={styles.catName}>
               {cat.category_name ?? 'Без категории'}
+              {allDeleted && (
+                <span className={styles.catDeletedNote}> · удалена</span>
+              )}
             </span>
-            <span className={styles.catTotal}>{cat.total_views} просм.</span>
+            <span className={styles.catTotal}>
+              {cat.total_views} {mode === 'orders' ? 'заказов' : 'просм.'}
+            </span>
           </div>
           <div className={styles.itemList}>
             {cat.items.map((item) => (
-              <ItemRow key={item.item_id} item={item} />
+              <ItemRow key={item.item_id} item={item} mode={mode} />
             ))}
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

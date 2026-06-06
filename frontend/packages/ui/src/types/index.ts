@@ -76,6 +76,7 @@ export interface TopItem {
   image_url: string | null;
   category_id: string | null;
   category_name: string | null;
+  is_deleted?: boolean;
 }
 
 export interface CategoryTopItems {
@@ -89,6 +90,7 @@ export interface DailyStats {
   date: string;
   menu_views: number;
   item_views: number;
+  ordered_qty: number;
   peak_hour: number | null;
 }
 
@@ -101,6 +103,7 @@ export interface OverviewStats {
   period_days: number;
   total_menu_views: number;
   total_item_views: number;
+  total_ordered_qty: number;
   device_breakdown: { mobile: number; desktop: number };
   top_items: TopItem[];
   most_common_peak_hour: number | null;

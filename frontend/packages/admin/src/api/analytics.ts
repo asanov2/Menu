@@ -26,3 +26,10 @@ export async function getTopByCategory(periodDays: number): Promise<CategoryTopI
   });
   return data;
 }
+
+export async function getTopOrderedByCategory(periodDays: number): Promise<CategoryTopItems[]> {
+  const { data } = await adminApi.get('/api/v1/analytics/orders/top-by-category', {
+    params: { days: periodDays },
+  });
+  return data;
+}

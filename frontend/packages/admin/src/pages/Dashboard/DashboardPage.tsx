@@ -5,7 +5,7 @@ import {
   ResponsiveContainer, Cell, ReferenceLine,
 } from 'recharts';
 import { Skeleton, PLAN, ANALYTICS_DAYS, SectionHeading, Icon } from '@qrmenu/ui';
-import { getOverview, getDailyStats, getPeakHours, getTopByCategory } from '../../api/analytics';
+import { getOverview, getDailyStats, getPeakHours, getTopOrderedByCategory } from '../../api/analytics';
 import TopItemsByCategory from './TopItemsByCategory';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './DashboardPage.module.css';
@@ -88,14 +88,14 @@ export default function DashboardPage() {
   });
 
   const { data: categoryData, isLoading: isCategoryLoading } = useQuery({
-    queryKey: ['analytics-top-by-category', days],
-    queryFn: () => getTopByCategory(days),
+    queryKey: ['analytics-top-ordered-by-category', days],
+    queryFn: () => getTopOrderedByCategory(days),
     staleTime: 0,
     refetchInterval: 60_000,
     retry: false,
   });
 
-  const hasDailyData = (dailyData ?? []).some(d => d.menu_views > 0 || d.item_views > 0);
+  const hasDailyData = (dailyData ?? []).some(d => d.menu_views > 0 || d.item_views > 0 || d.ordered_qty > 0);
   const hasPeakData = (peakData ?? []).some(h => h.views > 0);
 
   const peakHour = (peakData ?? []).reduce<{ hour: number; views: number } | null>(
@@ -114,7 +114,7 @@ export default function DashboardPage() {
   const dailyChartData = (dailyData ?? []).map(d => ({
     date: d.date,
     menu: d.menu_views,
-    items: d.item_views,
+    ordered: d.ordered_qty,
   }));
 
   const peakChartData = (peakData ?? []).map(h => ({
@@ -124,9 +124,9 @@ export default function DashboardPage() {
   }));
 
   const statCards = [
-    { label: 'Просмотров меню', value: data?.total_menu_views ?? 0 },
-    { label: 'Просмотров блюд', value: data?.total_item_views ?? 0 },
-    { label: 'Пиковый час',     value: peakHourStr },
+    { label: 'Просмотров меню',  value: data?.total_menu_views ?? 0,  icon: 'eye' as const },
+    { label: 'Заказано блюд',    value: data?.total_ordered_qty ?? 0, icon: 'shopping-cart' as const },
+    { label: 'Пиковый час',      value: peakHourStr,                  icon: 'clock' as const },
   ];
 
   return (
@@ -169,7 +169,10 @@ export default function DashboardPage() {
         ) : (
           statCards.map((stat) => (
             <div key={stat.label} className={common.card}>
-              <div className={styles.statLabel}>{stat.label}</div>
+              <div className={styles.statLabel}>
+                <Icon name={stat.icon} size={14} className={styles.statIcon} />
+                {stat.label}
+              </div>
               <div className={styles.statValue}>{stat.value}</div>
             </div>
           ))
@@ -205,12 +208,12 @@ export default function DashboardPage() {
                   cursor={{ fill: 'var(--cream-muted)' }}
                   formatter={(value: number, name: string) => [
                     value,
-                    name === 'menu' ? 'Просмотры меню' : 'Просмотры блюд',
+                    name === 'menu' ? 'Просмотры меню' : 'Заказано блюд',
                   ]}
                   labelFormatter={(label: string) => formatChartDate(label)}
                 />
                 <Bar dataKey="menu" name="menu" fill="var(--accent-gold)" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="items" name="items" fill="var(--ink-tertiary)" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="ordered" name="ordered" fill="var(--ink-tertiary)" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -279,12 +282,13 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Top items by category */}
+      {/* Top ordered items by category */}
       <div className={common.card}>
-        <SectionHeading size="sm">Топ блюда · за {days} дней</SectionHeading>
+        <SectionHeading size="sm">Заказанные блюда · за {days} дней</SectionHeading>
         <TopItemsByCategory
           categories={categoryData ?? []}
           isLoading={isCategoryLoading}
+          mode="orders"
         />
       </div>
     </div>
