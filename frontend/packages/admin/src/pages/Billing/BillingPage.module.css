@@ -269,6 +269,15 @@
   cursor: not-allowed;
 }
 
+.paymentSoonNote {
+  margin-top: 6px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-tertiary);
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
 /* ── Section 3: White label teaser ──────────────────────────── */
 
 .whiteLabel {

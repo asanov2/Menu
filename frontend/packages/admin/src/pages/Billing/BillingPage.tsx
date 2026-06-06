@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ConfirmModal, EmptyState, Skeleton, StatusBadge, SectionHeading, useToast, formatDate, getApiErrorMessage, Icon } from '@qrmenu/ui';
 import {
   PLANS,
+  PAYMENT_ENABLED,
   getSubscription,
   getMenuUsage,
   upgradePlan,
@@ -229,11 +230,14 @@ export default function BillingPage() {
                 </ul>
                 <button
                   className={`${styles.planBtn} ${styles[`planBtn${btn.style}`]}`}
-                  disabled={btn.disabled || isUpgrading}
-                  onClick={() => !btn.disabled && setUpgradeTarget(plan.id)}
+                  disabled={btn.disabled || isUpgrading || !PAYMENT_ENABLED}
+                  onClick={() => !btn.disabled && PAYMENT_ENABLED && setUpgradeTarget(plan.id)}
                 >
                   {isUpgrading && upgradeTarget === plan.id ? 'Загрузка...' : btn.label}
                 </button>
+                {!PAYMENT_ENABLED && !btn.disabled && (
+                  <div className={styles.paymentSoonNote}>Оплата скоро будет доступна</div>
+                )}
               </div>
             );
           })}

@@ -23,6 +23,17 @@ from app.services.subscription_service import (
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+# Set to True when Freedom Pay integration is ready
+PAYMENT_ENABLED = False
+
+_PAYMENT_UNAVAILABLE = HTTPException(
+    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+    detail={
+        "code": "PAYMENT_UNAVAILABLE",
+        "message": "Оплата временно недоступна. Скоро появится.",
+    },
+)
+
 
 @router.get("/subscription", response_model=SubscriptionWithPaymentsOut)
 async def get_subscription(
@@ -42,6 +53,8 @@ async def upgrade(
     current: dict = Depends(get_current_restaurant),
     db: AsyncSession = Depends(get_db),
 ) -> UpgradeResponse:
+    if not PAYMENT_ENABLED:
+        raise _PAYMENT_UNAVAILABLE
     restaurant_id: UUID = current["restaurant_id"]
     try:
         result = await upgrade_subscription(
@@ -75,6 +88,5 @@ async def mock_complete_payment(
     current: dict = Depends(get_current_restaurant),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Development only — simulates successful payment webhook."""
-    restaurant_id: UUID = UUID(str(current["restaurant_id"]))
-    return await complete_mock_payment(restaurant_id=restaurant_id, db=db)
+    """Stub — returns 503 until Freedom Pay integration is live."""
+    raise _PAYMENT_UNAVAILABLE

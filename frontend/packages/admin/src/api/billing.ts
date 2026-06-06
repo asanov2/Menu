@@ -1,5 +1,9 @@
 import { adminApi } from '@qrmenu/ui';
 
+// Set to true when Freedom Pay integration is ready.
+// When false: all payment/upgrade buttons are disabled on BillingPage.
+export const PAYMENT_ENABLED = false;
+
 export interface PlanInfo {
   id: 'starter' | 'business' | 'pro'
   name: string
