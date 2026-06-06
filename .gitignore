@@ -86,6 +86,10 @@ media/
 logs/
 log/
 
+# Playwright
+**/test-results/
+**/playwright-report/
+
 # Test coverage
 .coverage
 .coverage.*
